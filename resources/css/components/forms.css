@@ -1,0 +1,42 @@
+label,
+.profile-fieldset legend {
+    color: var(--ink-900);
+    font-size: .86rem;
+    font-weight: 650;
+}
+input, textarea, select {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    color: var(--charcoal);
+    outline: none;
+    transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+input, select { min-height: 44px; padding: 0 12px; }
+textarea { padding: 11px 12px; line-height: 1.55; resize: vertical; }
+input::placeholder, textarea::placeholder { color: #9b9c99; }
+input:focus, textarea:focus, select:focus { border-color: var(--info); box-shadow: var(--focus-ring); }
+input:disabled { color: #7d7f7c; background: #f0efeb; cursor: not-allowed; }
+.form-stack { display: grid; gap: 16px; }
+.form-stack > label { display: grid; gap: 7px; }
+.password-field { position: relative; display: block; }
+.password-field input { padding-right: 66px; }
+.password-toggle {
+    position: absolute;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    min-width: 48px;
+    min-height: 32px;
+    border: 0;
+    border-radius: 7px;
+    background: var(--canvas-soft);
+    color: var(--info);
+    cursor: pointer;
+    font-size: .75rem;
+    font-weight: 700;
+}
+.check-row { display: flex !important; align-items: flex-start; gap: 10px; font-weight: 500; color: var(--muted); }
+.check-row input { width: 17px; min-height: 17px; height: 17px; margin-top: 2px; accent-color: var(--ink-950); }
+.field-optional { color: var(--muted-2); font-size: .72rem; font-weight: 500; }

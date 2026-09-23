@@ -1,0 +1,1 @@
+@extends('layouts.app') @section('title','404 — BacaDulu Research') @section('content')<section class="error-page"><span>404</span><h1>Halaman tidak ditemukan.</h1><p>Alamat yang kamu buka tidak tersedia.</p><a class="btn btn-primary" href="{{ route('home') }}">Kembali</a></section>@endsection

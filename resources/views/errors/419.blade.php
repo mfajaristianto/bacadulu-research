@@ -1,0 +1,1 @@
+@extends('layouts.app') @section('title','419 — BacaDulu Research') @section('content')<section class="error-page"><span>419</span><h1>Sesi berakhir.</h1><p>Segarkan halaman lalu coba kembali.</p><a class="btn btn-primary" href="{{ url()->previous() }}">Coba Lagi</a></section>@endsection

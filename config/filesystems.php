@@ -47,6 +47,15 @@ return [
             'report' => false,
         ],
 
+        'profile_avatars' => [
+            'driver' => 'local',
+            'root' => public_path('uploads/profile-avatars'),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/uploads/profile-avatars',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

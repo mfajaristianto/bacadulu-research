@@ -1,0 +1,53 @@
+.btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    font-weight: 680;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform .18s var(--ease-out), box-shadow .18s ease, background .18s ease, border-color .18s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.btn-primary { color: #fff; background: var(--ink-950); border-color: var(--ink-950); }
+.btn-primary:hover { background: #262642; box-shadow: 0 10px 22px rgba(26, 26, 46, .13); }
+.btn-secondary { color: var(--ink-950); background: rgba(255,255,255,.55); border-color: var(--line-strong); }
+.btn-secondary:hover { background: #fff; border-color: #b8b2a6; }
+.btn-ghost { color: var(--ink-800); background: transparent; border-color: transparent; }
+.btn-ghost:hover { background: rgba(38,70,83,.07); }
+.btn-light { color: var(--ink-950); background: #fff; border-color: #fff; }
+.btn-full { width: 100%; }
+.text-button { padding: 4px; border: 0; background: transparent; color: var(--info); cursor: pointer; font-weight: 650; }
+
+/* MOTION — pointer-follow highlight without changing layout */
+[data-motion-button] {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+[data-motion-button]::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    width: 120px;
+    height: 120px;
+    left: calc(var(--motion-x, 50%) - 60px);
+    top: calc(var(--motion-y, 50%) - 60px);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(78, 205, 196, .28), rgba(78, 205, 196, 0) 68%);
+    opacity: 0;
+    transform: scale(.7);
+    transition: opacity .22s ease, transform .28s var(--ease-out);
+    pointer-events: none;
+}
+[data-motion-button]:hover::before,
+[data-motion-button]:focus-visible::before {
+    opacity: 1;
+    transform: scale(1);
+}

@@ -1,0 +1,1 @@
+@extends('layouts.app') @section('title','403 — BacaDulu Research') @section('content')<section class="error-page"><span>403</span><h1>Akses tidak tersedia.</h1><p>Halaman ini hanya dapat diakses oleh pengguna yang memiliki izin.</p><a class="btn btn-primary" href="{{ route('home') }}">Kembali</a></section>@endsection
