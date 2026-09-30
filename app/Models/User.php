@@ -7,12 +7,15 @@ use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class User extends Authenticatable implements MustVerifyEmailContract
 {
-    use HasFactory, MustVerifyEmailTrait, Notifiable;
+    use HasFactory;
+    use MustVerifyEmailTrait;
+    use Notifiable;
 
     protected $fillable = [
         'name',
@@ -46,74 +49,175 @@ class User extends Authenticatable implements MustVerifyEmailContract
 
     public function conversations()
     {
-        return $this->hasMany(Conversation::class);
+        return $this->hasMany(
+            Conversation::class
+        );
     }
 
     public function aiRuns()
     {
-        return $this->hasMany(AiRun::class);
+        return $this->hasMany(
+            AiRun::class
+        );
     }
 
     public function savedResults()
     {
-        return $this->hasMany(SavedResult::class);
+        return $this->hasMany(
+            SavedResult::class
+        );
     }
 
     public function profileCompletion(): int
     {
-        $fields = ['name', 'email', 'phone', 'institution', 'address', 'date_of_birth'];
+        $fields = [
+            'name',
+            'email',
+            'phone',
+            'institution',
+            'address',
+            'date_of_birth',
+        ];
+
         $complete = collect($fields)
-            ->filter(fn (string $field) => filled($this->{$field}))
+            ->filter(
+                fn (string $field) => filled(
+                    $this->{$field}
+                )
+            )
             ->count();
 
-        return (int) round(($complete / count($fields)) * 100);
+        return (int) round(
+            ($complete / count($fields)) * 100
+        );
     }
 
     public function missingProfileFields(): array
     {
         $labels = [
-            'name' => 'Full name',
-            'email' => 'Email address',
-            'phone' => 'Phone number',
-            'institution' => 'Institution',
-            'address' => 'Address',
-            'date_of_birth' => 'Date of birth',
+            'name' => 'Nama lengkap',
+            'email' => 'Email',
+            'phone' => 'Nomor telepon',
+            'institution' => 'Institusi',
+            'address' => 'Alamat',
+            'date_of_birth' => 'Tanggal lahir',
         ];
 
         return collect($labels)
-            ->reject(fn (string $label, string $field) => filled($this->{$field}))
+            ->reject(
+                fn (
+                    string $label,
+                    string $field
+                ) => filled($this->{$field})
+            )
             ->values()
             ->all();
     }
 
-    /**
-     * Resolve the avatar without depending on APP_URL.
-     * Local avatars use an authenticated same-origin route so localhost ports,
-     * staging hosts, and production hosts all work consistently.
+    /*
+     * Resolve avatar tanpa bergantung pada APP_URL.
+     *
+     * Avatar lokal diberikan melalui authenticated route
+     * sehingga localhost, staging, dan production
+     * menggunakan mekanisme yang sama.
      */
     public function getAvatarUrlAttribute(): ?string
     {
-        $avatar = trim((string) $this->avatar);
+        $avatar = trim(
+            (string) $this->avatar
+        );
 
         if ($avatar === '') {
             return null;
         }
 
-        if (Str::startsWith($avatar, ['http://', 'https://'])) {
+        /*
+         * Avatar Google/external.
+         */
+        if (
+            Str::startsWith(
+                $avatar,
+                ['http://', 'https://']
+            )
+        ) {
             return $avatar;
         }
 
-        $normalized = ltrim($avatar, '/');
-        $legacyPath = Str::replaceStart('storage/', '', $normalized);
+        $normalized = ltrim(
+            $avatar,
+            '/'
+        );
 
-        if (Str::startsWith($legacyPath, 'profile-avatars/') && Storage::disk('public')->exists($legacyPath)) {
-            return route('profile.avatar', ['v' => $this->updated_at?->timestamp], false);
+        $legacyStoragePath = Str::replaceStart(
+            'storage/',
+            '',
+            $normalized
+        );
+
+        /*
+         * Legacy:
+         * storage/app/public/profile-avatars.
+         */
+        if (
+            Str::startsWith(
+                $legacyStoragePath,
+                'profile-avatars/'
+            )
+            && Storage::disk('public')
+                ->exists($legacyStoragePath)
+        ) {
+            return route(
+                'profile.avatar',
+                [
+                    'v' => $this->updated_at?->timestamp,
+                ],
+                false
+            );
         }
 
-        $newPath = Str::replaceStart('profile-avatars/', '', $legacyPath);
+        $filename = Str::replaceStart(
+            'profile-avatars/',
+            '',
+            $legacyStoragePath
+        );
 
-        if (Storage::disk('profile_avatars')->exists($newPath)) {
-            return route('profile.avatar', ['v' => $this->updated_at?->timestamp], false);
+        /*
+         * Current:
+         * storage/app/private/profile-avatars.
+         */
+        if (
+            $filename !== ''
+            && Storage::disk('profile_avatars')
+                ->exists($filename)
+        ) {
+            return route(
+                'profile.avatar',
+                [
+                    'v' => $this->updated_at?->timestamp,
+                ],
+                false
+            );
+        }
+
+        /*
+         * Compatibility dengan project lama:
+         * public/uploads/profile-avatars.
+         */
+        if (
+            $filename !== ''
+            && File::isFile(
+                public_path(
+                    'uploads/profile-avatars/'.$filename
+                )
+            )
+        ) {
+            return route(
+                'profile.avatar',
+                [
+                    'v' => $this->updated_at?->timestamp,
+                ],
+                false
+            );
         }
 
         return null;
@@ -121,13 +225,23 @@ class User extends Authenticatable implements MustVerifyEmailContract
 
     public function getInitialsAttribute(): string
     {
-        $parts = preg_split('/\s+/', trim((string) $this->name)) ?: [];
+        $parts = preg_split(
+            '/\s+/',
+            trim((string) $this->name)
+        ) ?: [];
+
         $initials = collect($parts)
             ->filter()
             ->take(2)
-            ->map(fn (string $part) => Str::upper(Str::substr($part, 0, 1)))
+            ->map(
+                fn (string $part) => Str::upper(
+                    Str::substr($part, 0, 1)
+                )
+            )
             ->implode('');
 
-        return $initials !== '' ? $initials : 'B';
+        return $initials !== ''
+            ? $initials
+            : 'B';
     }
 }

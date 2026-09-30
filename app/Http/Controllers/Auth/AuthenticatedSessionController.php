@@ -12,42 +12,107 @@ class AuthenticatedSessionController extends Controller
 {
     public function create(): View
     {
-        return view('auth.login');
-    }
-
-    public function store(Request $request): RedirectResponse
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
-
-        $credentials['status'] = 'active';
-
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            return back()
-                ->withErrors(['email' => 'Email atau password tidak sesuai, atau akun tidak aktif.'])
-                ->onlyInput('email');
-        }
-
-        $request->session()->regenerate();
-
-        $user = $request->user();
-        $user->forceFill(['last_login_at' => now()])->save();
-
-        return redirect()->intended(
-            $user->profileCompletion() < config('research.profile_gate', 80)
-                ? route('profile.setup')
-                : route('dashboard')
+        return view(
+            'auth.login'
         );
     }
 
-    public function destroy(Request $request): RedirectResponse
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
 
-        return redirect()->route('home');
+    public function store(
+        Request $request
+    ): RedirectResponse {
+        $credentials =
+            $request->validate([
+                'email' => [
+                    'required',
+                    'email',
+                ],
+
+                'password' => [
+                    'required',
+                    'string',
+                ],
+            ]);
+
+
+        $credentials[
+            'status'
+        ] = 'active';
+
+
+        if (
+            ! Auth::attempt(
+                $credentials,
+                $request->boolean(
+                    'remember'
+                )
+            )
+        ) {
+            return back()
+                ->withErrors([
+                    'email'
+                        => 'Email atau password tidak sesuai, atau akun tidak aktif.',
+                ])
+                ->onlyInput(
+                    'email'
+                );
+        }
+
+
+        $request
+            ->session()
+            ->regenerate();
+
+
+        $user =
+            $request->user();
+
+
+        $user
+            ->forceFill([
+                'last_login_at'
+                    => now(),
+            ])
+            ->save();
+
+
+        return redirect()
+            ->intended(
+                $user
+                    ->profileCompletion()
+                < config(
+                    'research.profile_gate',
+                    80
+                )
+                    ? route(
+                        'profile.setup'
+                    )
+                    : route(
+                        'dashboard'
+                    )
+            );
+    }
+
+
+    public function destroy(
+        Request $request
+    ): RedirectResponse {
+        Auth::logout();
+
+
+        $request
+            ->session()
+            ->invalidate();
+
+
+        $request
+            ->session()
+            ->regenerateToken();
+
+
+        return redirect()
+            ->route(
+                'home'
+            );
     }
 }

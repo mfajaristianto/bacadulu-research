@@ -1,38 +1,79 @@
 :root {
-    --ink-950: #1a1a2e;
-    --ink-900: #20243a;
-    --ink-800: #264653;
-    --charcoal: #272a2d;
-    --muted: #6f716f;
-    --muted-2: #8f918e;
-    --canvas: #f4ede4;
-    --canvas-soft: #faf6f0;
-    --surface: #f7fff7;
-    --surface-white: #ffffff;
-    --surface-muted: #e6e4dc;
-    --line: #d9d6ce;
-    --line-strong: #c7c2b8;
-    --teal-600: #2a9d8f;
-    --teal-300: #4ecdc4;
-    --teal-soft: #dff5f1;
-    --coral-500: #e76f51;
-    --coral-600: #eb5b38;
-    --coral-soft: #fbe9e2;
-    --danger: #c93c3c;
-    --danger-soft: #fde9e8;
-    --success: #2f715f;
-    --success-soft: #e2f2eb;
-    --info: #245f9d;
-    --info-soft: #e6f0fb;
-    --shadow-card: 0 1px 2px rgba(26, 26, 46, 0.06);
-    --shadow-elevated: 0 16px 40px rgba(26, 26, 46, 0.10);
-    --focus-ring: 0 0 0 3px rgba(36, 95, 157, 0.22);
+    /* Canonical BacaDulu Research palette */
+    --bd-orange: #F26B4F;
+    --bd-orange-deep: #D95A42;
+    --bd-orange-soft: #FCE5DF;
+    --bd-navy: #17172B;
+    --bd-navy-soft: #27273D;
+    --bd-ivory: #F8F3EB;
+    --bd-paper: #FFFCF7;
+    --bd-teal: #21A6A0;
+    --bd-teal-deep: #17817D;
+    --bd-teal-soft: #DDF3F0;
+    --bd-gold: #D7A84A;
+    --bd-gold-soft: #F4E8CB;
+
+    /* Text */
+    --text-primary: #20202F;
+    --text-secondary: #666570;
+    --text-tertiary: #8A8891;
+
+    /* Lines / surfaces */
+    --line: #DDD7CE;
+    --line-strong: #C9C1B5;
+    --surface-subtle: #F1EBE3;
+    --surface-dark: #202033;
+
+    /* Functional */
+    --danger: #B94343;
+    --danger-soft: #F9E7E4;
+    --success: #2C7565;
+    --success-soft: #E0F1EB;
+    --info: #2D668D;
+    --info-soft: #E7F0F6;
+
+    /* Typography */
+    --font-display: ui-serif, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    --font-body: "Aptos", "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Elevation */
+    --shadow-card: 0 1px 2px rgba(23, 23, 43, .06);
+    --shadow-elevated: 0 24px 70px rgba(23, 23, 43, .12);
+    --shadow-window: 0 30px 90px rgba(23, 23, 43, .16);
+    --focus-ring: 0 0 0 3px rgba(33, 166, 160, .24);
+
+    /* Shape */
+    --radius-xs: 6px;
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
-    --radius-xl: 22px;
+    --radius-xl: 24px;
+
+    /* Layout */
     --content: 1240px;
     --content-narrow: 920px;
     --header-height: 68px;
+
+    /* Motion */
     --ease-out: cubic-bezier(.22, 1, .36, 1);
+    --ease-soft: cubic-bezier(.2, .75, .3, 1);
+
+    /* Compatibility aliases for existing pages */
+    --ink-950: var(--bd-navy);
+    --ink-900: var(--bd-navy-soft);
+    --ink-800: #2E4B54;
+    --charcoal: var(--text-primary);
+    --canvas: var(--bd-ivory);
+    --canvas-soft: #FBF7F1;
+    --surface: var(--bd-paper);
+    --surface-white: #FFFFFF;
+    --surface-muted: var(--surface-subtle);
+    --muted: var(--text-secondary);
+    --muted-2: var(--text-tertiary);
+    --teal-600: var(--bd-teal);
+    --teal-300: #67C9C3;
+    --teal-soft: var(--bd-teal-soft);
+    --coral-500: var(--bd-orange);
+    --coral-600: var(--bd-orange-deep);
+    --coral-soft: var(--bd-orange-soft);
 }

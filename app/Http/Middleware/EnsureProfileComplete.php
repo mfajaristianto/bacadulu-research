@@ -11,7 +11,9 @@ class EnsureProfileComplete
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        if (!$user) return redirect()->route('login');
+        if (! $user) {
+            return redirect()->route('login');
+        }
 
         if ($user->profileCompletion() < config('research.profile_gate', 80)) {
             return redirect()->route('profile.setup');

@@ -13,6 +13,13 @@ class PromptTemplate extends Model
     protected $fillable = [
         'ai_tool_id',
         'name',
+        'indonesian_name',
+        'short_description',
+        'meaning',
+        'when_to_use',
+        'when_not_to_use',
+        'example_text',
+        'expected_output',
         'version',
         'system_prompt',
         'task_prompt',
@@ -29,11 +36,25 @@ class PromptTemplate extends Model
 
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(
+            User::class,
+            'created_by'
+        );
     }
 
     public function aiRuns(): HasMany
     {
         return $this->hasMany(AiRun::class);
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        if (filled($this->indonesian_name)) {
+            return $this->name
+                .' — '
+                .$this->indonesian_name;
+        }
+
+        return $this->name;
     }
 }

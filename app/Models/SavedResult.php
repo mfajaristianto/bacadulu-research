@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SavedResult extends Model
 {
-    protected $table = 'saved_results';
-
     protected $fillable = [
         'user_id',
         'ai_run_id',
@@ -18,18 +17,32 @@ class SavedResult extends Model
         'is_favorite',
     ];
 
-    protected $casts = [
-        'tags_json' => 'array',
-        'is_favorite' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'tags_json' => 'array',
+            'is_favorite' => 'boolean',
+        ];
+    }
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(
+            User::class
+        );
     }
 
     public function aiRun(): BelongsTo
     {
-        return $this->belongsTo(AiRun::class);
+        return $this->belongsTo(
+            AiRun::class
+        );
+    }
+
+    public function documentGenerations(): HasMany
+    {
+        return $this->hasMany(
+            DocumentGeneration::class
+        );
     }
 }

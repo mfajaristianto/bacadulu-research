@@ -2,33 +2,50 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Conversation extends Model
 {
-    use HasFactory;
+    use SoftDeletes;
 
-    protected $table = 'research_conversations';
+    protected $table =
+        'research_conversations';
 
     protected $fillable = [
         'user_id',
         'category_id',
         'title',
         'status',
+        'pinned_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'pinned_at'
+                => 'datetime',
+
+            'deleted_at'
+                => 'datetime',
+        ];
+    }
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(
+            User::class
+        );
     }
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(
+            Category::class
+        );
     }
 
     public function messages(): HasMany
@@ -45,5 +62,27 @@ class Conversation extends Model
             ResearchMessage::class,
             'conversation_id'
         )->latestOfMany();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Direct AI Run Provenance
+    |--------------------------------------------------------------------------
+    */
+
+    public function aiRuns(): HasMany
+    {
+        return $this->hasMany(
+            AiRun::class,
+            'conversation_id'
+        );
+    }
+
+    public function documentGenerations(): HasMany
+    {
+        return $this->hasMany(
+            DocumentGeneration::class,
+            'conversation_id'
+        );
     }
 }

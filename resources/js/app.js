@@ -90,10 +90,14 @@ function initPasswordToggles() {
 
 function initPromptPicker() {
     const button = document.querySelector('[data-prompt-open]');
+    const secondaryButton = document.querySelector('[data-prompt-open-secondary]');
     const menu = document.querySelector('[data-prompt-menu]');
     const hiddenInput = document.querySelector('[data-prompt-input]');
     const label = document.querySelector('[data-prompt-label]');
     const closeButton = document.querySelector('[data-prompt-close]');
+    const activePanel = document.querySelector('[data-active-prompt]');
+    const activeName = activePanel?.querySelector('[data-active-prompt-name]');
+    const activeDescription = activePanel?.querySelector('[data-active-prompt-description]');
 
     if (!button || !menu) return;
 
@@ -105,7 +109,8 @@ function initPromptPicker() {
         button.setAttribute('aria-expanded', String(open));
 
         if (open) {
-            window.requestAnimationFrame(() => options[0]?.focus());
+            const selected = options.find((option) => option.getAttribute('aria-selected') === 'true');
+            window.requestAnimationFrame(() => (selected || options[0])?.focus());
         }
     };
 
@@ -113,8 +118,20 @@ function initPromptPicker() {
         if (!option) return;
 
         options.forEach((item) => item.setAttribute('aria-selected', String(item === option)));
+
         if (hiddenInput) hiddenInput.value = option.dataset.promptId || '';
-        if (label) label.textContent = option.dataset.promptName || 'Research prompt selected';
+        if (label) label.textContent = option.dataset.promptName || 'Research prompt dipilih';
+
+        if (activePanel) {
+            activePanel.hidden = false;
+            activePanel.classList.add('is-visible');
+        }
+
+        if (activeName) activeName.textContent = option.dataset.promptName || '';
+        if (activeDescription) {
+            activeDescription.textContent = option.dataset.promptDescription || option.dataset.promptTool || '';
+        }
+
         setOpen(false);
         button.focus();
     };
@@ -124,6 +141,11 @@ function initPromptPicker() {
     button.addEventListener('click', (event) => {
         event.preventDefault();
         setOpen(menu.hidden);
+    });
+
+    secondaryButton?.addEventListener('click', (event) => {
+        event.preventDefault();
+        setOpen(true);
     });
 
     closeButton?.addEventListener('click', () => {
@@ -164,7 +186,9 @@ function initPromptPicker() {
     });
 
     document.addEventListener('click', (event) => {
-        if (!menu.contains(event.target) && !button.contains(event.target)) setOpen(false);
+        if (!menu.contains(event.target) && !button.contains(event.target) && !secondaryButton?.contains(event.target)) {
+            setOpen(false);
+        }
     });
 
     document.addEventListener('keydown', (event) => {

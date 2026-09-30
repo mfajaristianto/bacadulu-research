@@ -3,11 +3,11 @@ html { scroll-behavior: smooth; }
 body {
     margin: 0;
     min-width: 320px;
-    color: var(--charcoal);
+    color: var(--text-primary);
     background: var(--canvas-soft);
-    font-family: "Instrument Sans", "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-body);
     font-size: 16px;
-    line-height: 1.5;
+    line-height: 1.55;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
 }
@@ -17,7 +17,8 @@ img { display: block; max-width: 100%; }
 button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 main { min-height: calc(100vh - var(--header-height)); }
-::selection { color: var(--ink-950); background: rgba(78, 205, 196, 0.42); }
+::selection { color: var(--bd-navy); background: rgba(33, 166, 160, .28); }
+:focus-visible { outline: 2px solid var(--bd-teal); outline-offset: 3px; }
 .skip-link {
     position: fixed;
     z-index: 9999;
@@ -25,8 +26,8 @@ main { min-height: calc(100vh - var(--header-height)); }
     left: 10px;
     transform: translateY(-140%);
     padding: 10px 14px;
-    border-radius: 8px;
-    background: var(--ink-950);
+    border-radius: var(--radius-sm);
+    background: var(--bd-navy);
     color: #fff;
     text-decoration: none;
     transition: transform .18s ease;
@@ -36,9 +37,9 @@ main { min-height: calc(100vh - var(--header-height)); }
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     *, *::before, *::after {
-        animation-duration: 0.001ms !important;
+        animation-duration: .001ms !important;
         animation-iteration-count: 1 !important;
-        transition-duration: 0.001ms !important;
+        transition-duration: .001ms !important;
         scroll-behavior: auto !important;
     }
 }
