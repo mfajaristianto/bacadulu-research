@@ -299,3 +299,866 @@
         transform: none;
     }
 }
+/* ==========================================================================
+   BACADULU RESEARCH — ANSWER EXPERIENCE V3
+   ========================================================================== */
+
+
+/* ==========================================================================
+   REMOVE LEGACY ANSWER ACTIONS
+   ========================================================================== */
+
+.br-answer-card--enhanced .research-message__actions {
+    display: none !important;
+}
+
+
+/*
+ * Kalau tombol save / generate lama berada
+ * di dalam answer wrapper tetapi bukan di
+ * research-message__actions.
+ */
+
+.br-answer-card--enhanced form[action*="/saved"],
+.br-answer-card--enhanced [data-generate-document],
+.br-answer-card--enhanced [data-next-prompt] {
+    display: none !important;
+}
+
+
+/* ==========================================================================
+   ANSWER CONTAINER
+   ========================================================================== */
+
+.research-answer-text.br-answer-text--enhanced {
+    display: block;
+    margin-top: 14px;
+    color: #3c465d;
+}
+
+
+.br-answer {
+    display: grid;
+    gap: 0;
+}
+
+
+/* ==========================================================================
+   INTRO
+   ========================================================================== */
+
+.br-answer__lead {
+    margin-bottom: 10px;
+}
+
+
+.br-answer__lead p,
+.br-answer__plain p {
+    margin: 0 0 9px;
+    color: #3f4960;
+    font-size: 0.79rem;
+    line-height: 1.72;
+}
+
+
+.br-answer__lead p:last-child,
+.br-answer__plain p:last-child {
+    margin-bottom: 0;
+}
+
+
+/* ==========================================================================
+   STANDARD SECTION
+   ========================================================================== */
+
+.br-answer-section {
+    display: grid;
+
+    grid-template-columns:
+        38px
+        minmax(0, 1fr);
+
+    gap: 10px;
+
+    padding:
+        17px
+        0;
+}
+
+
+/*
+ * BUKAN ANGKA.
+ *
+ * Cuma icon semantik.
+ */
+
+.br-answer-section__icon {
+    width: 34px;
+    height: 34px;
+
+    display: grid;
+    place-items: center;
+
+    margin-top: 1px;
+
+    border-radius: 10px;
+
+    color: #17a7a1;
+
+    background:
+        rgba(
+            33,
+            166,
+            160,
+            0.11
+        );
+}
+
+
+.br-answer-section__icon svg {
+    width: 18px;
+    height: 18px;
+
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+
+/* ==========================================================================
+   FINDING
+   ========================================================================== */
+
+.br-answer-section.is-finding
+.br-answer-section__icon {
+    color: #149f9a;
+
+    background:
+        rgba(
+            33,
+            166,
+            160,
+            0.11
+        );
+}
+
+
+/* ==========================================================================
+   LIMITATION / INCONSISTENCY
+   ========================================================================== */
+
+.br-answer-section.is-limitation
+.br-answer-section__icon {
+    color: #438bd5;
+
+    background:
+        rgba(
+            67,
+            139,
+            213,
+            0.11
+        );
+}
+
+
+/* ==========================================================================
+   OPPORTUNITY / GAP
+   ========================================================================== */
+
+.br-answer-section.is-opportunity
+.br-answer-section__icon {
+    color: #f0a024;
+
+    background:
+        rgba(
+            240,
+            160,
+            36,
+            0.12
+        );
+}
+
+
+/* ==========================================================================
+   SECTION CONTENT
+   ========================================================================== */
+
+.br-answer-section__content {
+    min-width: 0;
+}
+
+
+.br-answer-section__content h3 {
+    margin:
+        5px
+        0
+        7px;
+
+    color: #17172b;
+
+    font-size: 0.8rem;
+    font-weight: 800;
+
+    line-height: 1.35;
+
+    letter-spacing:
+        -0.012em;
+}
+
+
+.br-answer-section__content p {
+    margin:
+        0
+        0
+        8px;
+
+    color: #4d566b;
+
+    font-size: 0.74rem;
+    line-height: 1.75;
+}
+
+
+.br-answer-section__content p:last-child {
+    margin-bottom: 0;
+}
+
+
+.br-answer-section__content strong {
+    color: #22283b;
+
+    font-weight: 760;
+}
+
+
+/* ==========================================================================
+   LIST
+   ========================================================================== */
+
+.br-answer-section__content ul,
+.br-answer-section__content ol,
+.br-answer-conclusion__body ul,
+.br-answer-conclusion__body ol,
+.br-answer__plain ul,
+.br-answer__plain ol {
+    margin:
+        7px
+        0
+        9px;
+
+    padding-left:
+        1.25rem;
+
+    color: #4d566b;
+
+    font-size: 0.73rem;
+    line-height: 1.72;
+}
+
+
+.br-answer-section__content li + li,
+.br-answer-conclusion__body li + li,
+.br-answer__plain li + li {
+    margin-top: 4px;
+}
+
+
+/* ==========================================================================
+   CITATION
+   ========================================================================== */
+
+.br-answer-citation {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 19px;
+
+    margin:
+        0
+        2px;
+
+    padding:
+        1px
+        5px;
+
+    border:
+        1px solid
+        rgba(
+            242,
+            107,
+            79,
+            0.24
+        );
+
+    border-radius: 5px;
+
+    color: #e35e44;
+
+    background: #fff2ed;
+
+    font-size: 0.55rem;
+    font-weight: 800;
+
+    line-height: 1;
+
+    vertical-align: 1px;
+}
+
+
+/* ==========================================================================
+   INLINE CODE
+   ========================================================================== */
+
+.br-answer code {
+    padding:
+        1px
+        4px;
+
+    border:
+        1px solid
+        rgba(
+            23,
+            23,
+            43,
+            0.07
+        );
+
+    border-radius: 4px;
+
+    color: #34394e;
+
+    background: #f7f4ef;
+
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+
+    font-size: 0.9em;
+}
+
+
+/* ==========================================================================
+   LINK
+   ========================================================================== */
+
+.br-answer a {
+    color: #197f9e;
+
+    text-decoration:
+        underline;
+
+    text-decoration-color:
+        rgba(
+            25,
+            127,
+            158,
+            0.28
+        );
+
+    text-underline-offset:
+        2px;
+}
+
+
+/* ==========================================================================
+   CONCLUSION
+   ========================================================================== */
+
+.br-answer-conclusion {
+    margin:
+        9px
+        0
+        7px;
+
+    padding:
+        13px
+        15px;
+
+    border-left:
+        3px solid
+        #f2a028;
+
+    border-radius:
+        0
+        10px
+        10px
+        0;
+
+    background:
+        linear-gradient(
+            100deg,
+            rgba(
+                255,
+                246,
+                230,
+                0.96
+            ),
+            rgba(
+                255,
+                251,
+                246,
+                0.94
+            )
+        );
+}
+
+
+.br-answer-conclusion__head {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+}
+
+
+.br-answer-conclusion__icon {
+    width: 30px;
+    height: 30px;
+
+    display: grid;
+    place-items: center;
+
+    flex:
+        0
+        0
+        auto;
+
+    border-radius: 8px;
+
+    color: #ee981d;
+
+    background:
+        rgba(
+            240,
+            160,
+            36,
+            0.13
+        );
+}
+
+
+.br-answer-conclusion__icon svg {
+    width: 16px;
+    height: 16px;
+
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+
+.br-answer-conclusion__head h3 {
+    margin: 0;
+
+    color: #17172b;
+
+    font-size: 0.78rem;
+    font-weight: 800;
+
+    line-height: 1.35;
+}
+
+
+.br-answer-conclusion__body {
+    margin-top: 8px;
+}
+
+
+.br-answer-conclusion__body p {
+    margin:
+        0
+        0
+        7px;
+
+    color: #596176;
+
+    font-size: 0.7rem;
+    line-height: 1.7;
+}
+
+
+.br-answer-conclusion__body p:last-child {
+    margin-bottom: 0;
+}
+
+
+/* ==========================================================================
+   BOTTOM ACTION BAR
+   Copy / Share / Reload
+   ========================================================================== */
+
+.br-answer-actions {
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 3px;
+
+    min-height: 42px;
+
+    margin-top: 8px;
+
+    padding:
+        6px
+        0
+        1px;
+}
+
+
+/*
+ * Desain mengikuti reference:
+ * icon-only,
+ * kecil,
+ * grey,
+ * tanpa card/button besar.
+ */
+
+.br-answer-action {
+    position: relative;
+
+    width: 35px;
+    height: 35px;
+
+    display: grid;
+
+    place-items: center;
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 8px;
+
+    color:
+        rgba(
+            23,
+            23,
+            43,
+            0.48
+        );
+
+    background:
+        transparent;
+
+    cursor: pointer;
+
+    transition:
+        color 150ms ease,
+        background 150ms ease,
+        transform 150ms ease;
+}
+
+
+.br-answer-action svg {
+    width: 19px;
+    height: 19px;
+
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+
+.br-answer-action:hover {
+    color:
+        rgba(
+            23,
+            23,
+            43,
+            0.82
+        );
+
+    background:
+        rgba(
+            23,
+            23,
+            43,
+            0.055
+        );
+
+    transform:
+        translateY(
+            -1px
+        );
+}
+
+
+.br-answer-action:active {
+    transform:
+        scale(
+            0.94
+        );
+}
+
+
+.br-answer-action.is-success {
+    color: #14998f;
+
+    background:
+        rgba(
+            33,
+            166,
+            160,
+            0.09
+        );
+}
+
+
+.br-answer-action:disabled {
+    cursor:
+        wait;
+
+    opacity: 0.7;
+}
+
+
+/* ==========================================================================
+   TOOLTIP
+   ========================================================================== */
+
+.br-answer-action::after {
+    content:
+        attr(
+            data-tooltip
+        );
+
+    position:
+        absolute;
+
+    z-index: 40;
+
+    left: 50%;
+    bottom:
+        calc(
+            100%
+            +
+            7px
+        );
+
+    padding:
+        5px
+        7px;
+
+    border-radius: 6px;
+
+    color: #fff;
+
+    background:
+        rgba(
+            23,
+            23,
+            43,
+            0.94
+        );
+
+    font-size: 0.54rem;
+    font-weight: 650;
+
+    line-height: 1;
+
+    white-space:
+        nowrap;
+
+    pointer-events:
+        none;
+
+    opacity: 0;
+
+    transform:
+        translate(
+            -50%,
+            3px
+        );
+
+    transition:
+        opacity 130ms ease,
+        transform 130ms ease;
+}
+
+
+.br-answer-action:hover::after {
+    opacity: 1;
+
+    transform:
+        translate(
+            -50%,
+            0
+        );
+}
+
+
+/* ==========================================================================
+   TOOLBAR FEEDBACK
+   ========================================================================== */
+
+.br-answer-actions__feedback {
+    margin-left: 5px;
+
+    color:
+        rgba(
+            23,
+            23,
+            43,
+            0.47
+        );
+
+    font-size: 0.55rem;
+
+    opacity: 0;
+
+    transform:
+        translateX(
+            -3px
+        );
+
+    transition:
+        opacity 160ms ease,
+        transform 160ms ease;
+}
+
+
+.br-answer-actions__feedback.is-visible {
+    opacity: 1;
+
+    transform:
+        translateX(
+            0
+        );
+}
+
+
+/* ==========================================================================
+   RELOAD SPIN
+   ========================================================================== */
+
+.br-answer-action.is-loading svg {
+    animation:
+        br-answer-spin
+        650ms
+        linear
+        infinite;
+}
+
+
+@keyframes br-answer-spin {
+    to {
+        transform:
+            rotate(
+                360deg
+            );
+    }
+}
+
+
+/* ==========================================================================
+   MOBILE
+   ========================================================================== */
+
+@media (
+    max-width:
+        760px
+) {
+
+    .br-answer-section {
+        grid-template-columns:
+            33px
+            minmax(
+                0,
+                1fr
+            );
+
+        gap: 8px;
+
+        padding:
+            15px
+            0;
+    }
+
+
+    .br-answer-section__icon {
+        width: 31px;
+        height: 31px;
+
+        border-radius: 9px;
+    }
+
+
+    .br-answer-section__icon svg {
+        width: 16px;
+        height: 16px;
+    }
+
+
+    .br-answer-section__content h3 {
+        margin-top: 4px;
+
+        font-size: 0.75rem;
+    }
+
+
+    .br-answer-section__content p,
+    .br-answer__lead p,
+    .br-answer__plain p {
+        font-size: 0.71rem;
+    }
+
+
+    .br-answer-actions {
+        min-height: 40px;
+
+        margin-top: 6px;
+    }
+
+
+    .br-answer-action {
+        width: 37px;
+        height: 37px;
+    }
+
+
+    /*
+     * Tooltip mouse hover nggak relevan di HP.
+     */
+
+    .br-answer-action::after {
+        display: none;
+    }
+}
+
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
+
+@media (
+    prefers-reduced-motion:
+        reduce
+) {
+
+    .br-answer-action,
+    .br-answer-action::after,
+    .br-answer-actions__feedback {
+        transition: none;
+    }
+
+
+    .br-answer-action:hover {
+        transform: none;
+    }
+
+
+    .br-answer-action.is-loading svg {
+        animation: none;
+    }
+}

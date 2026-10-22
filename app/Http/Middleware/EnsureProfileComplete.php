@@ -15,6 +15,13 @@ class EnsureProfileComplete
             return redirect()->route('login');
         }
 
+        if (config('research.profile_fields_optional', true)
+            && filled($user->name)
+            && filled($user->email)
+            && filled($user->institution)) {
+            return $next($request);
+        }
+
         if ($user->profileCompletion() < config('research.profile_gate', 80)) {
             return redirect()->route('profile.setup');
         }

@@ -1,0 +1,107 @@
+{
+  "pack": "BacaDulu Research Master Context v2",
+  "created": "2026-10-15",
+  "baseline_zip": "BacaResearch_4research_sidebar_checkpoint.zip",
+  "instagram_references": [
+    {
+      "id": "IG-01",
+      "type": "Reel",
+      "url": "https://www.instagram.com/reel/DeebsTrx_3e/"
+    },
+    {
+      "id": "IG-02",
+      "type": "Reel",
+      "url": "https://www.instagram.com/reel/DecN_gbx_eD/"
+    },
+    {
+      "id": "IG-03",
+      "type": "Reel",
+      "url": "https://www.instagram.com/reel/Dea5G_fP7WX/"
+    },
+    {
+      "id": "IG-04",
+      "type": "Reel",
+      "url": "https://www.instagram.com/reel/DedJ2BTD_IJ/"
+    },
+    {
+      "id": "IG-05",
+      "type": "Post",
+      "url": "https://www.instagram.com/p/DebnbytmvVt/"
+    },
+    {
+      "id": "IG-06",
+      "type": "Post",
+      "url": "https://www.instagram.com/p/DeVERjTgMRE/"
+    },
+    {
+      "id": "IG-07",
+      "type": "Post",
+      "url": "https://www.instagram.com/p/DeE0-thCDFp/"
+    },
+    {
+      "id": "IG-08",
+      "type": "Reel",
+      "url": "https://www.instagram.com/reel/DdbLJv1jAI0/"
+    },
+    {
+      "id": "IG-09",
+      "type": "Post",
+      "url": "https://www.instagram.com/p/DeHgoP8kxyV/"
+    },
+    {
+      "id": "IG-10",
+      "type": "Post",
+      "url": "https://www.instagram.com/p/Dd9IBiPFmI_/"
+    }
+  ],
+  "files": {
+    "00_MASTER_CONTEXT_ALL_IN_ONE.md": {
+      "bytes": 33633,
+      "sha256": "a3db4c9a2925571e92eba7140fff5f473f89822a922e22229a0a25a872ae883c"
+    },
+    "01_PRD_BACADULU_RESEARCH.md": {
+      "bytes": 6256,
+      "sha256": "2a7e791a7f7d259e37afb37ff3242f3bb3fd9844f90e4104c10cbf9a45a239a2"
+    },
+    "02_MASTER_KEY.md": {
+      "bytes": 11771,
+      "sha256": "93b22831098b9749a76c5028192d6608f7d65625789e9116919edc2e8825cc03"
+    },
+    "03_VISUAL_REFERENCE_REGISTRY.md": {
+      "bytes": 2576,
+      "sha256": "0947afc442d06968333cabf4bc2c21a67a1bd0b53ff788c8c4af68afc09bcc8e"
+    },
+    "04_DESIGN_SYSTEM_UIUX.md": {
+      "bytes": 2258,
+      "sha256": "81fea342c1b49b5b85d93b5be971c0a35bbcbf9d1c62a81d3792ce0b05b4dfcf"
+    },
+    "05_TECHNICAL_ARCHITECTURE.md": {
+      "bytes": 2774,
+      "sha256": "28fb2d2abd0be3c93a9cfce70fdd47639103dc246828565c2988ed677a6f291b"
+    },
+    "06_IMPLEMENTATION_ROADMAP.md": {
+      "bytes": 2160,
+      "sha256": "ffc89c2c1150518aceaa9679a1ab83809eed0901b2c88d705eac57dfd62d6dda"
+    },
+    "07_SECURITY_CHANGE_GUARDRAILS.md": {
+      "bytes": 1730,
+      "sha256": "bb49b7f45c44e73a02cd89441e5dc40374ad8cc07865e171354f5ccf4913938e"
+    },
+    "08_SETUP_BUILD_RECOVERY.md": {
+      "bytes": 1554,
+      "sha256": "cf055ab518ff3961fdfe95746b712259536cafe7dff36320ca86b5dfc6c175f7"
+    },
+    "09_ACCEPTANCE_CHECKLIST.md": {
+      "bytes": 2112,
+      "sha256": "6a17143f67ed32d5e06531b37b4e965ab19843c35b220586c1df6ea268f3bcaf"
+    },
+    "10_ALL_PREVIOUS_READMES_VERBATIM.md": {
+      "bytes": 23964,
+      "sha256": "0085cf83d2bff8786b7fe39ac88d649692fb5fc400a5732429d5316532dfcdd2"
+    },
+    "README.md": {
+      "bytes": 1242,
+      "sha256": "8cef7b0959f7b6d8d4b16be53fadff0297958f956d71ec7c4e0e6355b60534e4"
+    }
+  }
+}

@@ -217,10 +217,7 @@
                             saved-evidence__items
                         "
                     >
-                        @foreach(
-                            $evidence
-                            as $index => $item
-                        )
+                        @foreach ($evidence as $index => $item)
 
                             <article
                                 class="
@@ -293,10 +290,7 @@
                         "
                     >
 
-                        @foreach(
-                            $run->sources
-                            as $index => $source
-                        )
+                        @foreach ($run->sources as $index => $source)
 
                             <article
                                 class="
@@ -392,10 +386,7 @@
                             saved-citations__content
                         "
                     >
-                        @foreach(
-                            $citations
-                            as $citation
-                        )
+                        @foreach ($citations as $citation)
 
                             <p>
                                 {{

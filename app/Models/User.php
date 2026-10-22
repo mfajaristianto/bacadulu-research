@@ -25,11 +25,15 @@ class User extends Authenticatable implements MustVerifyEmailContract
         'avatar',
         'phone',
         'institution',
+        'role',
+        'domicile_city',
+        'research_interest',
         'occupation',
         'address',
         'date_of_birth',
         'status',
         'last_login_at',
+        'onboarding_completed_at',
     ];
 
     protected $hidden = [
@@ -42,6 +46,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return [
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'onboarding_completed_at' => 'datetime',
             'date_of_birth' => 'date',
             'password' => 'hashed',
         ];
@@ -153,6 +158,17 @@ class User extends Authenticatable implements MustVerifyEmailContract
             '',
             $normalized
         );
+
+        /*
+         * ProfileController stores current device uploads in public/avatars.
+         * The same authenticated URL is used in Profile, topbar and Workspace.
+         */
+        if (
+            Str::startsWith($legacyStoragePath, 'avatars/')
+            && Storage::disk('public')->exists($legacyStoragePath)
+        ) {
+            return route('profile.avatar', ['v' => $this->updated_at?->timestamp], false);
+        }
 
         /*
          * Legacy:

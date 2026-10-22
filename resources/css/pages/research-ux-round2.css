@@ -1,0 +1,716 @@
+/* ========================================================================
+   BACARESEARCH — UX ROUND 2
+   Final overrides for inline Saved, chat-like Recent menu, document format
+   selection, generation motion, and single-format document viewing.
+   IMPORTANT: import this file LAST in resources/css/app.css.
+   ======================================================================== */
+
+/* ------------------------------------------------------------------------
+   1. RECENT — CHAT-LIKE THREE DOT MENU
+   ------------------------------------------------------------------------ */
+.br-sidebar-conversation-row {
+    position: relative;
+}
+
+.br-sidebar-conversation-menu__items {
+    position: fixed !important;
+    z-index: 5000 !important;
+    top: var(--conversation-menu-top, 80px) !important;
+    left: var(--conversation-menu-left, 300px) !important;
+    right: auto !important;
+
+    width: 214px !important;
+    padding: 8px !important;
+    display: grid;
+    gap: 3px;
+
+    border: 1px solid rgba(220, 225, 238, .12) !important;
+    border-radius: 15px !important;
+    background: #202840 !important;
+    color: #f7f8fc !important;
+    box-shadow: 0 22px 55px rgba(2, 8, 25, .42) !important;
+
+    transform: none !important;
+}
+
+.br-sidebar-conversation-menu__items button,
+.br-sidebar-conversation-menu__items a {
+    width: 100%;
+    min-height: 42px;
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 11px !important;
+
+    border: 0;
+    border-radius: 9px !important;
+    background: transparent !important;
+    color: #f0f3f9 !important;
+    text-align: left;
+    text-decoration: none;
+    font: inherit;
+    font-size: 12px !important;
+    cursor: pointer;
+}
+
+.br-sidebar-conversation-menu__items button:hover,
+.br-sidebar-conversation-menu__items a:hover {
+    background: rgba(255, 255, 255, .075) !important;
+}
+
+.br-sidebar-conversation-menu__items svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.br-sidebar-conversation-menu__divider {
+    width: calc(100% - 12px);
+    height: 1px;
+    margin: 4px 6px;
+    background: rgba(255, 255, 255, .11);
+}
+
+.br-sidebar-conversation-menu__items .is-danger {
+    color: #ff8c80 !important;
+}
+
+/* ------------------------------------------------------------------------
+   2. INLINE RENAME — title becomes input; Enter saves
+   ------------------------------------------------------------------------ */
+.br-sidebar-inline-rename {
+    min-width: 0;
+    min-height: 61px;
+    display: grid;
+    grid-template-columns: 27px minmax(0, 1fr);
+    align-items: center;
+    gap: 9px;
+    padding: 8px 5px 8px 8px;
+}
+
+.br-sidebar-inline-rename[hidden] {
+    display: none !important;
+}
+
+.br-sidebar-inline-rename .br-sidebar-conversation__icon {
+    width: 27px;
+    height: 27px;
+    display: grid;
+    place-items: center;
+    color: #dce3f0;
+}
+
+.br-sidebar-inline-rename .br-sidebar-conversation__icon svg {
+    width: 19px;
+    height: 19px;
+    stroke: currentColor;
+    stroke-width: 1.65;
+}
+
+.br-sidebar-inline-rename input {
+    min-width: 0;
+    width: 100%;
+    height: 37px;
+    padding: 7px 10px;
+    border: 1px solid rgba(255, 125, 95, .68);
+    border-radius: 9px;
+    outline: none;
+    color: #fff;
+    background: #151d35;
+    box-shadow: 0 0 0 3px rgba(255, 101, 71, .10);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.br-sidebar-conversation-row.is-renaming .br-sidebar-conversation-menu {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* ------------------------------------------------------------------------
+   3. SAVED BUTTON — inside the white answer card, top-right
+   ------------------------------------------------------------------------ */
+.research-answer-card__head {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+}
+
+.research-answer-card__head form.research-answer-save-form[action*="saved"] {
+    display: block !important;
+    margin-left: auto;
+}
+
+.research-answer-save-inline {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 14px;
+
+    border: 1px solid #f1b5a4;
+    border-radius: 11px;
+    background: #fff8f4;
+    color: #c94f39;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.research-answer-save-inline svg {
+    width: 17px;
+    height: 17px;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linejoin: round;
+}
+
+.research-answer-save-inline:hover {
+    transform: translateY(-1px);
+    background: #ffede4;
+    border-color: #ed9e87;
+}
+
+.research-answer-save-inline.is-loading {
+    opacity: .6;
+    pointer-events: none;
+}
+
+.research-answer-save-inline.is-saved {
+    color: #087b79;
+    border-color: #9ddbd7;
+    background: #eefaf8;
+}
+
+.research-answer-save-inline.is-saved svg {
+    fill: currentColor;
+}
+
+/* Header now only carries Evidence-aware. */
+.br-result-head-actions {
+    min-width: 0 !important;
+}
+
+.br-result-header-save,
+.br-result-saved-link {
+    display: none !important;
+}
+
+/* ------------------------------------------------------------------------
+   4. DOCUMENT FORMAT STAGE — appears only after Final Check
+   ------------------------------------------------------------------------ */
+.document-create-main.is-choosing-format > .document-create-form {
+    display: none !important;
+}
+
+.br-doc-format-stage {
+    min-height: 520px;
+    padding: clamp(24px, 4vw, 46px);
+    border: 1px solid #eadfd5;
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at 88% 14%, rgba(255, 199, 164, .25), transparent 28%),
+        linear-gradient(145deg, #fffdf9 0%, #fff8f1 100%);
+    box-shadow: 0 24px 70px rgba(37, 30, 45, .08);
+    opacity: 0;
+    transform: translateY(18px) scale(.992);
+    transition: opacity 260ms ease, transform 520ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.br-doc-format-stage[hidden] {
+    display: none !important;
+}
+
+.br-doc-format-stage.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.br-doc-format-stage__back {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: #66718d;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.br-doc-format-stage__copy {
+    max-width: 660px;
+    margin: 58px auto 30px;
+    text-align: center;
+}
+
+.br-doc-format-stage__copy h2 {
+    margin: 9px 0 10px;
+    color: #14182e;
+    font-size: clamp(34px, 4vw, 58px);
+    line-height: 1.02;
+    letter-spacing: -.045em;
+}
+
+.br-doc-format-stage__copy p {
+    margin: 0 auto;
+    max-width: 560px;
+    color: #69748f;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.br-doc-format-stage__choices {
+    max-width: 780px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.br-doc-format-card {
+    min-width: 0;
+    min-height: 146px;
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr) 20px;
+    align-items: center;
+    gap: 15px;
+    padding: 21px;
+
+    border: 1px solid #e8ddd5;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .90);
+    color: #151a34;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 12px 35px rgba(39, 29, 43, .04);
+    transition: transform 230ms ease, border-color 230ms ease, box-shadow 230ms ease;
+}
+
+.br-doc-format-card:hover {
+    transform: translateY(-4px);
+    border-color: #f3a28a;
+    box-shadow: 0 20px 42px rgba(48, 31, 43, .09);
+}
+
+.br-doc-format-card__icon {
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+}
+
+.br-doc-format-card__icon.is-pdf {
+    color: #e85742;
+    background: #fff0eb;
+}
+
+.br-doc-format-card__icon.is-docx {
+    color: #405cc7;
+    background: #eef1ff;
+}
+
+.br-doc-format-card__icon svg {
+    width: 28px;
+    height: 28px;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.br-doc-format-card > span:nth-child(2) {
+    min-width: 0;
+    display: grid;
+    gap: 7px;
+}
+
+.br-doc-format-card strong {
+    font-size: 20px;
+}
+
+.br-doc-format-card small {
+    color: #6e7892;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.br-doc-format-card > i {
+    color: #f26b4f;
+    font-style: normal;
+    font-size: 20px;
+}
+
+/* ------------------------------------------------------------------------
+   5. GENERATION LOADING — only after PDF/DOCX is chosen
+   ------------------------------------------------------------------------ */
+.br-doc-generation {
+    position: fixed !important;
+    z-index: 7000 !important;
+    inset: 0 !important;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.br-doc-generation[hidden] {
+    display: none !important;
+}
+
+.br-doc-generation__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(12, 18, 40, .62);
+    backdrop-filter: blur(9px);
+}
+
+.br-doc-generation__panel {
+    position: relative;
+    z-index: 1;
+    width: min(540px, calc(100vw - 34px));
+    padding: 34px;
+    border: 1px solid rgba(255,255,255,.65);
+    border-radius: 26px;
+    background: #fffaf4;
+    box-shadow: 0 34px 90px rgba(4, 9, 26, .30);
+    text-align: center;
+}
+
+.br-doc-generation__file-motion {
+    position: relative;
+    width: 126px;
+    height: 104px;
+    margin: 4px auto 22px;
+}
+
+.br-doc-generation__file-motion span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 64px;
+    height: 82px;
+    border: 1px solid #eadfd5;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 10px 24px rgba(32, 27, 42, .11);
+    transform-origin: 50% 95%;
+}
+
+.br-doc-generation__file-motion span:nth-child(1) {
+    transform: translate(-50%, -50%) rotate(-10deg);
+    animation: br-doc-paper-slow-a 2.4s ease-in-out infinite alternate;
+}
+
+.br-doc-generation__file-motion span:nth-child(2) {
+    transform: translate(-50%, -50%) rotate(5deg) translateX(10px);
+    animation: br-doc-paper-slow-b 2.8s ease-in-out infinite alternate;
+}
+
+.br-doc-generation__file-motion span:nth-child(3) {
+    transform: translate(-50%, -50%) rotate(0deg) translateY(-7px);
+    animation: br-doc-paper-slow-c 2.15s ease-in-out infinite alternate;
+}
+
+.br-doc-generation__file-motion span::before,
+.br-doc-generation__file-motion span::after {
+    content: '';
+    position: absolute;
+    left: 11px;
+    right: 11px;
+    height: 5px;
+    border-radius: 5px;
+    background: #e7e5e2;
+}
+
+.br-doc-generation__file-motion span::before { top: 19px; }
+.br-doc-generation__file-motion span::after { top: 31px; width: 58%; }
+
+@keyframes br-doc-paper-slow-a {
+    to { transform: translate(-50%, -54%) rotate(-14deg) translateX(-5px); }
+}
+
+@keyframes br-doc-paper-slow-b {
+    to { transform: translate(-50%, -46%) rotate(8deg) translateX(15px); }
+}
+
+@keyframes br-doc-paper-slow-c {
+    to { transform: translate(-50%, -55%) rotate(-2deg) translateY(-11px); }
+}
+
+.br-doc-generation__panel > strong {
+    display: block;
+    margin-top: 5px;
+    color: #15192f;
+    font-size: 24px;
+}
+
+.br-doc-generation__panel > p {
+    margin: 10px auto 22px;
+    max-width: 400px;
+    color: #6c7690;
+    line-height: 1.55;
+}
+
+.br-doc-generation__track {
+    height: 9px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #ece7e1;
+}
+
+.br-doc-generation__track > span {
+    width: var(--doc-progress, 0%);
+    height: 100%;
+    display: block;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #ff8a67, #f25d43);
+    transition: width 320ms cubic-bezier(.22,1,.36,1);
+}
+
+.br-doc-generation__meta {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+}
+
+.br-doc-generation__meta > span {
+    color: #67728b;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.br-doc-generation__meta > b {
+    color: #15192f;
+    font-size: 16px;
+}
+
+.br-doc-progress-disclaimer {
+    display: none !important;
+}
+
+.br-doc-generation__retry {
+    margin-top: 20px;
+    min-height: 42px;
+    padding: 9px 18px;
+    border: 1px solid #e3d8cf;
+    border-radius: 11px;
+    background: #fff;
+    color: #1b2038;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* File that physically flies toward Dokumen Saya. */
+.br-doc-flying-file {
+    position: fixed;
+    z-index: 9000;
+    width: 60px;
+    height: 72px;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    border-radius: 11px;
+    background: #fff;
+    border: 1px solid #e7ddd5;
+    box-shadow: 0 18px 46px rgba(7, 12, 31, .25);
+}
+
+.br-doc-flying-file svg {
+    width: 31px;
+    height: 31px;
+    stroke: currentColor;
+    stroke-width: 1.6;
+}
+
+.br-doc-flying-file span {
+    position: absolute;
+    left: 50%;
+    bottom: 7px;
+    transform: translateX(-50%);
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .06em;
+}
+
+.br-doc-flying-file.is-pdf { color: #d94d39; }
+.br-doc-flying-file.is-docx { color: #3858bf; }
+
+.br-sidebar-nav.is-document-arrival {
+    animation: br-document-arrival 700ms cubic-bezier(.22,1,.36,1);
+}
+
+@keyframes br-document-arrival {
+    0%,100% { box-shadow: 0 0 0 rgba(255,101,71,0); }
+    45% { box-shadow: 0 0 0 8px rgba(255,101,71,.16); }
+}
+
+/* ------------------------------------------------------------------------
+   6. SINGLE FORMAT VIEWER
+   ------------------------------------------------------------------------ */
+.document-page-head--single {
+    align-items: flex-end;
+}
+
+.br-doc-view-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 10px 0 18px;
+    padding: 11px 2px;
+    border-bottom: 1px solid #e9dfd6;
+    color: #79839a;
+    font-size: 11px;
+}
+
+.br-doc-view-toolbar a {
+    color: #087e7b;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.br-doc-pdf-only {
+    overflow: hidden;
+    border: 1px solid #e7ddd5;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 18px 50px rgba(34, 27, 42, .06);
+}
+
+.br-doc-pdf-only__head {
+    min-height: 78px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 17px 22px;
+    border-bottom: 1px solid #ece3dc;
+}
+
+.br-doc-pdf-only__head h2 {
+    margin: 4px 0 0;
+    color: #161a32;
+    font-size: 19px;
+}
+
+.br-doc-pdf-only__head small {
+    color: #74809a;
+}
+
+.br-doc-pdf-only iframe {
+    display: block;
+    width: 100%;
+    height: min(72vh, 820px);
+    min-height: 620px;
+    border: 0;
+    background: #2f2f2f;
+}
+
+.br-doc-view-empty {
+    min-height: 420px;
+    display: grid;
+    place-items: center;
+    color: #7a8398;
+}
+
+.document-workbench--docx {
+    grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr) !important;
+}
+
+/* PDF mode must never leak old editor/preview tabs from legacy CSS. */
+.br-document-view--pdf .document-workbench,
+.br-document-view--pdf .document-editor,
+.br-document-view--pdf .document-preview-shell,
+.br-document-view--pdf .br-doc-preview-tabs,
+.br-document-view--pdf .br-doc-format-hints,
+.br-document-view--pdf .br-doc-ready-banner,
+.br-document-view--pdf [data-document-download-dialog],
+.br-document-view--pdf [data-document-download-progress] {
+    display: none !important;
+}
+
+/* ------------------------------------------------------------------------
+   7. RESPONSIVE
+   ------------------------------------------------------------------------ */
+@media (max-width: 900px) {
+    .br-doc-format-stage__choices {
+        grid-template-columns: 1fr;
+    }
+
+    .document-workbench--docx {
+        grid-template-columns: 1fr !important;
+    }
+
+    .br-doc-pdf-only iframe {
+        min-height: 520px;
+        height: 68vh;
+    }
+}
+
+@media (max-width: 640px) {
+    .research-answer-card__head {
+        align-items: flex-start !important;
+    }
+
+    .research-answer-save-inline {
+        min-width: 44px;
+        padding-inline: 11px;
+    }
+
+    .br-doc-format-stage {
+        padding: 20px;
+        min-height: 480px;
+    }
+
+    .br-doc-format-stage__copy {
+        margin-top: 38px;
+        text-align: left;
+    }
+
+    .br-doc-format-card {
+        grid-template-columns: 50px minmax(0, 1fr) 16px;
+        min-height: 122px;
+        padding: 17px;
+    }
+
+    .br-doc-format-card__icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .br-doc-pdf-only__head,
+    .br-doc-view-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .br-doc-pdf-only iframe {
+        min-height: 480px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .br-doc-format-stage,
+    .br-doc-format-card,
+    .br-doc-generation__track > span,
+    .research-answer-save-inline {
+        transition: none !important;
+    }
+
+    .br-doc-generation__file-motion span,
+    .br-sidebar-nav.is-document-arrival {
+        animation: none !important;
+    }
+}

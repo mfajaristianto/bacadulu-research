@@ -1,0 +1,16 @@
+/*
+|--------------------------------------------------------------------------
+| Admin bundle (layouts/admin.blade.php, layouts/admin-auth.blade.php)
+|--------------------------------------------------------------------------
+| Loaded INSTEAD of app.css. Admin styles sit between core and overrides,
+| preserving the cascade order the admin pages were built against.
+*/
+
+@import './bundles/core.css';
+
+@import './pages/admin.css';
+@import './pages/admin-auth.css';
+@import './pages/admin-ai-runs.css';
+@import './pages/admin-library-source.css';
+
+@import './bundles/overrides.css';

@@ -2,44 +2,74 @@
 
 @section(
     'title',
-    ($authMode ?? 'login') === 'register'
+    ($authView ?? 'signin') === 'signup'
         ? 'Daftar — BacaDulu Research'
         : 'Masuk — BacaDulu Research'
 )
 
-@section('meta_description', 'Masuk atau buat akun BacaDulu Research.')
-
 @section('content')
 
-<section
-    class="research-auth-final"
-    data-auth-card
-    data-view="{{ ($authMode ?? 'login') === 'register' ? 'signup' : 'signin' }}"
->
-    {{-- =========================================================
-         MOVING BACKGROUND
-    ========================================================== --}}
-    <div class="research-auth-final__scene" aria-hidden="true">
-        <span class="research-auth-final__blob research-auth-final__blob--coral"></span>
-        <span class="research-auth-final__blob research-auth-final__blob--teal"></span>
-        <span class="research-auth-final__blob research-auth-final__blob--blue"></span>
-        <span class="research-auth-final__blob research-auth-final__blob--peach"></span>
+@php
+    $initialView = ($authView ?? 'signin') === 'signup'
+        ? 'signup'
+        : 'signin';
 
-        <span class="research-auth-final__bubble research-auth-final__bubble--one"></span>
-        <span class="research-auth-final__bubble research-auth-final__bubble--two"></span>
-        <span class="research-auth-final__bubble research-auth-final__bubble--three"></span>
-        <span class="research-auth-final__bubble research-auth-final__bubble--four"></span>
+    $roles = [
+        'student' => 'Pelajar',
+        'university_student' => 'Mahasiswa',
+        'teacher' => 'Guru',
+        'lecturer' => 'Dosen',
+        'researcher' => 'Peneliti',
+        'professional' => 'Profesional / Karyawan',
+        'practitioner' => 'Praktisi / Konsultan',
+        'entrepreneur' => 'Pengusaha / Wirausaha',
+        'editor_reviewer' => 'Editor / Reviewer Jurnal',
+        'education_staff' => 'Tenaga Kependidikan',
+        'government_employee' => 'Pegawai Pemerintah',
+        'other' => 'Lainnya',
+    ];
+
+    $researchInterests = [
+        'Akuntansi',
+        'Perpajakan',
+        'Keuangan',
+        'Manajemen',
+        'Ekonomi',
+        'Bisnis',
+        'Sustainability / ESG',
+        'Sistem Informasi',
+        'Artificial Intelligence',
+        'Pendidikan',
+        'Hukum',
+        'Ilmu Sosial',
+        'Kesehatan',
+        'Teknik / Teknologi',
+        'Lainnya',
+    ];
+@endphp
+
+<section
+    class="research-auth"
+    data-research-auth
+    data-view="{{ $initialView }}"
+    data-login-url="{{ route('login') }}"
+    data-register-url="{{ route('register') }}"
+>
+    <div class="research-auth__ambient" aria-hidden="true">
+        <span class="research-auth__blob research-auth__blob--coral"></span>
+        <span class="research-auth__blob research-auth__blob--teal"></span>
+        <span class="research-auth__blob research-auth__blob--blue"></span>
+        <span class="research-auth__blob research-auth__blob--peach"></span>
+
+        <span class="research-auth__particle research-auth__particle--1"></span>
+        <span class="research-auth__particle research-auth__particle--2"></span>
+        <span class="research-auth__particle research-auth__particle--3"></span>
+        <span class="research-auth__particle research-auth__particle--4"></span>
     </div>
 
-
-    <div class="research-auth-final__page">
-
-        {{-- BACK --}}
-        <div class="research-auth-final__topbar">
-            <a
-                href="{{ route('home') }}"
-                class="research-auth-final__back"
-            >
+    <div class="research-auth__page">
+        <div class="research-auth__top">
+            <a href="{{ route('home') }}" class="research-auth__back">
                 <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -53,79 +83,54 @@
                     <path d="M11 18l-6-6 6-6"/>
                 </svg>
 
-                Kembali ke situs
+                <span>Kembali ke situs</span>
             </a>
         </div>
 
-
-        <div class="research-auth-final__card">
-
-            {{-- =====================================================
-                 HEADER
-            ====================================================== --}}
-            <header class="research-auth-final__header">
-
-                <a
-                    href="{{ route('home') }}"
-                    class="research-auth-final__brand"
-                >
+        <div class="research-auth__shell">
+            <header class="research-auth__header">
+                <a href="{{ route('home') }}" class="research-auth__brand">
                     <span>BacaDulu</span>
                     <strong>Research</strong>
                 </a>
 
-
-                <nav class="research-auth-final__tabs">
-
+                <nav class="research-auth__tabs" aria-label="Navigasi autentikasi">
                     <a
                         href="{{ route('login') }}"
-                        data-auth-view="signin"
-                        class="research-auth-final__tab"
+                        class="research-auth__tab"
+                        data-auth-switch="signin"
                     >
                         Masuk
                     </a>
 
                     <a
                         href="{{ route('register') }}"
-                        data-auth-view="signup"
-                        class="research-auth-final__tab"
+                        class="research-auth__tab"
+                        data-auth-switch="signup"
                     >
                         Daftar
                     </a>
-
                 </nav>
-
             </header>
 
-
-            {{-- =====================================================
-                 BODY
-            ====================================================== --}}
-            <div class="research-auth-final__body">
-
-                {{-- =================================================
+            <div class="research-auth__body">
+                {{-- =====================================================
                      LEFT VISUAL
-                ================================================== --}}
-                <section
-                    class="research-auth-final__visual"
-                    data-auth-visual
-                >
+                ====================================================== --}}
+                <section class="research-auth__visual">
                     <div
-                        class="research-auth-final__visual-grid"
+                        class="research-auth__grid"
                         data-auth-grid
+                        aria-hidden="true"
                     ></div>
 
-
-                    {{-- =============================================
-                         LOGIN VISUAL
-                    ============================================== --}}
+                    {{-- LOGIN --}}
                     <div
-                        class="research-auth-final__hero"
+                        class="research-auth__hero"
                         data-auth-hero="signin"
                     >
-
-                        <div class="research-auth-final__intro">
-
-                            <p class="research-auth-final__eyebrow">
+                        <div class="research-auth__intro">
+                            <p class="research-auth__eyebrow">
                                 BACADULU RESEARCH
                             </p>
 
@@ -135,74 +140,66 @@
                             </h1>
 
                             <p>
-                                Kembali ke conversation, evidence,
-                                source, dan research output yang
-                                sebelumnya Anda kerjakan.
+                                Kembali ke conversation, evidence, source,
+                                dan research output yang sebelumnya Anda kerjakan.
                             </p>
-
                         </div>
 
+                        <div
+                            class="research-auth__journey"
+                            data-auth-journey
+                        >
+                            <div class="research-auth__journey-track">
+                                <span data-auth-journey-progress></span>
+                            </div>
 
-                        {{-- JOURNEY --}}
-                        <div class="research-auth-final__journey">
-
-                            <div class="research-auth-final__journey-line"></div>
-
-                            <article>
-                                <i class="is-coral"></i>
+                            <article data-auth-journey-step>
+                                <i></i>
                                 <small>01</small>
                                 <strong>Question</strong>
                             </article>
 
-                            <article>
-                                <i class="is-teal"></i>
+                            <article data-auth-journey-step>
+                                <i></i>
                                 <small>02</small>
                                 <strong>Retrieval</strong>
                             </article>
 
-                            <article>
+                            <article data-auth-journey-step>
                                 <i></i>
                                 <small>03</small>
                                 <strong>Analysis</strong>
                             </article>
 
-                            <article>
+                            <article data-auth-journey-step>
                                 <i></i>
                                 <small>04</small>
                                 <strong>Output</strong>
                             </article>
-
                         </div>
 
-
-                        {{-- WORKSPACE VISUAL --}}
-                        <div class="research-auth-final__workspace-stage">
-
-                            <div
-                                class="research-auth-final__workspace"
-                                data-auth-tile
+                        <div
+                            class="research-auth__workspace-stage"
+                            data-login-stage
+                        >
+                            <article
+                                class="research-auth__workspace"
+                                data-login-workspace
                             >
-
-                                <div class="research-auth-final__workspace-head">
-
+                                <header class="research-auth__workspace-head">
                                     <div>
                                         <small>RESEARCH SESSION</small>
-                                        <strong>ESG & Firm Value</strong>
+                                        <strong>ESG &amp; Firm Value</strong>
                                     </div>
 
-
-                                    <span>
+                                    <span class="research-auth__workspace-status">
                                         <i></i>
                                         Evidence ready
                                     </span>
+                                </header>
 
-                                </div>
-
-
-                                <div class="research-auth-final__workspace-body">
-
+                                <div class="research-auth__workspace-body">
                                     <nav>
-
                                         <span>
                                             <svg
                                                 viewBox="0 0 24 24"
@@ -217,8 +214,10 @@
                                             Question
                                         </span>
 
-
-                                        <span class="is-active">
+                                        <span
+                                            class="is-active"
+                                            data-evidence-nav
+                                        >
                                             <svg
                                                 viewBox="0 0 24 24"
                                                 fill="none"
@@ -232,14 +231,13 @@
                                                     height="16"
                                                     rx="2"
                                                 />
-
-                                                <path d="M8 9h8M8 13h6"/>
+                                                <path d="M9 9h6"/>
+                                                <path d="M9 13h6"/>
                                             </svg>
 
                                             Evidence
                                         </span>
 
-
                                         <span>
                                             <svg
                                                 viewBox="0 0 24 24"
@@ -247,13 +245,13 @@
                                                 stroke="currentColor"
                                                 stroke-width="1.8"
                                             >
-                                                <path d="M4 18l5-5 4 3 7-8"/>
+                                                <path d="M5 17l4-5 4 2 6-8"/>
+                                                <path d="M16 6h3v3"/>
                                             </svg>
 
                                             Analysis
                                         </span>
 
-
                                         <span>
                                             <svg
                                                 viewBox="0 0 24 24"
@@ -261,32 +259,32 @@
                                                 stroke="currentColor"
                                                 stroke-width="1.8"
                                             >
-                                                <path d="M6 3h9l3 3v15H6z"/>
-                                                <path d="M14 3v4h4"/>
+                                                <path d="M7 3h7l4 4v14H7z"/>
+                                                <path d="M14 3v5h5"/>
                                             </svg>
 
                                             Output
                                         </span>
-
                                     </nav>
 
-
-                                    <div class="research-auth-final__workspace-content">
-
+                                    <div class="research-auth__workspace-main">
                                         <small>
                                             RELEVANT ACADEMIC SOURCES
                                         </small>
 
-
-                                        <div class="research-auth-final__lines">
+                                        <div
+                                            class="research-auth__source-lines"
+                                            data-source-lines
+                                        >
                                             <span></span>
                                             <span></span>
                                             <span></span>
                                         </div>
 
-
-                                        <div class="research-auth-final__evidence">
-
+                                        <article
+                                            class="research-auth__evidence"
+                                            data-evidence-card
+                                        >
                                             <b>E01</b>
 
                                             <div>
@@ -295,100 +293,42 @@
                                                     Relevant academic evidence
                                                 </strong>
                                             </div>
+                                        </article>
 
-                                        </div>
-
-
-                                        <div class="research-auth-final__chips">
+                                        <div class="research-auth__chips">
                                             <span>PDF</span>
-                                            <span>Jurnal</span>
+                                            <span>Journal</span>
                                             <span>Dataset</span>
                                         </div>
-
                                     </div>
-
                                 </div>
+                            </article>
 
-                            </div>
-
-
-                            {{-- SOURCE --}}
                             <div
-                                class="research-auth-final__float research-auth-final__float--source"
-                                data-auth-tile
-                            >
-                                <span class="is-coral">
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.8"
-                                    >
-                                        <path d="M6 3h9l3 3v15H6z"/>
-                                        <path d="M14 3v4h4"/>
-                                        <path d="M9 12h6M9 16h5"/>
-                                    </svg>
-                                </span>
-
-                                <div>
-                                    <small>SOURCE</small>
-                                    <strong>Curated Evidence</strong>
-                                </div>
-                            </div>
-
-
-                            {{-- CHART --}}
-                            <div
-                                class="research-auth-final__mini-icon research-auth-final__mini-icon--chart"
-                                data-auth-tile
-                            >
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                    stroke-linecap="round"
-                                >
-                                    <path d="M5 19V11"/>
-                                    <path d="M12 19V5"/>
-                                    <path d="M19 19v-6"/>
-                                </svg>
-                            </div>
-
-
-                            {{-- SEARCH — sekarang nempel workspace --}}
-                            <div
-                                class="research-auth-final__search-orb"
-                                data-auth-tile
+                                class="research-auth__search"
+                                data-search-orb
+                                aria-hidden="true"
                             >
                                 <svg
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     stroke="currentColor"
                                     stroke-width="2"
-                                    stroke-linecap="round"
                                 >
-                                    <circle cx="10" cy="10" r="5"/>
-                                    <path d="M14 14l5 5"/>
+                                    <circle cx="10.5" cy="10.5" r="5.5"/>
+                                    <path d="M15 15l4 4"/>
                                 </svg>
                             </div>
-
                         </div>
-
                     </div>
 
-
-                    {{-- =============================================
-                         REGISTER VISUAL
-                    ============================================== --}}
+                    {{-- REGISTER --}}
                     <div
-                        class="research-auth-final__hero"
+                        class="research-auth__hero"
                         data-auth-hero="signup"
                     >
-
-                        <div class="research-auth-final__intro">
-
-                            <p class="research-auth-final__eyebrow">
+                        <div class="research-auth__intro">
+                            <p class="research-auth__eyebrow">
                                 MULAI DI BACADULU RESEARCH
                             </p>
 
@@ -398,148 +338,78 @@
                             </h1>
 
                             <p>
-                                Dapatkan akses ke research tools,
-                                curated sources, evidence, dan
-                                workspace penelitian.
+                                Daftar sekali untuk membuka research tools,
+                                curated sources, evidence, dan personal workspace.
                             </p>
-
                         </div>
 
+                        <div
+                            class="research-auth__journey"
+                            data-auth-journey
+                        >
+                            <div class="research-auth__journey-track">
+                                <span data-auth-journey-progress></span>
+                            </div>
 
-                        <div class="research-auth-final__journey">
-
-                            <div class="research-auth-final__journey-line"></div>
-
-                            <article>
-                                <i class="is-coral"></i>
+                            <article data-auth-journey-step>
+                                <i></i>
                                 <small>01</small>
                                 <strong>Daftar</strong>
                             </article>
 
-                            <article>
-                                <i class="is-teal"></i>
+                            <article data-auth-journey-step>
+                                <i></i>
                                 <small>02</small>
                                 <strong>Verifikasi</strong>
                             </article>
 
-                            <article>
+                            <article data-auth-journey-step>
                                 <i></i>
                                 <small>03</small>
                                 <strong>Atur profil</strong>
                             </article>
 
-                            <article>
+                            <article data-auth-journey-step>
                                 <i></i>
                                 <small>04</small>
                                 <strong>Mulai riset</strong>
                             </article>
-
                         </div>
 
-
-                        {{-- REGISTER FLOW --}}
-                        <div class="research-auth-final__research-flow">
-
-                            {{-- ARROWS --}}
+                        <div
+                            class="research-auth__flow"
+                            data-register-flow
+                        >
                             <svg
-                                class="research-auth-final__flow-svg"
-                                viewBox="0 0 440 235"
+                                class="research-auth__flow-lines"
+                                viewBox="0 0 600 300"
                                 preserveAspectRatio="none"
                                 aria-hidden="true"
                             >
-                                <defs>
-                                    <marker
-                                        id="research-flow-arrow"
-                                        markerWidth="8"
-                                        markerHeight="8"
-                                        refX="7"
-                                        refY="4"
-                                        orient="auto"
-                                    >
-                                        <path
-                                            d="M0,0 L8,4 L0,8 z"
-                                            fill="currentColor"
-                                        />
-                                    </marker>
-                                </defs>
-
-
                                 <path
-                                    data-auth-route
-                                    d="M90 45 C130 55 155 80 195 105"
-                                    marker-end="url(#research-flow-arrow)"
+                                    data-flow-path
+                                    d="M125 62 C190 80 240 112 285 142"
                                 />
 
                                 <path
-                                    data-auth-route
-                                    d="M350 45 C310 55 285 80 245 105"
-                                    marker-end="url(#research-flow-arrow)"
+                                    data-flow-path
+                                    d="M475 62 C410 80 360 112 315 142"
                                 />
 
                                 <path
-                                    data-auth-route
-                                    d="M205 145 C170 170 135 186 90 195"
-                                    marker-end="url(#research-flow-arrow)"
+                                    data-flow-path
+                                    d="M285 165 C230 195 185 218 125 240"
                                 />
 
                                 <path
-                                    data-auth-route
-                                    d="M235 145 C270 170 305 186 350 195"
-                                    marker-end="url(#research-flow-arrow)"
+                                    data-flow-path
+                                    d="M315 165 C370 195 415 218 475 240"
                                 />
-
-
-                                <circle
-                                    data-auth-packet
-                                    data-start-x="90"
-                                    data-start-y="45"
-                                    data-end-x="195"
-                                    data-end-y="105"
-                                    cx="90"
-                                    cy="45"
-                                    r="4"
-                                />
-
-                                <circle
-                                    data-auth-packet
-                                    data-start-x="350"
-                                    data-start-y="45"
-                                    data-end-x="245"
-                                    data-end-y="105"
-                                    cx="350"
-                                    cy="45"
-                                    r="4"
-                                />
-
-                                <circle
-                                    data-auth-packet
-                                    data-start-x="220"
-                                    data-start-y="145"
-                                    data-end-x="90"
-                                    data-end-y="195"
-                                    cx="220"
-                                    cy="145"
-                                    r="4"
-                                />
-
-                                <circle
-                                    data-auth-packet
-                                    data-start-x="220"
-                                    data-start-y="145"
-                                    data-end-x="350"
-                                    data-end-y="195"
-                                    cx="220"
-                                    cy="145"
-                                    r="4"
-                                />
-
                             </svg>
 
-
-                            {{-- SOURCE --}}
                             <article
-                                class="research-auth-final__flow-card research-auth-final__flow-card--source"
-                                data-auth-source
+                                class="research-auth__flow-card flow-source"
+                                data-flow-card
                             >
                                 <span class="is-teal">
                                     <svg
@@ -548,9 +418,10 @@
                                         stroke="currentColor"
                                         stroke-width="1.8"
                                     >
-                                        <path d="M6 3h9l3 3v15H6z"/>
-                                        <path d="M14 3v4h4"/>
-                                        <path d="M9 12h6M9 16h5"/>
+                                        <path d="M7 3h7l4 4v14H7z"/>
+                                        <path d="M14 3v5h5"/>
+                                        <path d="M10 12h5"/>
+                                        <path d="M10 16h5"/>
                                     </svg>
                                 </span>
 
@@ -560,11 +431,9 @@
                                 </div>
                             </article>
 
-
-                            {{-- AI --}}
                             <article
-                                class="research-auth-final__flow-card research-auth-final__flow-card--ai"
-                                data-auth-source
+                                class="research-auth__flow-card flow-ai"
+                                data-flow-card
                             >
                                 <span class="is-purple">
                                     <svg
@@ -573,8 +442,8 @@
                                         stroke="currentColor"
                                         stroke-width="1.8"
                                     >
-                                        <path d="M12 3l1.5 4.3L18 9l-4.5 1.7L12 15l-1.5-4.3L6 9l4.5-1.7z"/>
-                                        <path d="M18 15l.8 2.2 2.2.8-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/>
+                                        <path d="M12 3l1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1L6.5 8.5l4.1-1.4L12 3z"/>
+                                        <path d="M18 14l.8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8L18 14z"/>
                                     </svg>
                                 </span>
 
@@ -584,16 +453,14 @@
                                 </div>
                             </article>
 
-
-                            {{-- CENTER NOTE --}}
                             <article
-                                class="research-auth-final__note"
-                                data-auth-output
+                                class="research-auth__research-note"
+                                data-research-note
                             >
-                                <div>
+                                <header>
                                     <i></i>
                                     <small>RESEARCH NOTE</small>
-                                </div>
+                                </header>
 
                                 <span></span>
                                 <span></span>
@@ -604,11 +471,9 @@
                                 <em></em>
                             </article>
 
-
-                            {{-- EVIDENCE --}}
                             <article
-                                class="research-auth-final__flow-card research-auth-final__flow-card--evidence"
-                                data-auth-source
+                                class="research-auth__flow-card flow-evidence"
+                                data-flow-card
                             >
                                 <span class="is-teal">
                                     <svg
@@ -617,9 +482,9 @@
                                         stroke="currentColor"
                                         stroke-width="1.8"
                                     >
-                                        <circle cx="10" cy="10" r="5"/>
-                                        <path d="M14 14l5 5"/>
-                                        <path d="M7.5 10h5"/>
+                                        <circle cx="10.5" cy="10.5" r="5"/>
+                                        <path d="M14.5 14.5L19 19"/>
+                                        <path d="M8.5 10.5l1.3 1.3 2.5-2.7"/>
                                     </svg>
                                 </span>
 
@@ -629,20 +494,18 @@
                                 </div>
                             </article>
 
-
-                            {{-- WORKSPACE --}}
                             <article
-                                class="research-auth-final__flow-card research-auth-final__flow-card--workspace"
-                                data-auth-source
+                                class="research-auth__flow-card flow-workspace"
+                                data-flow-card
                             >
-                                <span class="is-gold">
+                                <span class="is-coral">
                                     <svg
                                         viewBox="0 0 24 24"
                                         fill="none"
                                         stroke="currentColor"
                                         stroke-width="1.8"
                                     >
-                                        <path d="M3 7h7l2 2h9v11H3z"/>
+                                        <path d="M3 7h7l2 2h9v10H3z"/>
                                     </svg>
                                 </span>
 
@@ -651,94 +514,93 @@
                                     <strong>Workspace</strong>
                                 </div>
                             </article>
-
                         </div>
-
                     </div>
-
                 </section>
 
-
-                {{-- =================================================
-                     FORMS
-                ================================================== --}}
-                <section
-                    class="research-auth-final__forms"
-                    data-auth-forms
-                >
-
+                {{-- =====================================================
+                     RIGHT FORMS
+                ====================================================== --}}
+                <section class="research-auth__forms">
                     {{-- LOGIN --}}
                     <div
-                        class="research-auth-final__form-pane"
+                        class="research-auth__form-pane"
                         data-auth-pane="signin"
                     >
-                        <div class="research-auth-final__form-inner">
-
-                            <div class="research-auth-final__form-head">
-
-                                <p class="research-auth-final__eyebrow is-coral">
+                        <div class="research-auth__form-inner">
+                            <header class="research-auth__form-head">
+                                <p class="research-auth__eyebrow is-coral">
                                     SELAMAT DATANG KEMBALI
                                 </p>
 
-                                <h2>
-                                    Selamat datang kembali
-                                </h2>
+                                <h2>Selamat datang kembali</h2>
 
                                 <p>
-                                    Masuk ke BacaDulu Research untuk
-                                    melanjutkan penelitian Anda.
+                                    Masuk dengan akun yang telah terdaftar.
                                 </p>
+                            </header>
 
-                            </div>
-
-
-                            @if (
-                                ($authMode ?? 'login') === 'login'
-                                && $errors->any()
-                            )
-                                <div class="alert alert-error">
+                            @if ($initialView === 'signin' && $errors->any())
+                                <div
+                                    class="research-auth__error"
+                                    role="alert"
+                                >
                                     {{ $errors->first() }}
                                 </div>
                             @endif
 
-
+                            {{-- Keep Google OAuth markup for future reactivation. --}}
+                            @if (config('research.google_auth_enabled', false))
                             <a
                                 href="{{ route('google.redirect') }}"
-                                class="research-auth-final__google"
+                                class="research-auth__google"
                             >
-                                <span>
-                                    <svg viewBox="0 0 24 24">
-                                        <path fill="#4285F4" d="M21.35 12.2c0-.7-.06-1.2-.2-1.72H12v3.32h5.37a4.6 4.6 0 01-1.99 2.93l3.21 2.49c1.87-1.73 2.76-4.28 2.76-7.02z"/>
-                                        <path fill="#34A853" d="M12 21.7c2.68 0 4.93-.88 6.58-2.39l-3.21-2.49c-.89.6-2.03.96-3.37.96-2.58 0-4.77-1.74-5.56-4.09l-3.31 2.56A9.94 9.94 0 0012 21.7z"/>
-                                        <path fill="#FBBC05" d="M6.44 13.69A6.01 6.01 0 016.13 12c0-.59.1-1.16.31-1.69L3.13 7.75A9.99 9.99 0 002.05 12c0 1.54.39 3 1.08 4.25l3.31-2.56z"/>
-                                        <path fill="#EA4335" d="M12 6.22c1.46 0 2.77.5 3.8 1.48l2.85-2.85A9.55 9.55 0 0012 2.3a9.94 9.94 0 00-8.87 5.45l3.31 2.56C7.23 7.96 9.42 6.22 12 6.22z"/>
+                                <span class="research-auth__google-icon">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            fill="#4285F4"
+                                            d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.7 4.7 0 0 1-2 3.1v2.6h3.2c1.9-1.7 3-4.3 3-7.5z"
+                                        />
+                                        <path
+                                            fill="#34A853"
+                                            d="M12 22c2.7 0 5-.9 6.6-2.3l-3.2-2.6c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.2H3.1v2.6A10 10 0 0 0 12 22z"
+                                        />
+                                        <path
+                                            fill="#FBBC05"
+                                            d="M6.4 13.9a6 6 0 0 1 0-3.8V7.5H3.1a10 10 0 0 0 0 9l3.3-2.6z"
+                                        />
+                                        <path
+                                            fill="#EA4335"
+                                            d="M12 5.9c1.5 0 2.9.5 3.9 1.5l2.9-2.9A9.8 9.8 0 0 0 3.1 7.5l3.3 2.6C7.2 7.7 9.4 5.9 12 5.9z"
+                                        />
                                     </svg>
                                 </span>
 
                                 <strong>
-                                    Lanjutkan dengan Google
+                                    Masuk dengan Google
                                 </strong>
                             </a>
 
-
-                            <div class="research-auth-final__divider">
+                            <div class="research-auth__divider">
                                 <span>atau gunakan email</span>
                             </div>
 
+                            @endif
 
                             <form
                                 method="POST"
                                 action="{{ route('login.store') }}"
-                                class="research-auth-final__form"
+                                class="research-auth__form"
                             >
                                 @csrf
-
 
                                 <label>
                                     <span>Email</span>
 
-                                    <div class="research-auth-final__input">
-
+                                    <div class="research-auth__input">
                                         <i>
                                             <svg
                                                 viewBox="0 0 24 24"
@@ -753,11 +615,9 @@
                                                     height="14"
                                                     rx="2"
                                                 />
-
-                                                <path d="M3 7l9 6 9-6"/>
+                                                <path d="M4 7l8 6 8-6"/>
                                             </svg>
                                         </i>
-
 
                                         <input
                                             type="email"
@@ -767,16 +627,13 @@
                                             autocomplete="email"
                                             required
                                         >
-
                                     </div>
                                 </label>
-
 
                                 <label>
                                     <span>Kata sandi</span>
 
-                                    <div class="research-auth-final__input">
-
+                                    <div class="research-auth__input">
                                         <i>
                                             <svg
                                                 viewBox="0 0 24 24"
@@ -791,37 +648,30 @@
                                                     height="10"
                                                     rx="2"
                                                 />
-
-                                                <path d="M8 10V7a4 4 0 018 0v3"/>
+                                                <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
                                             </svg>
                                         </i>
 
-
                                         <input
-                                            id="auth-login-password"
                                             type="password"
                                             name="password"
                                             placeholder="Masukkan password"
                                             autocomplete="current-password"
                                             required
+                                            data-password-input
                                         >
-
 
                                         <button
                                             type="button"
-                                            class="research-auth-final__show"
-                                            data-auth-password-toggle
-                                            data-target="auth-login-password"
+                                            class="research-auth__show"
+                                            data-password-toggle
                                         >
                                             Show
                                         </button>
-
                                     </div>
                                 </label>
 
-
-                                <label class="research-auth-final__remember">
-
+                                <label class="research-auth__remember">
                                     <input
                                         type="checkbox"
                                         name="remember"
@@ -831,107 +681,70 @@
                                     <span>
                                         Ingat perangkat ini
                                     </span>
-
                                 </label>
-
 
                                 <button
                                     type="submit"
-                                    class="research-auth-final__submit is-navy"
+                                    class="research-auth__submit is-navy"
                                 >
                                     <span>Masuk</span>
                                     <span>→</span>
                                 </button>
-
                             </form>
 
-
-                            <p class="research-auth-final__switch">
+                            <p class="research-auth__switch">
                                 Belum punya akun?
 
                                 <a
                                     href="{{ route('register') }}"
-                                    data-auth-view="signup"
+                                    data-auth-switch="signup"
                                 >
-                                    Buat akun
+                                    Daftar terlebih dahulu
                                 </a>
                             </p>
-
                         </div>
                     </div>
 
-
                     {{-- REGISTER --}}
                     <div
-                        class="research-auth-final__form-pane"
+                        class="research-auth__form-pane"
                         data-auth-pane="signup"
                     >
-                        <div class="research-auth-final__form-inner">
-
-                            <div class="research-auth-final__form-head">
-
-                                <p class="research-auth-final__eyebrow is-coral">
-                                    MULAI RESEARCH
+                        <div class="research-auth__form-inner is-register">
+                            <header class="research-auth__form-head">
+                                <p class="research-auth__eyebrow is-coral">
+                                    PENDAFTARAN
                                 </p>
 
-                                <h2>
-                                    Buat akun baru
-                                </h2>
+                                <h2>Buat akun baru</h2>
 
                                 <p>
-                                    Isi informasi berikut untuk mulai
-                                    menggunakan BacaDulu Research.
+                                    Minimum 80% data identitas untuk membuat akun.
                                 </p>
+                            </header>
 
-                            </div>
-
-
-                            @if (
-                                ($authMode ?? 'login') === 'register'
-                                && $errors->any()
-                            )
-                                <div class="alert alert-error">
+                            @if ($initialView === 'signup' && $errors->any())
+                                <div
+                                    class="research-auth__error"
+                                    role="alert"
+                                >
                                     {{ $errors->first() }}
                                 </div>
                             @endif
 
-
-                            <a
-                                href="{{ route('google.redirect') }}"
-                                class="research-auth-final__google"
-                            >
-                                <span>
-                                    <svg viewBox="0 0 24 24">
-                                        <path fill="#4285F4" d="M21.35 12.2c0-.7-.06-1.2-.2-1.72H12v3.32h5.37a4.6 4.6 0 01-1.99 2.93l3.21 2.49c1.87-1.73 2.76-4.28 2.76-7.02z"/>
-                                        <path fill="#34A853" d="M12 21.7c2.68 0 4.93-.88 6.58-2.39l-3.21-2.49c-.89.6-2.03.96-3.37.96-2.58 0-4.77-1.74-5.56-4.09l-3.31 2.56A9.94 9.94 0 0012 21.7z"/>
-                                        <path fill="#FBBC05" d="M6.44 13.69A6.01 6.01 0 016.13 12c0-.59.1-1.16.31-1.69L3.13 7.75A9.99 9.99 0 002.05 12c0 1.54.39 3 1.08 4.25l3.31-2.56z"/>
-                                        <path fill="#EA4335" d="M12 6.22c1.46 0 2.77.5 3.8 1.48l2.85-2.85A9.55 9.55 0 0012 2.3a9.94 9.94 0 00-8.87 5.45l3.31 2.56C7.23 7.96 9.42 6.22 12 6.22z"/>
-                                    </svg>
-                                </span>
-
-                                <strong>
-                                    Daftar dengan Google
-                                </strong>
-                            </a>
-
-
-                            <div class="research-auth-final__divider">
-                                <span>atau gunakan email</span>
-                            </div>
-
-
                             <form
                                 method="POST"
                                 action="{{ route('register.store') }}"
-                                class="research-auth-final__form research-auth-final__form--register"
+                                class="research-auth__form research-auth__form--register"
+                                data-register-form
                             >
                                 @csrf
 
-
+                                {{-- NAME --}}
                                 <label class="is-full">
                                     <span>Nama lengkap</span>
 
-                                    <div class="research-auth-final__input">
+                                    <div class="research-auth__input">
                                         <i>
                                             <svg
                                                 viewBox="0 0 24 24"
@@ -940,7 +753,7 @@
                                                 stroke-width="1.8"
                                             >
                                                 <circle cx="12" cy="8" r="4"/>
-                                                <path d="M5 21a7 7 0 0114 0"/>
+                                                <path d="M5 20c0-4 3-7 7-7s7 3 7 7"/>
                                             </svg>
                                         </i>
 
@@ -951,16 +764,16 @@
                                             placeholder="Nama sesuai identitas"
                                             autocomplete="name"
                                             required
+                                            data-progress-field="name"
                                         >
                                     </div>
                                 </label>
 
-
+                                {{-- EMAIL --}}
                                 <label class="is-full">
                                     <span>Email</span>
 
-                                    <div class="research-auth-final__input">
-
+                                    <div class="research-auth__input">
                                         <i>
                                             <svg
                                                 viewBox="0 0 24 24"
@@ -975,8 +788,7 @@
                                                     height="14"
                                                     rx="2"
                                                 />
-
-                                                <path d="M3 7l9 6 9-6"/>
+                                                <path d="M4 7l8 6 8-6"/>
                                             </svg>
                                         </i>
 
@@ -987,19 +799,16 @@
                                             placeholder="nama@email.com"
                                             autocomplete="email"
                                             required
+                                            data-progress-field="email"
                                         >
                                     </div>
                                 </label>
 
+                                {{-- INSTITUTION --}}
+                                <label>
+                                    <span>Institusi</span>
 
-                                <label class="is-full">
-                                    <span>
-                                        Institusi
-                                        <small>(opsional)</small>
-                                    </span>
-
-                                    <div class="research-auth-final__input">
-
+                                    <div class="research-auth__input">
                                         <i>
                                             <svg
                                                 viewBox="0 0 24 24"
@@ -1008,7 +817,11 @@
                                                 stroke-width="1.8"
                                             >
                                                 <path d="M4 21V7l8-4 8 4v14"/>
-                                                <path d="M8 10h1M8 14h1M15 10h1M15 14h1M9 21v-4h6v4"/>
+                                                <path d="M8 10h2"/>
+                                                <path d="M14 10h2"/>
+                                                <path d="M8 14h2"/>
+                                                <path d="M14 14h2"/>
+                                                <path d="M10 21v-4h4v4"/>
                                             </svg>
                                         </i>
 
@@ -1016,17 +829,187 @@
                                             type="text"
                                             name="institution"
                                             value="{{ old('institution') }}"
-                                            placeholder="Universitas atau organisasi"
+                                            placeholder="Universitas / organisasi"
                                             autocomplete="organization"
+                                            required
+                                            data-progress-field="institution"
                                         >
                                     </div>
                                 </label>
 
+                                {{-- ROLE --}}
+                                <label>
+                                    <span>Peran utama</span>
 
+                                    <div class="research-auth__select">
+                                        <select
+                                            name="role"
+                                            required
+                                            data-progress-field="role"
+                                        >
+                                            <option value="">
+                                                Pilih peran
+                                            </option>
+
+                                            @foreach ($roles as $value => $label)
+                                                <option
+                                                    value="{{ $value }}"
+                                                    @selected(old('role') === $value)
+                                                >
+                                                    {{ $label }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.8"
+                                            aria-hidden="true"
+                                        >
+                                            <path d="M7 10l5 5 5-5"/>
+                                        </svg>
+                                    </div>
+                                </label>
+
+                                {{-- DOMICILE --}}
+                                <label>
+                                    <span>
+                                        Kota / Kabupaten
+                                        <small>opsional</small>
+                                    </span>
+
+                                    <div
+                                        class="research-auth__combo"
+                                        data-domicile-combo
+                                    >
+                                        <div class="research-auth__input">
+                                            <i>
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="1.8"
+                                                >
+                                                    <path d="M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11z"/>
+                                                    <circle cx="12" cy="10" r="2"/>
+                                                </svg>
+                                            </i>
+
+                                            <input
+                                                type="text"
+                                                value="{{ old('domicile_city') }}"
+                                                placeholder="Cari kota / kabupaten"
+                                                autocomplete="off"
+                                                role="combobox"
+                                                aria-autocomplete="list"
+                                                aria-expanded="false"
+                                                data-domicile-search
+                                            >
+                                        </div>
+
+                                        <input
+                                            type="hidden"
+                                            name="domicile_city"
+                                            value="{{ old('domicile_city') }}"
+                                            data-domicile-value
+                                            data-progress-field="domicile"
+                                        >
+
+                                        <div
+                                            class="research-auth__combo-panel"
+                                            data-domicile-panel
+                                            hidden
+                                        >
+                                            <div
+                                                class="research-auth__combo-status"
+                                                data-domicile-status
+                                            >
+                                                Ketik nama kota atau kabupaten.
+                                            </div>
+
+                                            <div
+                                                class="research-auth__combo-results"
+                                                data-domicile-results
+                                            ></div>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                {{-- RESEARCH INTEREST --}}
+                                <label>
+                                    <span>
+                                        Minat riset
+                                        <small>opsional</small>
+                                    </span>
+
+                                    <div
+                                        class="research-auth__multi"
+                                        data-interest-select
+                                    >
+                                        <button
+                                            type="button"
+                                            class="research-auth__multi-trigger"
+                                            data-interest-trigger
+                                            aria-expanded="false"
+                                        >
+                                            <span data-interest-label>
+                                                Pilih maksimal 3
+                                            </span>
+
+                                            <svg
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="1.8"
+                                            >
+                                                <path d="M7 10l5 5 5-5"/>
+                                            </svg>
+                                        </button>
+
+                                        <div
+                                            class="research-auth__multi-panel"
+                                            data-interest-panel
+                                            hidden
+                                        >
+                                            <div class="research-auth__multi-head">
+                                                <strong>Minat Riset</strong>
+                                                <small data-interest-count>
+                                                    0/3
+                                                </small>
+                                            </div>
+
+                                            <div class="research-auth__multi-options">
+                                                @foreach ($researchInterests as $interest)
+                                                    <label>
+                                                        <input
+                                                            type="checkbox"
+                                                            value="{{ $interest }}"
+                                                            data-interest-option
+                                                        >
+
+                                                        <span>{{ $interest }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        <input
+                                            type="hidden"
+                                            name="research_interest"
+                                            value="{{ old('research_interest') }}"
+                                            data-interest-value
+                                            data-progress-field="interest"
+                                        >
+                                    </div>
+                                </label>
+
+                                {{-- PASSWORD --}}
                                 <label>
                                     <span>Kata sandi</span>
 
-                                    <div class="research-auth-final__input">
+                                    <div class="research-auth__input">
                                         <i>
                                             <svg
                                                 viewBox="0 0 24 24"
@@ -1041,36 +1024,35 @@
                                                     height="10"
                                                     rx="2"
                                                 />
-
-                                                <path d="M8 10V7a4 4 0 018 0v3"/>
+                                                <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
                                             </svg>
                                         </i>
 
                                         <input
-                                            id="auth-register-password"
                                             type="password"
                                             name="password"
-                                            placeholder="Buat password"
+                                            placeholder="Minimal 8 karakter"
                                             autocomplete="new-password"
                                             required
+                                            data-password-input
+                                            data-register-password
                                         >
 
                                         <button
                                             type="button"
-                                            class="research-auth-final__show"
-                                            data-auth-password-toggle
-                                            data-target="auth-register-password"
+                                            class="research-auth__show"
+                                            data-password-toggle
                                         >
                                             Show
                                         </button>
                                     </div>
                                 </label>
 
-
+                                {{-- PASSWORD CONFIRMATION --}}
                                 <label>
                                     <span>Ulangi sandi</span>
 
-                                    <div class="research-auth-final__input">
+                                    <div class="research-auth__input">
                                         <i>
                                             <svg
                                                 viewBox="0 0 24 24"
@@ -1085,128 +1067,86 @@
                                                     height="10"
                                                     rx="2"
                                                 />
-
-                                                <path d="M8 10V7a4 4 0 018 0v3"/>
+                                                <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
                                             </svg>
                                         </i>
 
                                         <input
-                                            id="auth-register-confirm"
                                             type="password"
                                             name="password_confirmation"
                                             placeholder="Ulangi password"
                                             autocomplete="new-password"
                                             required
+                                            data-password-input
+                                            data-register-confirmation
                                         >
 
                                         <button
                                             type="button"
-                                            class="research-auth-final__show"
-                                            data-auth-password-toggle
-                                            data-target="auth-register-confirm"
+                                            class="research-auth__show"
+                                            data-password-toggle
                                         >
                                             Show
                                         </button>
                                     </div>
                                 </label>
 
-
-                                <div class="research-auth-final__profile-note is-full">
-
-                                    <span>
-                                        <strong>MIN.</strong>
-                                        80%
-                                    </span>
-
-                                    <div>
-                                        <strong>
-                                            Kelengkapan profil untuk membuka Workspace
+                                {{-- PROGRESS --}}
+                                <div
+                                    class="research-auth__signup-progress is-full"
+                                    data-signup-progress
+                                    style="--signup-progress: 0;"
+                                    aria-live="polite"
+                                >
+                                    <div class="research-auth__signup-progress-ring">
+                                        <strong data-signup-progress-value>
+                                            0%
                                         </strong>
-
-                                        <p>
-                                            Setelah akun dibuat, progress aktual
-                                            akan tampil di halaman profil Anda.
-                                        </p>
                                     </div>
 
+                                    <div class="research-auth__signup-progress-copy">
+                                        <b>
+                                            Kelengkapan pendaftaran
+                                        </b>
+
+                                        <span data-signup-progress-text>
+                                            Minimum 80% untuk membuat akun.
+                                        </span>
+                                    </div>
                                 </div>
 
-
+                                {{-- SUBMIT --}}
                                 <button
                                     type="submit"
-                                    class="research-auth-final__submit is-coral is-full"
+                                    class="research-auth__submit is-coral is-full"
+                                    data-register-submit
+                                    disabled
                                 >
-                                    <span>Buat akun</span>
+                                    <span data-register-submit-label>
+                                        Lengkapi minimal 80%
+                                    </span>
+
                                     <span>→</span>
                                 </button>
-
                             </form>
 
-
-                            <p class="research-auth-final__switch">
-                                Sudah punya akun?
+                            <p class="research-auth__switch">
+                                Sudah terdaftar?
 
                                 <a
                                     href="{{ route('login') }}"
-                                    data-auth-view="signin"
+                                    data-auth-switch="signin"
                                 >
                                     Masuk
                                 </a>
                             </p>
-
                         </div>
                     </div>
-
                 </section>
-
-
-                {{-- =================================================
-                     WAVE TRANSITION
-                ================================================== --}}
-                <svg
-                    class="research-auth-final__wave"
-                    data-auth-wave
-                    viewBox="0 0 1200 600"
-                    preserveAspectRatio="none"
-                    aria-hidden="true"
-                >
-                    <defs>
-                        <linearGradient
-                            id="research-auth-wave-gradient"
-                            x1="0"
-                            x2="1"
-                        >
-                            <stop
-                                offset="0%"
-                                stop-color="#fb795e"
-                            />
-
-                            <stop
-                                offset="55%"
-                                stop-color="#f7b784"
-                            />
-
-                            <stop
-                                offset="100%"
-                                stop-color="#54c9c6"
-                            />
-                        </linearGradient>
-                    </defs>
-
-                    <path
-                        data-auth-wave-path
-                        fill="url(#research-auth-wave-gradient)"
-                        d="M -170 0 C -60 90 -260 210 -160 300 C -60 420 -240 520 -140 600 L -320 600 L -320 0 Z"
-                    />
-                </svg>
-
             </div>
-
         </div>
 
-
-        <footer class="research-auth-final__footer">
-
+        <footer class="research-auth__footer">
             <span>
                 © {{ now()->year }} BacaDulu Research
             </span>
@@ -1214,11 +1154,8 @@
             <span>
                 Research with evidence, not just answers.
             </span>
-
         </footer>
-
     </div>
-
 </section>
 
 @endsection

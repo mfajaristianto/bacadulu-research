@@ -156,69 +156,56 @@ class DatabaseSeeder extends Seeder
                     'version' => 1,
                 ],
                 [
-                    'indonesian_name'
-                        => $promptDefinition[
+                    'indonesian_name' => $promptDefinition[
                             'indonesian_name'
                         ],
 
-                    'short_description'
-                        => $promptDefinition[
+                    'short_description' => $promptDefinition[
                             'short_description'
                         ],
 
-                    'meaning'
-                        => $promptDefinition[
+                    'meaning' => $promptDefinition[
                             'meaning'
                         ],
 
-                    'when_to_use'
-                        => $promptDefinition[
+                    'when_to_use' => $promptDefinition[
                             'when_to_use'
                         ],
 
-                    'when_not_to_use'
-                        => $promptDefinition[
+                    'when_not_to_use' => $promptDefinition[
                             'when_not_to_use'
                         ],
 
-                    'example_text'
-                        => $promptDefinition[
+                    'example_text' => $promptDefinition[
                             'example_text'
                         ],
 
-                    'expected_output'
-                        => $promptDefinition[
+                    'expected_output' => $promptDefinition[
                             'expected_output'
                         ],
 
-                    'system_prompt'
-                        => 'You are BacaDulu Research. Work only with retrieved eligible evidence supplied by the platform. Never invent sources or citations.',
+                    'system_prompt' => 'You are BacaDulu Research. Work only with retrieved eligible evidence supplied by the platform. Never invent sources or citations.',
 
-                    'task_prompt'
-                        => $promptDefinition[
+                    'task_prompt' => $promptDefinition[
                             'task_prompt'
                         ],
 
-                    'retrieval_instructions'
-                        => $promptDefinition[
+                    'retrieval_instructions' => $promptDefinition[
                             'retrieval_instructions'
                         ],
 
-                    'output_instructions'
-                        => $promptDefinition[
+                    'output_instructions' => $promptDefinition[
                             'output_instructions'
                         ],
 
                     'status' => 'active',
 
-                    'created_by'
-                        => $adminUser?->id,
+                    'created_by' => $adminUser?->id,
                 ]
             );
 
             $tool->update([
-                'active_prompt_template_id'
-                    => $prompt->id,
+                'active_prompt_template_id' => $prompt->id,
             ]);
         }
     }

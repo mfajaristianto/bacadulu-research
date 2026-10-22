@@ -40,3 +40,108 @@ input:disabled { color: #7d7f7c; background: #f0efeb; cursor: not-allowed; }
 .check-row { display: flex !important; align-items: flex-start; gap: 10px; font-weight: 500; color: var(--muted); }
 .check-row input { width: 17px; min-height: 17px; height: 17px; margin-top: 2px; accent-color: var(--ink-950); }
 .field-optional { color: var(--muted-2); font-size: .72rem; font-weight: 500; }
+
+/*
+|--------------------------------------------------------------------------
+| Field — design system v2 (<x-ui.field>)
+|--------------------------------------------------------------------------
+| .field > .field__label + .field__control + .field__hint / .field__error
+| Bare input/select/textarea rules above stay as the legacy baseline.
+*/
+
+.field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.field__label {
+    color: var(--navy-900);
+    font-size: var(--text-label);
+    font-weight: 650;
+}
+
+.field__required {
+    margin-left: 2px;
+    color: var(--orange-600);
+}
+
+.field__control {
+    min-height: var(--control-md);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-control);
+    background: #fff;
+    color: var(--text-primary);
+    font-size: var(--text-body);
+}
+
+textarea.field__control {
+    min-height: 112px;
+    padding: 11px 12px;
+}
+
+.field__control:hover { border-color: var(--navy-500); }
+
+.field__control:focus,
+.field__control:focus-visible {
+    border-color: var(--orange-600);
+    box-shadow: 0 0 0 3px rgba(194, 74, 44, .16);
+}
+
+.field__control[aria-invalid="true"] {
+    border-color: var(--danger);
+    background: #FFFBFA;
+}
+
+.field__hint {
+    margin: 0;
+    color: var(--navy-500);
+    font-size: var(--text-caption);
+    line-height: 1.45;
+}
+
+.field__error {
+    margin: 0;
+    color: var(--danger);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+@media (max-width: 767px) {
+    .field__control:not(textarea) { min-height: 48px; }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Badge — design system v2 (<x-ui.badge>)
+|--------------------------------------------------------------------------
+*/
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 24px;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    font-size: var(--text-caption);
+    font-weight: 650;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.badge--neutral { color: var(--navy-700); background: var(--cream); border-color: var(--line); }
+.badge--info { color: var(--info); background: var(--info-soft); }
+.badge--success { color: var(--success); background: var(--success-soft); }
+.badge--warning { color: var(--warning); background: var(--warning-soft); }
+.badge--danger { color: var(--danger); background: var(--danger-soft); }

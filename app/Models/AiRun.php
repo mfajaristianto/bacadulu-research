@@ -29,17 +29,13 @@ class AiRun extends Model
     protected function casts(): array
     {
         return [
-            'user_parameters_json'
-                => 'array',
+            'user_parameters_json' => 'array',
 
-            'temperature'
-                => 'float',
+            'temperature' => 'float',
 
-            'started_at'
-                => 'datetime',
+            'started_at' => 'datetime',
 
-            'finished_at'
-                => 'datetime',
+            'finished_at' => 'datetime',
         ];
     }
 

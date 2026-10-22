@@ -1,0 +1,226 @@
+/* ========================================================================
+   BacaDulu Research — QA pass (15 October 2026)
+   Corrects regressions without replacing the approved design identity.
+   Loaded LAST in app.css so earlier phase overrides cannot conflict.
+   ======================================================================== */
+
+:root { --br-curtain-ease: cubic-bezier(.23,1,.32,1); --br-curtain-duration: 630ms; }
+
+/* 1. Sidebar: smooth 286px panel on hover; mini-rail remains stable.
+   Explicit edge grip locks it expanded until pressed again. */
+@media (min-width:981px) {
+    .br-sidebar {
+        transition: width var(--br-curtain-duration) var(--br-curtain-ease),
+                    min-width var(--br-curtain-duration) var(--br-curtain-ease),
+                    padding var(--br-curtain-duration) var(--br-curtain-ease),
+                    box-shadow .5s ease !important;
+    }
+    .br-sidebar.is-collapsed:not(.is-peeking) {
+        width:78px!important;
+        min-width:78px!important;
+        padding:20px 12px 18px!important;
+    }
+    .br-sidebar.is-collapsed.is-peeking { overflow:visible; }
+    .br-sidebar.is-collapsed.is-peeking .br-sidebar__recent-list { overflow-y:auto; }
+    .br-sidebar.is-collapsed:not(.is-peeking) .br-sidebar__new {
+        height:48px!important;width:48px!important;min-height:48px!important;
+        min-width:48px!important;max-width:48px!important;border-radius:14px!important;
+        padding:0!important;margin-inline:auto!important;
+        display:flex!important;align-items:center!important;justify-content:center!important;
+    }
+    .br-sidebar.is-collapsed:not(.is-peeking) .br-sidebar__new svg,
+    .br-sidebar.is-collapsed:not(.is-peeking) .br-sidebar__new svg path {
+        display:block!important;visibility:visible!important;opacity:1!important;
+        width:23px!important;height:23px!important;
+        stroke:#fff!important;stroke-width:2.2!important;stroke-linecap:round;
+    }
+    .br-sidebar.is-collapsed:not(.is-peeking) .br-sidebar__navigation { padding-top:18px!important; }
+    .br-sidebar.is-collapsed:not(.is-peeking) .br-sidebar-nav {
+        width:48px!important;min-width:48px!important;max-width:48px!important;
+        height:48px!important;min-height:48px!important;margin:0 auto!important;
+        padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;
+        overflow:visible!important;
+    }
+    .br-sidebar.is-collapsed:not(.is-peeking) .br-sidebar-nav__icon {
+        flex:0 0 38px!important;width:38px!important;height:38px!important;
+        display:flex!important;align-items:center!important;justify-content:center!important;
+        margin:0!important;transform:none!important;
+    }
+    .br-sidebar.is-collapsed:not(.is-peeking) .br-sidebar-nav__icon svg { width:20px!important;height:20px!important; }
+    .br-sidebar.is-collapsed:not(.is-peeking) .br-sidebar__brand-mark {display:block!important;}
+}
+.br-sidebar__edge-toggle {touch-action:manipulation;}
+.br-sidebar__edge-toggle > span { background:rgba(210,217,231,.58)!important; }
+.br-sidebar__edge-toggle:focus-visible { outline:2px solid #ffc3ad; outline-offset:0; border-radius:10px; }
+.br-sidebar__brand-row {isolation:isolate;}
+
+/* Restore action menu for Recent sessions without putting buttons inside links. */
+.br-sidebar-conversation-row { position:relative; display:flex;align-items:center;min-width:0;border-radius:12px; }
+.br-sidebar-conversation-row > .br-sidebar-conversation {flex:1 1 0;min-width:0;margin:0; padding-right:1px; }
+.br-sidebar-conversation-row .br-sidebar-conversation__body {min-width:0;}
+.br-sidebar-conversation__pin { flex:0 0 16px;color:#ff8766;display:grid;place-items:center; }
+.br-sidebar-conversation__pin svg { width:14px;height:14px;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round; }
+.br-sidebar-conversation-menu { position:relative; flex:0 0 27px;min-width:0; z-index:6; }
+.br-sidebar-conversation-menu > summary { list-style:none;display:grid;place-items:center;width:27px;height:32px;color:#aeb9cf;cursor:pointer;border-radius:8px; }
+.br-sidebar-conversation-menu > summary::-webkit-details-marker {display:none;}
+.br-sidebar-conversation-menu > summary svg {width:17px;height:17px;}
+.br-sidebar-conversation-menu:is([open],:hover) > summary {color:#fff;background:rgba(255,255,255,.08);}
+.br-sidebar-conversation-menu__items {position:absolute;right:0;top:calc(100% + 4px);width:min(255px,80vw);padding:8px;display:grid;gap:4px;border:1px solid #39415e;background:#202841;color:#fff;border-radius:12px;box-shadow:0 16px 32px rgba(0,0,0,.35);z-index:100;}
+.br-sidebar-conversation-menu__items form {margin:0;display:grid;gap:6px;}
+.br-sidebar-conversation-menu__items button, .br-sidebar-conversation-menu__items a { display:block;width:100%;border:0;border-radius:7px;padding:9px 11px;text-align:left;background:transparent;color:#e8e9f1;cursor:pointer;font:inherit;font-size:11px;text-decoration:none; }
+.br-sidebar-conversation-menu__items button:hover,.br-sidebar-conversation-menu__items a:hover { background:#333e5b; }
+.br-sidebar-conversation-menu__items .is-danger {color:#ffb0a3;}
+.br-sidebar-conversation-menu__rename {border-top:1px solid #49506a;padding-top:7px!important;}
+.br-sidebar-conversation-menu__rename label {font-size:10px;padding:0 8px;color:#d4d9e6;}
+.br-sidebar-conversation-menu__rename input {width:100%;min-width:0;border:1px solid #56617d;border-radius:7px;background:#151c32;color:#fff;padding:8px;font-size:11px;}
+.br-sidebar__recent-list {overscroll-behavior:contain;}
+.br-sidebar-conversation-menu:focus-within {z-index:50;}
+@media(min-width:981px) {
+ .br-sidebar.is-collapsed:not(.is-peeking) .br-sidebar-conversation-menu {display:none;}
+}
+
+/* 2. Result actions: Save in upper-right white canvas, never navbar. */
+.br-result-head-actions {display:flex;align-items:flex-end;flex-direction:column;gap:11px;min-width:155px;}
+.br-result-header-save {display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:42px;min-width:130px;padding:9px 16px;border:1px solid #f5b6a3;border-radius:12px;background:#fff2ec;color:#d34b32;font-size:12px;font-weight:800;cursor:pointer;}
+.br-result-header-save svg {width:18px;height:18px;stroke:currentColor;stroke-width:1.7;fill:none;}
+.br-result-header-save:hover {background:#ffe9dd;transform:translateY(-1px);}
+.br-result-saved-link {font-size:11px;color:#168785;text-decoration:none;font-weight:750;}
+.br-result-saved-link:hover {text-decoration:underline;}
+.research-result-header {gap:12px;}
+.research-result-header h1 {font-size:clamp(26px,2.4vw,39px)!important;line-height:1.17!important;overflow-wrap:anywhere;}
+@media(max-width:740px){.br-result-head-actions{flex-direction:row;flex-wrap:wrap;align-items:center;}.br-result-header-save{min-width:0;}.research-result-header{display:flex;flex-direction:column;}}
+
+/* 3. Crisp single focus treatment: no mint + orange double outlines. */
+.research-select-shell:focus-within,
+.research-question-panel__input:focus-within,
+.research-prompt-picker:focus-visible,
+.research-composer__input-row:focus-within {
+    outline:none!important;
+    border-color:#f26b4f!important;
+    box-shadow:0 0 0 3px rgba(242,107,79,.13)!important;
+}
+.research-category-select select:focus,
+.research-category-select select:focus-visible,
+.research-question-panel textarea:focus,
+.research-question-panel textarea:focus-visible {outline:none!important;box-shadow:none!important;}
+.research-composer__controls :focus-within::before,
+.research-composer__controls :focus-within::after { box-shadow:none!important; }
+
+/* 4. Rebuild 'Apa ini?' visual hierarchy to match the editorial reference.
+   No numbering; icon badges, full title visibility, illustrative papers on desktop. */
+.prompt-explainer:popover-open {
+    width:min(880px,calc(100vw - 40px))!important;max-width:880px!important;
+    max-height:min(88dvh,830px)!important;overflow-y:auto!important;overflow-x:hidden!important;
+    border-radius:21px!important;scrollbar-gutter:auto!important;
+}
+.prompt-explainer__head {
+    min-height:242px!important;position:relative!important;display:block!important;
+    padding:35px 345px 27px 38px!important;overflow:hidden!important;
+    background:radial-gradient(circle at 84% 28%,rgba(255,218,190,.56),transparent 30%),linear-gradient(120deg,#fffcf8 35%,#fff5ec)!important;
+}
+.prompt-explainer__head > div {max-width:100%!important;position:relative;z-index:2;}
+.prompt-explainer__head h2 {
+    max-width:100%!important;font-size:clamp(33px,3.8vw,53px)!important;
+    line-height:1.08!important;overflow-wrap:anywhere!important;word-break:normal!important;
+    letter-spacing:-.045em!important;margin:12px 0 8px!important;
+}
+.prompt-explainer__eyebrow {font-size:11px!important;}
+.prompt-explainer__indonesian {font-size:18px!important;line-height:1.35!important;}
+.prompt-explainer__head::before {display:block!important;content:""!important;right:90px!important;top:56px!important;width:166px!important;height:128px!important;transform:rotate(7deg)!important;}
+.prompt-explainer__head::after {display:grid!important;content:"⌕"!important;right:47px!important;top:110px!important;}
+.prompt-explainer__close {top:18px!important;right:19px!important;width:43px!important;height:43px!important;}
+.prompt-explainer__summary {padding:15px 36px!important;color:#66738e!important;font-size:13px!important;line-height:1.55!important;}
+.prompt-explainer__body {display:grid!important;grid-template-columns:1fr!important;gap:0!important;padding:0 36px 10px!important;counter-reset:none!important;}
+.prompt-explainer__section,.prompt-explainer__section:nth-child(5) {
+    min-width:0!important;display:grid!important;grid-template-columns:50px minmax(0,1fr)!important;
+    align-items:start!important;column-gap:16px!important;row-gap:3px!important;
+    padding:17px 0!important;margin:0!important;background:transparent!important;border:0!important;border-bottom:1px solid #e9e2d9!important;
+}
+.prompt-explainer__section::before,.prompt-explainer__section > span::before {display:none!important;content:none!important;}
+.prompt-explainer__icon {grid-column:1!important;grid-row:1/span 2!important;width:43px;height:43px;display:grid;place-items:center;border-radius:50%;background:#eaf7f4;color:#078b86;}
+.prompt-explainer__section:nth-child(3) .prompt-explainer__icon,.prompt-explainer__section:nth-child(5) .prompt-explainer__icon{background:#fff1eb;color:#ef684d;}
+.prompt-explainer__section:nth-child(4) .prompt-explainer__icon{background:#f2efff;color:#8070ce;}
+.prompt-explainer__icon svg{width:23px;height:23px;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.prompt-explainer__section > span {grid-column:2!important;grid-row:1!important;padding:0!important;color:#5c6680!important;font-size:10.5px!important;font-weight:850!important;letter-spacing:.095em!important;}
+.prompt-explainer__section p {grid-column:2!important;grid-row:2!important;margin:1px 0 0!important;padding:0!important;font-size:12.5px!important;line-height:1.65!important;overflow-wrap:anywhere!important;}
+.prompt-explainer__example {margin-top:3px!important;padding:12px 15px!important;border-radius:10px!important;white-space:normal!important;}
+.prompt-explainer__footer {padding:13px 36px!important;gap:12px!important;}
+.prompt-explainer__use {min-width:185px!important;font-size:12px!important;}
+@media(max-width:780px){
+ .prompt-explainer:popover-open {width:min(660px,calc(100vw - 24px))!important;max-height:88dvh!important;}
+ .prompt-explainer__head{min-height:0!important;padding:24px 65px 23px 24px!important;}
+ .prompt-explainer__head::before,.prompt-explainer__head::after{display:none!important;}
+ .prompt-explainer__head h2{font-size:clamp(27px,6vw,39px)!important;}
+ .prompt-explainer__summary{padding:14px 24px!important;}
+ .prompt-explainer__body{padding:0 24px 10px!important;}
+ .prompt-explainer__footer{padding:12px 24px!important;}
+}
+@media(max-width:520px){
+ .prompt-explainer:popover-open{width:calc(100vw - 14px)!important;max-height:91dvh!important;border-radius:16px!important;}
+ .prompt-explainer__head{padding:20px 51px 20px 17px!important;}
+ .prompt-explainer__head h2{font-size:30px!important;}
+ .prompt-explainer__summary,.prompt-explainer__body{padding-left:17px!important;padding-right:17px!important;}
+ .prompt-explainer__section{grid-template-columns:38px minmax(0,1fr)!important;column-gap:11px!important;}
+ .prompt-explainer__icon{width:35px;height:35px;}.prompt-explainer__icon svg{width:19px;height:19px;}
+ .prompt-explainer__footer{padding:12px 15px!important;}
+ .prompt-explainer__back{min-width:80px;}
+}
+
+/* 5. Document library: separate *filter* from *download*, single preview action. */
+.br-doc-library__formats {display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:25px 0 18px;}
+.br-doc-library__formats a {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:43px;padding:0 17px;border-radius:11px;border:1px solid #e7ded4;background:#fffdfa;color:#57617a;text-decoration:none;font-size:12px;font-weight:800;transition:background .25s ease,color .25s ease,transform .25s ease;}
+.br-doc-library__formats a svg {width:17px;height:17px;stroke:currentColor;stroke-width:1.65;}
+.br-doc-library__formats a:hover{border-color:#edb4a4;transform:translateY(-1px);}
+.br-doc-library__formats a.is-active {background:#f26b4f;border-color:#f26b4f;color:#fff;box-shadow:0 6px 15px rgba(242,107,79,.17);}
+.br-doc-library__formats p {flex:1 1 270px;text-align:right;margin:0;color:#858ca0;font-size:10.5px;line-height:1.5;}
+.br-doc-library-card {min-width:0;}
+.br-doc-library-card__actions {grid-template-columns:minmax(0,1fr) 44px!important;align-items:center!important;}
+.br-doc-library-card__actions form{margin:0;}
+.br-doc-library-card__actions .is-primary{width:100%;min-width:0;}
+.br-doc-library-card__delete {display:grid;place-items:center;width:42px;height:40px;border:1px solid #f1d2c8;border-radius:10px;background:#fff9f6;color:#de624b;cursor:pointer;}
+.br-doc-library-card__delete svg {width:18px;height:18px;stroke:currentColor;stroke-width:1.75;stroke-linejoin:round;}
+.br-doc-library-card__delete:hover {background:#ffebe6;border-color:#e89b86;}
+.br-doc-library__feedback {padding:12px 15px;margin-top:15px;background:#effaf6;border:1px solid #b7e6d2;border-radius:10px;font-size:12px;color:#22645b;}
+.br-doc-preview-tabs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:15px 0;}
+.br-doc-preview-tabs a{display:inline-flex;min-height:39px;align-items:center;padding:0 15px;border-radius:9px;border:1px solid #e2d8ce;background:#fff;color:#5d6780;font-size:11px;font-weight:800;text-decoration:none;}
+.br-doc-preview-tabs a.is-active{background:#f26b4f;color:white;border-color:#f26b4f;}
+.br-doc-preview-tabs span{flex:1 1 200px;text-align:right;color:#68827d;font-size:11px;}
+.br-doc-inline-pdf{border:1px solid #e2d8ce;border-radius:15px;background:#fff;padding:14px;margin:15px 0 24px;}
+.br-doc-inline-pdf > div{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+.br-doc-inline-pdf strong{font-size:12px;color:#17172b;}
+.br-doc-inline-pdf small{font-size:10px;color:#72809a;}
+.br-doc-inline-pdf iframe{display:block;width:100%;height:min(74dvh,760px);min-height:380px;border:1px solid #e7e3dd;border-radius:8px;background:#f1f1f1;}
+
+/* 6. Generation: quiet saving state. Flying paper belongs to DOWNLOAD only. */
+.br-doc-generation__spinner {width:37px;height:37px;border-radius:50%;border:3px solid #f3ddcf;border-top-color:#f26b4f;margin:10px auto 18px;animation:brFinalSpinner 1.2s linear infinite;}
+@keyframes brFinalSpinner {to{transform:rotate(360deg)}}
+.br-download-progress[hidden]{display:none!important;}
+.br-download-progress {position:fixed;inset:0;display:grid;place-items:center;z-index:999999;}
+.br-download-progress__scrim {position:absolute;inset:0;background:rgba(16,22,43,.68);backdrop-filter:blur(5px);}
+.br-download-progress__panel {position:relative;z-index:1;width:min(400px,calc(100vw - 28px));padding:33px 30px 26px;background:#fffcf7;border-radius:20px;box-shadow:0 25px 100px rgba(0,0,0,.22);text-align:center;color:#17172b;overflow:visible;}
+.br-download-progress__panel > b{display:block;font-size:19px;line-height:1.3;margin:16px 0 7px;}
+.br-download-progress__panel > p{font-size:12px;line-height:1.6;color:#6e7890;margin:5px 0 16px;}
+.br-download-progress__papers {width:100px;height:100px;position:relative;margin:0 auto;transform:rotate(-5deg);}
+.br-download-progress__papers span{position:absolute;top:10px;left:20px;width:67px;height:82px;border:1px solid #e3d9d0;background:repeating-linear-gradient(to bottom,transparent 0 14px,#e5e9ea 15px 17px,transparent 18px 23px),#fff;border-radius:7px;box-shadow:0 8px 22px rgba(23,23,43,.1);animation:brPaperFloat 2.5s ease-in-out infinite;}
+.br-download-progress__papers span:nth-child(1){transform:translate(-13px,4px) rotate(-13deg);opacity:.55;animation-delay:-.4s;}
+.br-download-progress__papers span:nth-child(2){transform:translate(10px,0) rotate(10deg);opacity:.8;animation-delay:-.7s;}
+.br-download-progress__papers span:nth-child(3){background:linear-gradient(#ffbba8,#ffbba8) 12px 19px/34px 4px no-repeat,repeating-linear-gradient(to bottom,transparent 0 14px,#dfe3e7 15px 17px,transparent 18px 23px),#fff;}
+@keyframes brPaperFloat{0%,100%{translate:0 0}50%{translate:0 -5px}}
+.br-download-progress__bar {height:7px;background:#eee8e1;border-radius:999px;overflow:hidden;}
+.br-download-progress__bar > span {display:block;height:100%;width:0;background:linear-gradient(90deg,#f26b4f,#ff9a6e);border-radius:inherit;transition:width .65s cubic-bezier(.21,1,.34,1);}
+.br-download-progress__panel > strong {display:block;color:#e26549;font-size:23px;line-height:1.4;margin-top:9px;font-variant-numeric:tabular-nums;}
+.br-download-progress__panel > button {margin-top:10px;padding:9px 18px;border:1px solid #e1d9ce;border-radius:9px;background:#fff;font:inherit;font-size:11px;font-weight:800;cursor:pointer;}
+.br-download-progress.is-complete .br-download-progress__papers{animation:brPaperFly 1.2s cubic-bezier(.31,.68,.25,1) forwards;}
+@keyframes brPaperFly {0%{opacity:1;transform:translate(0,0) rotate(-5deg) scale(1);}100%{opacity:.05;transform:translate(calc(var(--paper-fly-x, -310px) * .7),calc(var(--paper-fly-y, -180px) * .7)) rotate(-15deg) scale(.27);}}
+.br-download-progress.is-error .br-download-progress__bar > span{background:#cd4a4e;}
+@media(max-width:700px){.br-doc-library__formats p{text-align:left;flex-basis:100%;}.br-doc-inline-pdf iframe{min-height:350px;height:65dvh;}}
+@media(prefers-reduced-motion:reduce){
+ .br-sidebar,.br-doc-library__formats a,.br-doc-generation__spinner,.br-download-progress__papers,.br-download-progress__papers span,.br-download-progress__bar > span {transition:none!important;animation:none!important;}
+}
+
+/* Saved shortcut belongs on the warm-white Workspace canvas, not in the topbar. */
+.research-canvas {position:relative;}
+.br-workspace-saved-shortcut {position:absolute;top:87px;right:24px;z-index:8;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid #ebded4;border-radius:11px;background:#fffcf7;box-shadow:0 7px 17px rgba(23,23,43,.035);color:#d95c3e;text-decoration:none;font-size:12px;font-weight:800;}
+.br-workspace-saved-shortcut svg {width:17px;height:17px;stroke:currentColor;stroke-width:1.8;}
+.br-workspace-saved-shortcut:hover {border-color:#f26b4f;background:#fff2ed;}
+@media(max-width:730px){.br-workspace-saved-shortcut{top:72px;right:12px;min-height:36px;padding:0 10px;font-size:11px;}}

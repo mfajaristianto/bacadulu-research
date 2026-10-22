@@ -14,10 +14,14 @@ class DocumentGeneration extends Model
         'ai_run_id',
         'saved_result_id',
         'document_template_id',
+        'template_version',
         'document_type',
         'citation_style',
         'title',
         'content_json',
+        'template_snapshot_json',
+        'settings_snapshot_json',
+        'glossary_snapshot_json',
         'status',
         'docx_disk',
         'docx_path',
@@ -30,11 +34,23 @@ class DocumentGeneration extends Model
     protected function casts(): array
     {
         return [
-            'content_json'
-                => 'array',
+            'content_json' =>
+                'array',
 
-            'generated_at'
-                => 'datetime',
+            'template_snapshot_json' =>
+                'array',
+
+            'settings_snapshot_json' =>
+                'array',
+
+            'glossary_snapshot_json' =>
+                'array',
+
+            'template_version' =>
+                'integer',
+
+            'generated_at' =>
+                'datetime',
         ];
     }
 

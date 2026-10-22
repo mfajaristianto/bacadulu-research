@@ -33,8 +33,8 @@
     --info-soft: #E7F0F6;
 
     /* Typography */
-    --font-display: ui-serif, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-    --font-body: "Aptos", "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    --font-body: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 
     /* Elevation */
     --shadow-card: 0 1px 2px rgba(23, 23, 43, .06);
@@ -57,6 +57,93 @@
     /* Motion */
     --ease-out: cubic-bezier(.22, 1, .36, 1);
     --ease-soft: cubic-bezier(.2, .75, .3, 1);
+
+    /*
+    |----------------------------------------------------------------------
+    | Design system v2 tokens
+    |----------------------------------------------------------------------
+    | New components use these. Legacy tokens above keep their values so
+    | existing pages render unchanged until they are migrated.
+    */
+
+    /* Brand scale. 600/700 meet WCAG AA with white text / on ivory. */
+    --orange-50: #FEF4F1;
+    --orange-100: var(--bd-orange-soft);
+    --orange-500: var(--bd-orange);
+    --orange-600: #C24A2C;
+    --orange-700: #A63D25;
+
+    --navy-900: var(--bd-navy);
+    --navy-700: var(--bd-navy-soft);
+    --navy-500: var(--text-secondary);
+
+    --paper: var(--bd-paper);
+    --ivory: var(--bd-ivory);
+    --cream: var(--surface-subtle);
+
+    --warning: #8A5A12;
+    --warning-soft: #FBF0DA;
+
+    /* Type scale */
+    --text-display: clamp(2.25rem, 4vw, 3rem);
+    --text-h1: 2rem;
+    --text-h2: 1.5rem;
+    --text-h3: 1.125rem;
+    --text-body: 1rem;
+    --text-body-sm: .9375rem;
+    --text-label: .8125rem;
+    --text-caption: .75rem;
+
+    /* Spacing (4px base) */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+    --space-16: 64px;
+    --space-24: 96px;
+
+    /* Radius */
+    --radius-control: 10px;
+    --radius-card: 14px;
+    --radius-panel: 20px;
+    --radius-pill: 999px;
+
+    /* Shadow */
+    --shadow-sm: 0 1px 2px rgba(23, 23, 43, .06);
+    --shadow-md: 0 10px 28px rgba(23, 23, 43, .10);
+    --shadow-lg: 0 24px 64px rgba(23, 23, 43, .16);
+
+    /* Focus: one ring for every control */
+    --focus-outline: 2px solid var(--orange-600);
+    --focus-offset: 2px;
+
+    /* Layering */
+    --z-raised: 10;
+    --z-sticky: 100;
+    --z-dropdown: 200;
+    --z-drawer: 300;
+    --z-modal: 400;
+    --z-toast: 500;
+
+    /* Containers (breakpoints: 480 / 768 / 1024 / 1280) */
+    --container: 1200px;
+    --container-narrow: 960px;
+    --container-prose: 720px;
+
+    /* Control sizes */
+    --control-sm: 36px;
+    --control-md: 44px;
+    --control-lg: 52px;
+
+    /* Motion */
+    --duration-micro: 150ms;
+    --duration-ui: 240ms;
+    --duration-enter: 400ms;
+    --duration-story: 700ms;
+    --ease-in-out: cubic-bezier(.65, 0, .35, 1);
 
     /* Compatibility aliases for existing pages */
     --ink-950: var(--bd-navy);

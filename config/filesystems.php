@@ -2,118 +2,91 @@
 
 return [
 
-    'default'
-        => env(
-            'FILESYSTEM_DISK',
-            'local'
+    'default' => env(
+        'FILESYSTEM_DISK',
+        'local'
+    ),
+
+    'disks' => [
+
+    'local' => [
+        'driver' => 'local',
+
+        'root' => storage_path(
+            'app/private'
         ),
 
-    'disks'
-        => [
+        'serve' => true,
 
-            'local'
-                => [
-                    'driver'
-                        => 'local',
+        'throw' => false,
 
-                    'root'
-                        => storage_path(
-                            'app/private'
-                        ),
+        'report' => false,
+    ],
 
-                    'serve'
-                        => true,
+    'public' => [
+            'driver' => 'local',
 
-                    'throw'
-                        => false,
+            'root' => storage_path(
+                'app/public'
+            ),
 
-                    'report'
-                        => false,
-                ],
+            'url' => rtrim(
+                env(
+                    'APP_URL',
+                    'http://localhost'
+                ),
+                '/'
+            )
+            .'/storage',
 
-            'public'
-                => [
-                    'driver'
-                        => 'local',
+            'visibility' => 'public',
 
-                    'root'
-                        => storage_path(
-                            'app/public'
-                        ),
+            'throw' => false,
 
-                    'url'
-                        => rtrim(
-                            env(
-                                'APP_URL',
-                                'http://localhost'
-                            ),
-                            '/'
-                        )
-                            .'/storage',
+            'report' => false,
+        ],
 
-                    'visibility'
-                        => 'public',
-
-                    'throw'
-                        => false,
-
-                    'report'
-                        => false,
-                ],
-
-            /*
+    /*
             |--------------------------------------------------------------------------
             | Private Profile Avatar
             |--------------------------------------------------------------------------
             */
 
-            'profile_avatars'
-                => [
-                    'driver'
-                        => 'local',
+    'profile_avatars' => [
+            'driver' => 'local',
 
-                    'root'
-                        => storage_path(
-                            'app/private/profile-avatars'
-                        ),
+            'root' => storage_path(
+                'app/private/profile-avatars'
+            ),
 
-                    'visibility'
-                        => 'private',
+            'visibility' => 'private',
 
-                    'throw'
-                        => false,
+            'throw' => false,
 
-                    'report'
-                        => false,
-                ],
+            'report' => false,
+        ],
 
-            /*
+    /*
             |--------------------------------------------------------------------------
             | Private Research Source PDF
             |--------------------------------------------------------------------------
             */
 
-            'research_sources'
-                => [
-                    'driver'
-                        => 'local',
+    'research_sources' => [
+            'driver' => 'local',
 
-                    'root'
-                        => storage_path(
-                            'app/private/research-sources'
-                        ),
+            'root' => storage_path(
+                'app/private/research-sources'
+            ),
 
-                    'visibility'
-                        => 'private',
+            'visibility' => 'private',
 
-                    'throw'
-                        => false,
+            'throw' => false,
 
-                    'report'
-                        => false,
-                ],
+            'report' => false,
+        ],
 
-            /*
+    /*
             |--------------------------------------------------------------------------
             | Private Research Output
             |--------------------------------------------------------------------------
@@ -123,83 +96,64 @@ return [
             |
             */
 
-            'research_outputs'
-                => [
-                    'driver'
-                        => 'local',
+    'research_outputs' => [
+            'driver' => 'local',
 
-                    'root'
-                        => storage_path(
-                            'app/private/research-outputs'
-                        ),
+            'root' => storage_path(
+                'app/private/research-outputs'
+            ),
 
-                    'visibility'
-                        => 'private',
+            'visibility' => 'private',
 
-                    'throw'
-                        => false,
+            'throw' => false,
 
-                    'report'
-                        => false,
-                ],
-
-            's3'
-                => [
-                    'driver'
-                        => 's3',
-
-                    'key'
-                        => env(
-                            'AWS_ACCESS_KEY_ID'
-                        ),
-
-                    'secret'
-                        => env(
-                            'AWS_SECRET_ACCESS_KEY'
-                        ),
-
-                    'region'
-                        => env(
-                            'AWS_DEFAULT_REGION'
-                        ),
-
-                    'bucket'
-                        => env(
-                            'AWS_BUCKET'
-                        ),
-
-                    'url'
-                        => env(
-                            'AWS_URL'
-                        ),
-
-                    'endpoint'
-                        => env(
-                            'AWS_ENDPOINT'
-                        ),
-
-                    'use_path_style_endpoint'
-                        => env(
-                            'AWS_USE_PATH_STYLE_ENDPOINT',
-                            false
-                        ),
-
-                    'throw'
-                        => false,
-
-                    'report'
-                        => false,
-                ],
+            'report' => false,
         ],
 
-    'links'
-        => [
-            public_path(
-                'storage'
-            )
-                => storage_path(
-                    'app/public'
-                ),
+    's3' => [
+            'driver' => 's3',
+
+            'key' => env(
+                'AWS_ACCESS_KEY_ID'
+            ),
+
+            'secret' => env(
+                'AWS_SECRET_ACCESS_KEY'
+            ),
+
+            'region' => env(
+                'AWS_DEFAULT_REGION'
+            ),
+
+            'bucket' => env(
+                'AWS_BUCKET'
+            ),
+
+            'url' => env(
+                'AWS_URL'
+            ),
+
+            'endpoint' => env(
+                'AWS_ENDPOINT'
+            ),
+
+            'use_path_style_endpoint' => env(
+                'AWS_USE_PATH_STYLE_ENDPOINT',
+                false
+            ),
+
+            'throw' => false,
+
+            'report' => false,
         ],
+    ],
+
+    'links' => [
+        public_path(
+            'storage'
+        ) => storage_path(
+            'app/public'
+        ),
+    ],
 
 ];

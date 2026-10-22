@@ -80,9 +80,8 @@ return new class extends Migration
                                     'conversation_id'
                                 )
                                 ->update([
-                                    'conversation_id'
-                                        => $message
-                                            ->conversation_id,
+                                    'conversation_id' => $message
+                                        ->conversation_id,
                                 ]);
                         }
                     }

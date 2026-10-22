@@ -463,15 +463,15 @@ class ResearchController extends Controller
                     ),
 
                     'metadata' => [
-                    'prompt_template_id' => $prompt
-                        ->id,
+                        'prompt_template_id' => $prompt
+                            ->id,
 
-                    'prompt_version' => $prompt
-                        ->version,
+                        'prompt_version' => $prompt
+                            ->version,
 
-                    'research_tool_code' => $prompt
-                        ->aiTool
-                        ?->code,
+                        'research_tool_code' => $prompt
+                            ->aiTool
+                            ?->code,
                     ],
                 ]);
 

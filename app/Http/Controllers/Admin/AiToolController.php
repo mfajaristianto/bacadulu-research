@@ -85,7 +85,7 @@ class AiToolController extends Controller
         return view(
             'admin.tools.form',
             [
-                'tool' => new AiTool(),
+                'tool' => new AiTool,
             ]
         );
     }

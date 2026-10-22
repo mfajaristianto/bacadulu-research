@@ -16,770 +16,354 @@ use Throwable;
 
 class GoogleController extends Controller
 {
-    private const PENDING_LINK_SESSION_KEY =
-        'bacadulu_google_pending_link';
+    private const PENDING_LINK_SESSION_KEY = 'bacadulu_google_pending_link';
 
-    private const PENDING_LINK_TTL_MINUTES =
-        10;
+    private const PENDING_LINK_TTL_MINUTES = 10;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Redirect to Google
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * Redirect user to Google OAuth.
+     *
+     * Google di BacaDulu Research hanya digunakan untuk login.
+     * Pendaftaran akun baru tetap dilakukan melalui form register.
+     */
+    public function redirect(Request $request): RedirectResponse
+    {
+        $request->session()->forget(self::PENDING_LINK_SESSION_KEY);
 
-    public function redirect(
-        Request $request
-    ): RedirectResponse {
-        /*
-         * Bersihkan pending linking lama.
-         */
-        $request
-            ->session()
-            ->forget(
-                self::PENDING_LINK_SESSION_KEY
-            );
-
-        return Socialite::driver(
-            'google'
-        )->redirect();
+        return Socialite::driver('google')->redirect();
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Google Callback
-    |--------------------------------------------------------------------------
-    */
-
-    public function callback(
-        Request $request
-    ): RedirectResponse {
+    /**
+     * Handle Google OAuth callback.
+     */
+    public function callback(Request $request): RedirectResponse
+    {
         try {
-            $googleUser =
-                Socialite::driver(
-                    'google'
-                )->user();
+            $googleUser = Socialite::driver('google')->user();
         } catch (Throwable $exception) {
-            Log::warning(
-                'Google OAuth callback failed.',
-                [
-                    'exception'
-                        => $exception::class,
-                ]
-            );
+            Log::warning('Google OAuth callback failed.', [
+                'exception' => $exception::class,
+                'message' => $exception->getMessage(),
+            ]);
 
             return redirect()
-                ->route(
-                    'login'
-                )
+                ->route('login')
                 ->withErrors([
-                    'email'
-                        => 'Login Google gagal. Silakan coba lagi atau gunakan login email.',
+                    'email' => 'Login Google gagal. Silakan coba lagi atau gunakan email dan kata sandi.',
                 ]);
         }
 
+        $googleId = trim((string) $googleUser->getId());
+        $email = Str::lower(trim((string) $googleUser->getEmail()));
+        $googleAvatar = trim((string) $googleUser->getAvatar());
 
-        $googleId =
-            trim(
-                (string)
-                    $googleUser
-                        ->getId()
-            );
-
-        $email =
-            Str::lower(
-                trim(
-                    (string)
-                        $googleUser
-                            ->getEmail()
-                )
-            );
-
-        $googleName =
-            trim(
-                (string)
-                    $googleUser
-                        ->getName()
-            );
-
-        $googleAvatar =
-            trim(
-                (string)
-                    $googleUser
-                        ->getAvatar()
-            );
-
+        if ($googleId === '' || $email === '') {
+            return redirect()
+                ->route('login')
+                ->withErrors([
+                    'email' => 'Google tidak mengirimkan informasi akun yang diperlukan.',
+                ]);
+        }
 
         /*
-         * Google wajib mengirim subject ID dan email.
+         * CASE 1
+         * Google ID sudah pernah ditautkan.
+         * Ini adalah login Google normal.
          */
-        if (
-            $googleId === ''
-            || $email === ''
-        ) {
-            return redirect()
-                ->route(
-                    'login'
-                )
-                ->withErrors([
-                    'email'
-                        => 'Google tidak mengirimkan informasi akun yang diperlukan.',
-                ]);
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CASE 1
-        |--------------------------------------------------------------------------
-        |
-        | google_id sudah pernah tertaut.
-        |
-        | Ini adalah login Google normal.
-        |
-        */
-
-        $linkedUser =
-            User::query()
-                ->where(
-                    'google_id',
-                    $googleId
-                )
-                ->first();
+        $linkedUser = User::query()
+            ->where('google_id', $googleId)
+            ->first();
 
         if ($linkedUser) {
-            if (
-                $linkedUser->status
-                !== 'active'
-            ) {
+            if ($linkedUser->status !== 'active') {
                 return redirect()
-                    ->route(
-                        'login'
-                    )
+                    ->route('login')
                     ->withErrors([
-                        'email'
-                            => 'Akun ini tidak aktif. Silakan hubungi administrator.',
+                        'email' => 'Akun ini tidak aktif. Silakan hubungi administrator.',
                     ]);
             }
 
-
             /*
-             * Jangan overwrite avatar lokal user.
-             *
-             * Avatar Google hanya disimpan jika user
-             * belum memiliki avatar sama sekali.
+             * Jangan overwrite avatar lokal.
+             * Avatar Google hanya dipakai jika avatar user masih kosong.
              */
-            if (
-                blank(
-                    $linkedUser->avatar
-                )
-                && $googleAvatar !== ''
-            ) {
+            if (blank($linkedUser->avatar) && $googleAvatar !== '') {
                 $linkedUser->forceFill([
-                    'avatar'
-                        => $googleAvatar,
+                    'avatar' => $googleAvatar,
                 ])->save();
             }
 
-
             /*
-             * Google OAuth membuktikan kepemilikan
-             * Google account/email.
+             * Login Google membuktikan kepemilikan email Google.
              */
-            if (
-                ! $linkedUser
-                    ->email_verified_at
-            ) {
+            if (! $linkedUser->email_verified_at) {
                 $linkedUser->forceFill([
-                    'email_verified_at'
-                        => now(),
+                    'email_verified_at' => now(),
                 ])->save();
             }
 
-
-            return $this
-                ->loginAndRedirect(
-                    $request,
-                    $linkedUser
-                );
+            return $this->loginAndRedirect(
+                $request,
+                $linkedUser
+            );
         }
 
+        /*
+         * CASE 2
+         * Google ID belum tertaut.
+         * Cari akun BacaDulu Research berdasarkan email.
+         */
+        $existingUser = User::query()
+            ->where('email', $email)
+            ->first();
 
         /*
-        |--------------------------------------------------------------------------
-        | CASE 2
-        |--------------------------------------------------------------------------
-        |
-        | Belum ada google_id.
-        |
-        | Sekarang cek apakah email sudah ada.
-        |
-        */
-
-        $existingUser =
-            User::query()
-                ->where(
-                    'email',
-                    $email
-                )
-                ->first();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CASE 2A — NEW USER
-        |--------------------------------------------------------------------------
-        |
-        | Email sama sekali belum ada.
-        |
-        | Buat akun baru dari Google.
-        |
-        */
-
+         * CASE 2A
+         * Email Google belum pernah terdaftar.
+         *
+         * PENTING:
+         * JANGAN membuat user otomatis.
+         * Semua pengguna wajib daftar terlebih dahulu.
+         */
         if (! $existingUser) {
-            $user =
-                User::create([
-                    'name'
-                        => $googleName !== ''
-                            ? $googleName
-                            : 'BacaDulu User',
+            $request->session()->forget(self::PENDING_LINK_SESSION_KEY);
 
-                    'email'
-                        => $email,
-
-                    'password'
-                        => null,
-
-                    'google_id'
-                        => $googleId,
-
-                    'avatar'
-                        => $googleAvatar !== ''
-                            ? $googleAvatar
-                            : null,
-
-                    'email_verified_at'
-                        => now(),
-
-                    'status'
-                        => 'active',
-                ]);
-
-
-            return $this
-                ->loginAndRedirect(
-                    $request,
-                    $user,
-                    true
-                );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | EXISTING ACCOUNT STATUS
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $existingUser->status
-            !== 'active'
-        ) {
             return redirect()
-                ->route(
-                    'login'
-                )
+                ->route('register')
                 ->withErrors([
-                    'email'
-                        => 'Akun ini tidak aktif. Silakan hubungi administrator.',
-                ]);
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CASE 2B
-        |--------------------------------------------------------------------------
-        |
-        | Email sudah ada dan google_id juga sudah terisi.
-        |
-        | Karena query google_id di atas tidak menemukan akun ini,
-        | berarti google_id-nya berbeda.
-        |
-        | Jangan overwrite.
-        |
-        */
-
-        if (
-            filled(
-                $existingUser
-                    ->google_id
-            )
-        ) {
-            return redirect()
-                ->route(
-                    'login'
-                )
-                ->withErrors([
-                    'email'
-                        => 'Email ini sudah terhubung dengan akun Google lain. Gunakan metode login yang sebelumnya digunakan.',
-                ]);
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CASE 2C
-        |--------------------------------------------------------------------------
-        |
-        | Existing user tetapi password kosong.
-        |
-        | Ini biasanya legacy OAuth account atau akun
-        | yang memang tidak pernah memiliki password.
-        |
-        | Karena Google berhasil membuktikan kepemilikan
-        | email yang sama, akun dapat ditautkan.
-        |
-        */
-
-        if (
-            blank(
-                $existingUser
-                    ->password
-            )
-        ) {
-            $existingUser
-                ->forceFill([
-                    'google_id'
-                        => $googleId,
-
-                    'email_verified_at'
-                        => $existingUser
-                            ->email_verified_at
-                            ?: now(),
-
-                    'avatar'
-                        => $existingUser
-                            ->avatar
-                            ?: (
-                                $googleAvatar !== ''
-                                    ? $googleAvatar
-                                    : null
-                            ),
+                    'email' => 'Email Google tersebut belum terdaftar di BacaDulu Research. Silakan buat akun terlebih dahulu.',
                 ])
-                ->save();
-
-
-            return $this
-                ->loginAndRedirect(
-                    $request,
-                    $existingUser
-                );
+                ->withInput([
+                    'email' => $email,
+                ]);
         }
 
+        /*
+         * Akun harus aktif.
+         */
+        if ($existingUser->status !== 'active') {
+            return redirect()
+                ->route('login')
+                ->withErrors([
+                    'email' => 'Akun ini tidak aktif. Silakan hubungi administrator.',
+                ]);
+        }
 
         /*
-        |--------------------------------------------------------------------------
-        | CASE 2D — MANUAL ACCOUNT
-        |--------------------------------------------------------------------------
-        |
-        | User pernah daftar dengan email/password.
-        |
-        | Jangan langsung menautkan Google hanya karena
-        | email sama.
-        |
-        | User harus verifikasi password BacaDulu sekali.
-        |
-        */
+         * CASE 2B
+         * Email sudah terdaftar, tetapi google_id juga sudah terisi.
+         *
+         * Karena lookup berdasarkan google_id sebelumnya tidak menemukan
+         * akun tersebut, google_id yang tersimpan pasti berbeda.
+         * Jangan overwrite relasi Google yang sudah ada.
+         */
+        if (filled($existingUser->google_id)) {
+            return redirect()
+                ->route('login')
+                ->withErrors([
+                    'email' => 'Email ini sudah terhubung dengan akun Google lain. Gunakan metode login yang sebelumnya digunakan.',
+                ]);
+        }
 
-        $request
-            ->session()
-            ->put(
-                self::PENDING_LINK_SESSION_KEY,
-                [
-                    'user_id'
-                        => $existingUser->id,
+        /*
+         * CASE 2C
+         * Legacy OAuth account.
+         *
+         * Akun sudah ada tetapi tidak memiliki password dan belum punya
+         * google_id. Karena Google berhasil membuktikan email yang sama,
+         * akun boleh langsung ditautkan.
+         */
+        if (blank($existingUser->password)) {
+            $existingUser->forceFill([
+                'google_id' => $googleId,
+                'email_verified_at' => $existingUser->email_verified_at ?: now(),
+                'avatar' => $existingUser->avatar ?: ($googleAvatar !== '' ? $googleAvatar : null),
+            ])->save();
 
-                    'email'
-                        => $email,
-
-                    'google_id'
-                        => $googleId,
-
-                    'google_name'
-                        => $googleName,
-
-                    'google_avatar'
-                        => $googleAvatar,
-
-                    'created_at'
-                        => now()
-                            ->timestamp,
-                ]
+            return $this->loginAndRedirect(
+                $request,
+                $existingUser
             );
+        }
 
+        /*
+         * CASE 2D
+         * Akun manual email/password.
+         *
+         * Jangan langsung link Google hanya berdasarkan email.
+         * User harus memasukkan password BacaDulu satu kali.
+         */
+        $request->session()->put(self::PENDING_LINK_SESSION_KEY, [
+            'user_id' => $existingUser->id,
+            'email' => $email,
+            'google_id' => $googleId,
+            'google_avatar' => $googleAvatar,
+            'created_at' => now()->timestamp,
+        ]);
 
-        return redirect()
-            ->route(
-                'google.link.form'
-            );
+        return redirect()->route('google.link.form');
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Google Account Linking Screen
-    |--------------------------------------------------------------------------
-    */
-
-    public function linkForm(
-        Request $request
-    ): View|RedirectResponse {
-        $pending =
-            $this
-                ->pendingLink(
-                    $request
-                );
+    /**
+     * Show Google linking confirmation form.
+     */
+    public function linkForm(Request $request): View|RedirectResponse
+    {
+        $pending = $this->pendingLink($request);
 
         if (! $pending) {
             return redirect()
-                ->route(
-                    'login'
-                )
+                ->route('login')
                 ->withErrors([
-                    'email'
-                        => 'Sesi penautan Google sudah berakhir. Silakan coba masuk dengan Google lagi.',
+                    'email' => 'Sesi penautan Google sudah berakhir. Silakan coba masuk dengan Google lagi.',
                 ]);
         }
 
+        $user = User::query()->find($pending['user_id']);
 
-        $user =
-            User::query()
-                ->find(
-                    $pending[
-                        'user_id'
-                    ]
-                );
-
-
-        if (
-            ! $user
-            || $user->status
-                !== 'active'
-        ) {
-            $request
-                ->session()
-                ->forget(
-                    self::PENDING_LINK_SESSION_KEY
-                );
+        if (! $user || $user->status !== 'active') {
+            $request->session()->forget(self::PENDING_LINK_SESSION_KEY);
 
             return redirect()
-                ->route(
-                    'login'
-                )
+                ->route('login')
                 ->withErrors([
-                    'email'
-                        => 'Akun tidak ditemukan atau tidak aktif.',
+                    'email' => 'Akun tidak ditemukan atau tidak aktif.',
                 ]);
         }
 
-
-        return view(
-            'auth.link-google',
-            [
-                'user'
-                    => $user,
-
-                'pendingGoogleEmail'
-                    => $pending[
-                        'email'
-                    ],
-            ]
-        );
+        return view('auth.link-google', [
+            'user' => $user,
+            'pendingGoogleEmail' => $pending['email'],
+        ]);
     }
 
+    /**
+     * Confirm Google account linking.
+     */
+    public function link(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'password' => [
+                'required',
+                'string',
+            ],
+        ]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Confirm Google Linking
-    |--------------------------------------------------------------------------
-    */
-
-    public function link(
-        Request $request
-    ): RedirectResponse {
-        $data =
-            $request
-                ->validate([
-                    'password'
-                        => [
-                            'required',
-                            'string',
-                        ],
-                ]);
-
-
-        $pending =
-            $this
-                ->pendingLink(
-                    $request
-                );
-
+        $pending = $this->pendingLink($request);
 
         if (! $pending) {
             return redirect()
-                ->route(
-                    'login'
-                )
+                ->route('login')
                 ->withErrors([
-                    'email'
-                        => 'Sesi penautan Google sudah berakhir. Silakan coba masuk dengan Google lagi.',
+                    'email' => 'Sesi penautan Google sudah berakhir. Silakan coba masuk dengan Google lagi.',
                 ]);
         }
 
+        $user = User::query()->find($pending['user_id']);
 
-        $user =
-            User::query()
-                ->find(
-                    $pending[
-                        'user_id'
-                    ]
-                );
-
-
-        if (
-            ! $user
-            || $user->status
-                !== 'active'
-        ) {
-            $request
-                ->session()
-                ->forget(
-                    self::PENDING_LINK_SESSION_KEY
-                );
+        if (! $user || $user->status !== 'active') {
+            $request->session()->forget(self::PENDING_LINK_SESSION_KEY);
 
             return redirect()
-                ->route(
-                    'login'
-                )
+                ->route('login')
                 ->withErrors([
-                    'email'
-                        => 'Akun tidak ditemukan atau tidak aktif.',
+                    'email' => 'Akun tidak ditemukan atau tidak aktif.',
                 ]);
         }
 
-
         /*
-         * Email harus masih sama.
+         * Pastikan email akun lokal tidak berubah selama proses linking.
          */
         if (
-            Str::lower(
-                trim(
-                    (string)
-                        $user->email
-                )
-            )
-            !==
-            Str::lower(
-                trim(
-                    (string)
-                        $pending[
-                            'email'
-                        ]
-                )
-            )
+            Str::lower(trim((string) $user->email))
+            !== Str::lower(trim((string) $pending['email']))
         ) {
-            $request
-                ->session()
-                ->forget(
-                    self::PENDING_LINK_SESSION_KEY
-                );
+            $request->session()->forget(self::PENDING_LINK_SESSION_KEY);
 
             return redirect()
-                ->route(
-                    'login'
-                )
+                ->route('login')
                 ->withErrors([
-                    'email'
-                        => 'Informasi akun berubah. Silakan mulai proses Google login kembali.',
+                    'email' => 'Informasi akun berubah. Silakan mulai proses Google login kembali.',
                 ]);
         }
 
-
         /*
-         * Kalau di antara callback dan form ini
-         * akun ternyata sudah tertaut, hentikan.
+         * Jika google_id sudah terisi selama proses berlangsung,
+         * hentikan linking agar tidak menimpa relasi existing.
          */
-        if (
-            filled(
-                $user
-                    ->google_id
-            )
-        ) {
-            $request
-                ->session()
-                ->forget(
-                    self::PENDING_LINK_SESSION_KEY
-                );
+        if (filled($user->google_id)) {
+            $request->session()->forget(self::PENDING_LINK_SESSION_KEY);
 
             return redirect()
-                ->route(
-                    'login'
-                )
+                ->route('login')
                 ->withErrors([
-                    'email'
-                        => 'Akun ini sudah terhubung dengan Google. Silakan masuk kembali.',
+                    'email' => 'Akun ini sudah terhubung dengan Google. Silakan masuk kembali.',
                 ]);
         }
 
-
         /*
-         * Password wajib cocok untuk akun manual.
+         * Untuk akun manual, password lokal wajib benar.
          */
         if (
-            blank(
-                $user
-                    ->password
-            )
-            || ! Hash::check(
-                $data[
-                    'password'
-                ],
-                $user->password
-            )
+            blank($user->password)
+            || ! Hash::check($data['password'], $user->password)
         ) {
             return back()
                 ->withErrors([
-                    'password'
-                        => 'Password BacaDulu tidak sesuai.',
-                ]);
+                    'password' => 'Password BacaDulu tidak sesuai.',
+                ])
+                ->onlyInput([]);
         }
 
-
         /*
-        |--------------------------------------------------------------------------
-        | Attach Google
-        |--------------------------------------------------------------------------
-        */
+         * Attach Google account.
+         */
+        $user->forceFill([
+            'google_id' => $pending['google_id'],
+            'email_verified_at' => $user->email_verified_at ?: now(),
+            'avatar' => $user->avatar ?: (
+                filled($pending['google_avatar'] ?? null)
+                    ? $pending['google_avatar']
+                    : null
+            ),
+        ])->save();
 
-        $user
-            ->forceFill([
-                'google_id'
-                    => $pending[
-                        'google_id'
-                    ],
+        $request->session()->forget(self::PENDING_LINK_SESSION_KEY);
 
-                'email_verified_at'
-                    => $user
-                        ->email_verified_at
-                        ?: now(),
-
-                'avatar'
-                    => $user
-                        ->avatar
-                        ?: (
-                            filled(
-                                $pending[
-                                    'google_avatar'
-                                ]
-                            )
-                                ? $pending[
-                                    'google_avatar'
-                                ]
-                                : null
-                        ),
-            ])
-            ->save();
-
-
-        $request
-            ->session()
-            ->forget(
-                self::PENDING_LINK_SESSION_KEY
-            );
-
-
-        return $this
-            ->loginAndRedirect(
-                $request,
-                $user,
-                false,
-                'Akun Google berhasil dihubungkan.'
-            );
+        return $this->loginAndRedirect(
+            $request,
+            $user,
+            'Akun Google berhasil dihubungkan. Selanjutnya Anda dapat masuk menggunakan Google.'
+        );
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Login + Profile Gate
-    |--------------------------------------------------------------------------
-    */
-
+    /**
+     * Log user in and apply profile completion gate.
+     */
     private function loginAndRedirect(
         Request $request,
         User $user,
-        bool $newGoogleUser = false,
         ?string $message = null
     ): RedirectResponse {
-        Auth::login(
-            $user,
-            true
+        Auth::login($user, true);
+
+        $request->session()->regenerate();
+
+        $user->forceFill([
+            'last_login_at' => now(),
+        ])->save();
+
+        $profileGate = (int) config(
+            'research.profile_gate',
+            80
         );
 
-
-        $request
-            ->session()
-            ->regenerate();
-
-
-        $user
-            ->forceFill([
-                'last_login_at'
-                    => now(),
-            ])
-            ->save();
-
-
-        $profileGate =
-            (int)
-                config(
-                    'research.profile_gate',
-                    80
-                );
-
-
         /*
-         * User Google baru SELALU diarahkan
-         * ke profile setup.
-         *
-         * Ini membuat onboarding eksplisit.
+         * Semua user tetap wajib mencapai profile completion minimum.
          */
-        if ($newGoogleUser) {
+        if ($user->profileCompletion() < $profileGate) {
             return redirect()
-                ->route(
-                    'profile.setup'
-                )
-                ->with(
-                    'success',
-                    'Akun Google berhasil dibuat. Lengkapi profil Anda hingga minimal '.$profileGate.'% untuk membuka Research Workspace.'
-                );
-        }
-
-
-        /*
-         * Existing user tetap harus melewati
-         * profile completion gate.
-         */
-        if (
-            $user
-                ->profileCompletion()
-            < $profileGate
-        ) {
-            return redirect()
-                ->route(
-                    'profile.setup'
-                )
+                ->route('profile.setup')
                 ->with(
                     'success',
                     $message
@@ -787,52 +371,30 @@ class GoogleController extends Controller
                 );
         }
 
-
-        $response =
-            redirect()
-                ->route(
-                    'dashboard'
-                );
-
+        $response = redirect()->route('dashboard');
 
         if ($message) {
-            $response
-                ->with(
-                    'success',
-                    $message
-                );
+            $response->with(
+                'success',
+                $message
+            );
         }
-
 
         return $response;
     }
 
+    /**
+     * Read and validate temporary Google linking session.
+     */
+    private function pendingLink(Request $request): ?array
+    {
+        $pending = $request
+            ->session()
+            ->get(self::PENDING_LINK_SESSION_KEY);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Pending Google Link Session
-    |--------------------------------------------------------------------------
-    */
-
-    private function pendingLink(
-        Request $request
-    ): ?array {
-        $pending =
-            $request
-                ->session()
-                ->get(
-                    self::PENDING_LINK_SESSION_KEY
-                );
-
-
-        if (
-            ! is_array(
-                $pending
-            )
-        ) {
+        if (! is_array($pending)) {
             return null;
         }
-
 
         $requiredKeys = [
             'user_id',
@@ -841,47 +403,28 @@ class GoogleController extends Controller
             'created_at',
         ];
 
-
         foreach ($requiredKeys as $key) {
-            if (
-                ! array_key_exists(
-                    $key,
-                    $pending
-                )
-            ) {
+            if (! array_key_exists($key, $pending)) {
+                $request
+                    ->session()
+                    ->forget(self::PENDING_LINK_SESSION_KEY);
+
                 return null;
             }
         }
 
+        $createdAt = (int) $pending['created_at'];
 
-        $createdAt =
-            (int)
-                $pending[
-                    'created_at'
-                ];
+        $expiresAt = $createdAt
+            + (self::PENDING_LINK_TTL_MINUTES * 60);
 
-
-        $expiresAt =
-            $createdAt
-            + (
-                self::PENDING_LINK_TTL_MINUTES
-                * 60
-            );
-
-
-        if (
-            now()->timestamp
-            > $expiresAt
-        ) {
+        if (now()->timestamp > $expiresAt) {
             $request
                 ->session()
-                ->forget(
-                    self::PENDING_LINK_SESSION_KEY
-                );
+                ->forget(self::PENDING_LINK_SESSION_KEY);
 
             return null;
         }
-
 
         return $pending;
     }

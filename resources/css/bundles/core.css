@@ -1,0 +1,32 @@
+/*
+|--------------------------------------------------------------------------
+| Core: foundation + page styles that load BEFORE the admin styles
+|--------------------------------------------------------------------------
+| Shared by app.css and admin.css. Keep the import order: the legacy
+| cascade depends on it.
+*/
+
+@import '../base/fonts.css';
+@import '../base/variables.css';
+@import '../base/reset.css';
+@import '../base/typography.css';
+
+@import '../components/buttons.css';
+@import '../components/forms.css';
+@import '../components/navbar.css';
+@import '../components/feedback.css';
+
+@import '../pages/landing.css';
+@import '../pages/landing-refinement.css';
+@import '../pages/landing-hero-reference.css';
+
+@import '../pages/profile.css';
+@import '../pages/library.css';
+
+@import '../pages/workspace.css';
+@import '../pages/prompt-education.css';
+
+@import '../pages/conversations.css';
+@import '../pages/saved.css';
+@import '../pages/documents.css';
+@import '../pages/research-output.css';

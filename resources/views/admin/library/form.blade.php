@@ -1,138 +1,145 @@
 @extends('layouts.admin')
 
+@php
+    $editing = $document->exists;
+
+    $maxMb = (int) round(
+        config(
+            'research.ingestion.max_upload_kb',
+            102400
+        ) / 1024
+    );
+
+    $currentFileName =
+        $latestFile?->original_name
+        ?: (
+            $latestFile?->path
+            ? basename($latestFile->path)
+            : null
+        );
+
+    $currentFileMb =
+        $latestFile
+        ? number_format(
+            ($latestFile->file_size ?? 0) / 1048576,
+            2
+        )
+        : null;
+
+    $previewTitle = trim(
+        (string) old(
+            'title',
+            $document->title
+        )
+    );
+
+    if (
+        $previewTitle === ''
+        && $currentFileName
+    ) {
+        $previewTitle = pathinfo(
+            $currentFileName,
+            PATHINFO_FILENAME
+        );
+    }
+
+    if ($previewTitle === '') {
+        $previewTitle = 'Judul Source';
+    }
+@endphp
+
 @section(
     'title',
-    (
-        $document->exists
-            ? 'Edit Source'
-            : 'Add Source'
-    ).' — Admin'
+    $editing
+        ? 'Source Detail'
+        : 'Tambah Source'
+)
+
+@section(
+    'page_title',
+    $editing
+        ? 'Source Detail'
+        : 'Tambah Source'
 )
 
 @section('content')
 
-<section class="admin-page narrow-page">
+<section class="admin-page">
 
-    <div
-        class="admin-hero compact"
-        data-admin-reveal
-    >
-        <div>
-            <p class="eyebrow">
-                ADMIN / LIBRARY
+    <header class="bd-admin-page-head">
+
+        <div
+            class="bd-admin-page-head__copy"
+            data-admin-reveal
+        >
+            <p class="bd-admin-kicker">
+                KNOWLEDGE / SOURCE
             </p>
 
             <h1>
                 {{
-                    $document->exists
-                        ? 'Edit source.'
-                        : 'Add source.'
+                    $editing
+                    ? $document->title
+                    : 'Tambah Curated Source'
                 }}
             </h1>
 
             <p>
-                Source disimpan secara private,
-                diproses menjadi text chunks,
-                lalu baru tersedia untuk
-                evidence retrieval.
+                Metadata dibuat sederhana agar source mudah dikelola,
+                diproses menjadi evidence, dan ditelusuri kembali.
             </p>
         </div>
 
-        <a
-            href="{{
-                route(
-                    'admin.library.index'
-                )
-            }}"
-            class="btn btn-secondary"
-        >
-            Back to library
-        </a>
-    </div>
-
-    @if(session('warning'))
         <div
-            class="alert alert-warning"
+            class="bd-admin-page-head__actions"
+            data-admin-reveal
+            data-reveal-from="right"
+        >
+            <a
+                href="{{ route('admin.library.index') }}"
+                class="
+                    bd-admin-button
+                    bd-admin-button--ghost
+                "
+            >
+                ← Library
+            </a>
+        </div>
+
+    </header>
+
+
+    @if($categories->isEmpty())
+
+        <div
+            class="
+                bd-admin__flash
+                bd-admin__flash--warning
+            "
             role="status"
         >
-            {{ session('warning') }}
+            <span></span>
+
+            <p>
+                Belum ada category aktif.
+                Buat category dulu sebelum menambahkan source.
+
+                <a
+                    href="{{ route('admin.categories.create') }}"
+                    class="bd-admin-table__action"
+                >
+                    Buat Category →
+                </a>
+            </p>
         </div>
+
     @endif
 
-    @if($errors->any())
-        <div
-            class="alert alert-error"
-            role="alert"
-        >
-            {{ $errors->first() }}
-        </div>
-    @endif
-
-    @if($document->exists)
-        <div
-            class="admin-info-banner"
-            data-admin-reveal
-        >
-            <span class="quick-icon">
-                {{
-                    $chunkCount > 0
-                        ? '✓'
-                        : '!'
-                }}
-            </span>
-
-            <div>
-                <strong>
-                    {{
-                        $chunkCount > 0
-                            ? $chunkCount.' chunks siap'
-                            : 'Source belum memiliki chunks'
-                    }}
-                </strong>
-
-                <p>
-                    @if($latestFile)
-                        File:
-                        {{
-                            $latestFile
-                                ->original_name
-                            ?: 'Private PDF'
-                        }}
-
-                        ·
-
-                        {{
-                            number_format(
-                                (
-                                    $latestFile
-                                        ->file_size
-                                    ?? 0
-                                ) / 1024 / 1024,
-                                2
-                            )
-                        }}
-                        MB
-
-                        ·
-
-                        Status file:
-                        {{
-                            $latestFile
-                                ->status
-                        }}
-                    @else
-                        Belum ada PDF tersimpan
-                        untuk source ini.
-                    @endif
-                </p>
-            </div>
-        </div>
-    @endif
 
     <form
         method="POST"
         action="{{
-            $document->exists
+            $editing
                 ? route(
                     'admin.library.update',
                     $document
@@ -141,434 +148,1078 @@
                     'admin.library.store'
                 )
         }}"
-        class="admin-form-card"
         enctype="multipart/form-data"
+        class="bd-admin-form-shell"
         data-admin-reveal
+        data-reveal-delay="70"
     >
+
         @csrf
 
-        @if($document->exists)
+        @if($editing)
             @method('PUT')
         @endif
 
-        <div class="admin-form-section">
-            <span class="admin-kicker">
-                SOURCE IDENTITY
-            </span>
 
-            <h2>
-                Core metadata
-            </h2>
-        </div>
+        <div class="bd-admin-form">
 
-        <div class="admin-form-grid">
+            <section class="bd-admin-form__section">
 
-            <label class="full">
-                Title
+                <div class="bd-admin-form__section-head">
 
-                <input
-                    name="title"
-                    value="{{
-                        old(
-                            'title',
-                            $document->title
-                        )
-                    }}"
-                    required
-                    maxlength="255"
-                >
-            </label>
+                    <strong>
+                        Identitas Source
+                    </strong>
 
-            <label>
-                Category
+                    <p>
+                        Judul di bawah ini juga digunakan
+                        sebagai visual cover source.
+                    </p>
 
-                <select name="category_id">
-                    <option value="">
-                        No category
-                    </option>
+                </div>
 
-                    @foreach(
-                        $categories
-                        as $category
-                    )
-                        <option
-                            value="{{ $category->id }}"
-                            @selected(
+
+                <div class="bd-admin-form__grid">
+
+                    <label
+                        class="
+                            bd-admin-form-field
+                            is-full
+                        "
+                    >
+
+                        <span>
+                            Judul
+                            <small>wajib</small>
+                        </span>
+
+                        <input
+                            class="bd-admin-input"
+                            type="text"
+                            name="title"
+                            value="{{
                                 old(
-                                    'category_id',
-                                    $document
-                                        ->category_id
+                                    'title',
+                                    $document->title
                                 )
-                                == $category->id
+                            }}"
+                            maxlength="255"
+                            placeholder="Contoh: ESG Disclosure and Firm Value"
+                            required
+                            data-source-title-input
+                        >
+
+                        @error('title')
+
+                            <small class="admin-danger-text">
+                                {{ $message }}
+                            </small>
+
+                        @enderror
+
+                    </label>
+
+
+                    <label
+                        class="
+                            bd-admin-form-field
+                            is-full
+                        "
+                    >
+
+                        <span>
+                            Kategori
+                            <small>wajib</small>
+                        </span>
+
+                        <select
+                            class="bd-admin-select"
+                            name="category_id"
+                            required
+                            @disabled(
+                                $categories->isEmpty()
                             )
                         >
-                            {{ $category->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </label>
 
-            <label>
-                Document type
+                            <option value="">
+                                Pilih kategori
+                            </option>
 
-                <input
-                    name="document_type"
-                    value="{{
-                        old(
-                            'document_type',
-                            $document
-                                ->document_type
-                        )
-                    }}"
-                    required
-                    maxlength="100"
-                    placeholder="journal article, report, book chapter…"
-                >
-            </label>
+                            @foreach ($categories as $category)
 
-            <label>
-                Publication year
+                                <option
+                                    value="{{ $category->id }}"
+                                    @selected(
+                                        (string) old(
+                                            'category_id',
+                                            $document->category_id
+                                        )
+                                        ===
+                                        (string) $category->id
+                                    )
+                                >
+                                    {{ $category->name }}
+                                </option>
 
-                <input
-                    type="number"
-                    name="publication_year"
-                    min="1900"
-                    max="{{
-                        now()->year + 2
-                    }}"
-                    value="{{
-                        old(
-                            'publication_year',
-                            $document
-                                ->publication_year
-                        )
-                    }}"
-                >
-            </label>
+                            @endforeach
 
-            <label>
-                Language
+                        </select>
 
-                <input
-                    name="language"
-                    value="{{
-                        old(
-                            'language',
-                            $document->language
-                                ?: 'id'
-                        )
-                    }}"
-                    maxlength="20"
-                >
-            </label>
+                        @error('category_id')
 
-            <label>
-                Publisher
+                            <small class="admin-danger-text">
+                                {{ $message }}
+                            </small>
 
-                <input
-                    name="publisher"
-                    value="{{
-                        old(
-                            'publisher',
-                            $document->publisher
-                        )
-                    }}"
-                    maxlength="255"
-                >
-            </label>
+                        @enderror
 
-            <label>
-                Source label
+                    </label>
 
-                <input
-                    name="source_label"
-                    value="{{
-                        old(
-                            'source_label',
-                            $document
-                                ->source_label
-                        )
-                    }}"
-                    maxlength="255"
-                    placeholder="Curated Source"
-                >
-            </label>
+                </div>
 
-            <label>
-                DOI
+            </section>
 
-                <input
-                    name="doi"
-                    value="{{
-                        old(
-                            'doi',
-                            $document->doi
-                        )
-                    }}"
-                    maxlength="255"
-                >
-            </label>
 
-            <label>
-                ISBN
+            <section class="bd-admin-form__section">
 
-                <input
-                    name="isbn"
-                    value="{{
-                        old(
-                            'isbn',
-                            $document->isbn
-                        )
-                    }}"
-                    maxlength="100"
-                >
-            </label>
+                <div class="bd-admin-form__section-head">
 
-        </div>
+                    <strong>
+                        PDF Source
+                    </strong>
 
-        <label>
-            Abstract
+                    <p>
+                        {{
+                            $editing
+                                ? 'Upload PDF baru hanya jika ingin mengganti file source. Visual cover mengikuti judul Library secara otomatis.'
+                                : 'Pilih atau drag PDF. Visual cover akan terbentuk otomatis dari nama file dan judul Library.'
+                        }}
+                    </p>
 
-            <textarea
-                name="abstract"
-                rows="8"
-                placeholder="Abstract atau editorial summary source…"
-            >{{ old(
-                'abstract',
-                $document->abstract
-            ) }}</textarea>
-        </label>
+                </div>
 
-        <div class="admin-form-section">
-            <span class="admin-kicker">
-                SOURCE FILE
-            </span>
 
-            <h2>
-                PDF & extraction
-            </h2>
-
-            <p>
-                PDF disimpan pada private storage.
-                User tidak memperoleh akses langsung
-                ke raw internal PDF.
-            </p>
-        </div>
-
-        <label>
-            {{
-                $document->exists
-                    ? 'Replace PDF'
-                    : 'Upload PDF'
-            }}
-            <span class="field-optional">
-                optional
-            </span>
-
-            <input
-                type="file"
-                name="source_file"
-                accept="application/pdf,.pdf"
-            >
-
-            <small class="field-help">
-                PDF maksimal
-                {{
-                    number_format(
-                        config(
-                            'research.ingestion.max_upload_kb',
-                            51200
-                        ) / 1024,
-                        0
-                    )
-                }}
-                MB.
-                File disimpan private.
-            </small>
-        </label>
-
-        <label>
-            Extracted Text
-            <span class="field-optional">
-                fallback
-            </span>
-
-            <textarea
-                name="extracted_text"
-                rows="12"
-                placeholder="Opsional. Paste text hasil ekstraksi PDF di sini jika pdftotext belum tersedia atau PDF merupakan hasil scan."
-            >{{ old(
-                'extracted_text'
-            ) }}</textarea>
-
-            <small class="field-help">
-                Jika field ini diisi,
-                text ini diprioritaskan untuk chunking.
-                PDF tetap disimpan sebagai source file.
-            </small>
-        </label>
-
-        @if($document->exists && $latestFile)
-            <label class="check-row">
-                <input
-                    type="checkbox"
-                    name="reprocess_source"
-                    value="1"
-                    @checked(
-                        old(
-                            'reprocess_source'
-                        )
-                    )
+                <div
+                    class="
+                        bd-source-upload
+                        {{
+                            $latestFile
+                                ? 'has-file'
+                                : ''
+                        }}
+                    "
+                    data-source-upload
                 >
 
-                <span>
-                    Reprocess PDF existing dan
-                    rebuild seluruh chunks.
-                </span>
-            </label>
-        @endif
-
-        <div class="admin-form-section">
-            <span class="admin-kicker">
-                ACCESS & INDEX STATE
-            </span>
-
-            <h2>
-                Availability
-            </h2>
-        </div>
-
-        <div class="admin-form-grid">
-
-            <label>
-                Visibility
-
-                <select
-                    name="visibility"
-                    required
-                >
-                    <option
-                        value="public"
-                        @selected(
-                            old(
-                                'visibility',
-                                $document
-                                    ->visibility
-                                ?: 'restricted'
-                            )
-                            === 'public'
-                        )
+                    <div
+                        class="bd-source-paper-stage"
+                        aria-hidden="true"
                     >
-                        Eligible for retrieval
-                    </option>
 
-                    <option
-                        value="restricted"
-                        @selected(
-                            old(
-                                'visibility',
-                                $document
-                                    ->visibility
-                                ?: 'restricted'
-                            )
-                            === 'restricted'
-                        )
-                    >
-                        Restricted
-                    </option>
-                </select>
-            </label>
+                        <div
+                            class="bd-source-paper-orbit"
+                        ></div>
 
-            <label>
-                Status
 
-                <select
-                    name="status"
-                    required
-                >
-                    @foreach(
-                        [
-                            'draft',
-                            'processing',
-                            'ready',
-                            'published',
-                            'archived',
-                        ]
-                        as $status
-                    )
-                        <option
-                            value="{{ $status }}"
-                            @selected(
-                                old(
-                                    'status',
-                                    $document->status
-                                        ?: 'draft'
-                                )
-                                === $status
-                            )
+                        <article
+                            class="bd-source-paper"
+                            data-pdf-paper
                         >
-                            {{ ucfirst($status) }}
-                        </option>
-                    @endforeach
-                </select>
 
-                <small class="field-help">
-                    Hanya
-                    <strong>Published + Eligible for retrieval</strong>
-                    yang dapat dipakai oleh Research Workspace.
-                </small>
-            </label>
+                            <span
+                                class="bd-source-paper__scan"
+                            ></span>
+
+
+                            <div class="bd-source-paper__top">
+
+                                <span
+                                    class="
+                                        bd-source-paper__badge
+                                    "
+                                >
+                                    PDF
+                                </span>
+
+                                <span
+                                    class="
+                                        bd-source-paper__mark
+                                    "
+                                >
+                                    BACA
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    bd-source-paper__content
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        bd-source-paper__eyebrow
+                                    "
+                                >
+                                    CURATED SOURCE
+                                </span>
+
+                                <h3
+                                    class="
+                                        bd-source-paper__title
+                                    "
+                                    data-pdf-preview-title
+                                >
+                                    {{ $previewTitle }}
+                                </h3>
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    bd-source-paper__footer
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        bd-source-paper__file
+                                    "
+                                    data-pdf-preview-file
+                                >
+                                    {{
+                                        $currentFileName
+                                            ?: 'Belum ada PDF'
+                                    }}
+                                </span>
+
+                                <span
+                                    class="
+                                        bd-source-paper__meta
+                                    "
+                                    data-pdf-preview-meta
+                                >
+                                    @if($latestFile)
+
+                                        {{
+                                            $currentFileMb
+                                        }}
+                                        MB · tersimpan
+
+                                    @else
+
+                                        Pilih file untuk preview
+
+                                    @endif
+                                </span>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            bd-source-upload__control
+                        "
+                    >
+
+                        <label
+                            class="
+                                bd-admin-file
+                                bd-source-dropzone
+                            "
+                            for="source-file"
+                            data-source-dropzone
+                        >
+
+                            <input
+                                id="source-file"
+                                type="file"
+                                name="source_file"
+                                accept="
+                                    application/pdf,
+                                    .pdf
+                                "
+                                data-file-input
+                                data-file-target="#source-file-name"
+                                data-source-pdf-input
+                                @required(! $editing)
+                            >
+
+
+                            <span
+                                class="
+                                    bd-admin-file__copy
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        bd-source-dropzone__icon
+                                    "
+                                    aria-hidden="true"
+                                >
+                                    PDF
+                                </span>
+
+
+                                <strong>
+                                    {{
+                                        $latestFile
+                                            ? 'Ganti PDF'
+                                            : 'Pilih PDF'
+                                    }}
+                                </strong>
+
+
+                                <span>
+                                    Maksimum
+                                    {{ $maxMb }}
+                                    MB · PDF only
+                                </span>
+
+
+                                <small id="source-file-name">
+
+                                    @if($latestFile)
+
+                                        {{
+                                            $currentFileName
+                                        }}
+                                        ·
+                                        {{
+                                            $currentFileMb
+                                        }}
+                                        MB
+
+                                    @else
+
+                                        Belum ada PDF dipilih
+
+                                    @endif
+
+                                </small>
+
+
+                                <span
+                                    class="
+                                        bd-source-dropzone__hint
+                                    "
+                                >
+                                    Klik area ini atau
+                                    drag & drop file PDF.
+                                </span>
+
+                            </span>
+
+                        </label>
+
+
+                        @error('source_file')
+
+                            <small
+                                class="
+                                    admin-danger-text
+                                "
+                            >
+                                {{ $message }}
+                            </small>
+
+                        @enderror
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section class="bd-admin-form__section">
+
+                <div
+                    class="
+                        bd-admin-form__section-head
+                    "
+                >
+
+                    <strong>
+                        Aksi Source
+                    </strong>
+
+                    <p>
+                        Simpan tidak mengubah lifecycle.
+                        Publish hanya berhasil jika source
+                        sudah memiliki chunks.
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="
+                        bd-admin-inline-actions
+                    "
+                    style="
+                        justify-content:
+                        flex-start;
+                    "
+                >
+
+                    <button
+                        class="
+                            bd-admin-button
+                            bd-admin-button--primary
+                        "
+                        type="submit"
+                        name="action"
+                        value="save"
+                        @disabled(
+                            $categories->isEmpty()
+                        )
+                    >
+                        {{
+                            $editing
+                                ? 'Simpan Perubahan'
+                                : 'Simpan & Proses'
+                        }}
+                    </button>
+
+
+                    @if($editing)
+
+                        <button
+                            class="
+                                bd-admin-button
+                                bd-admin-button--ghost
+                            "
+                            type="submit"
+                            name="action"
+                            value="reprocess"
+                        >
+                            Proses Ulang
+                        </button>
+
+
+                        @if(
+                            $document->status
+                            ===
+                            'published'
+                        )
+
+                            <button
+                                class="
+                                    bd-admin-button
+                                    bd-admin-button--ghost
+                                "
+                                type="submit"
+                                name="action"
+                                value="unpublish"
+                            >
+                                Unpublish
+                            </button>
+
+                        @else
+
+                            <button
+                                class="
+                                    bd-admin-button
+                                    bd-admin-button--coral
+                                "
+                                type="submit"
+                                name="action"
+                                value="publish"
+                                @disabled(
+                                    $chunkCount < 1
+                                )
+                            >
+                                Publish
+                            </button>
+
+                        @endif
+
+
+                        <button
+                            class="
+                                bd-admin-button
+                                bd-admin-button--danger
+                            "
+                            type="submit"
+                            name="action"
+                            value="archive"
+                            onclick="
+                                return confirm(
+                                    'Archive source ini? Source tidak lagi digunakan sebagai source aktif.'
+                                )
+                            "
+                        >
+                            Archive
+                        </button>
+
+                    @endif
+
+                </div>
+
+            </section>
 
         </div>
 
-        <div class="admin-info-banner">
-            <span class="quick-icon">
-                i
-            </span>
 
-            <div>
+        <aside class="bd-admin-form__aside">
+
+            <section>
+
                 <strong>
-                    Flow ingestion
+                    Source State
                 </strong>
 
                 <p>
-                    PDF → private storage →
-                    text extraction →
-                    chunking →
-                    ready/published →
-                    retrieval.
+
+                    <span
+                        class="
+                            bd-admin-status
+                            bd-admin-status--{{
+                                $document->status
+                                    ?: 'draft'
+                            }}
+                        "
+                    >
+                        {{
+                            ucfirst(
+                                $document->status
+                                    ?: 'draft'
+                            )
+                        }}
+                    </span>
+
                 </p>
-            </div>
-        </div>
 
-        <div class="admin-form-footer">
+            </section>
 
-            <button
-                class="btn btn-primary"
-                type="submit"
-            >
-                {{
-                    $document->exists
-                        ? 'Save & Process'
-                        : 'Add & Process Source'
-                }}
-            </button>
 
-            <a
-                class="btn btn-secondary"
-                href="{{
-                    route(
-                        'admin.library.index'
-                    )
-                }}"
-            >
-                Cancel
-            </a>
+            <section>
 
-        </div>
+                <strong>
+                    Processing
+                </strong>
+
+
+                <div class="bd-admin-process">
+
+                    <div
+                        class="
+                            bd-admin-process__item
+                            {{
+                                $latestFile
+                                    ? 'is-done'
+                                    : ''
+                            }}
+                        "
+                    >
+
+                        <i>
+                            {{
+                                $latestFile
+                                    ? '✓'
+                                    : '1'
+                            }}
+                        </i>
+
+                        <span>
+                            PDF tersimpan
+                        </span>
+
+                        <strong>
+                            {{
+                                $latestFile
+                                    ? 'Ready'
+                                    : 'Waiting'
+                            }}
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            bd-admin-process__item
+                            {{
+                                $chunkCount > 0
+                                    ? 'is-done'
+                                    : ''
+                            }}
+                        "
+                    >
+
+                        <i>
+                            {{
+                                $chunkCount > 0
+                                    ? '✓'
+                                    : '2'
+                            }}
+                        </i>
+
+                        <span>
+                            Chunks
+                        </span>
+
+                        <strong>
+                            {{ $chunkCount }}
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            bd-admin-process__item
+                            {{
+                                $document->status === 'published'
+                                &&
+                                $chunkCount > 0
+                                    ? 'is-done'
+                                    : ''
+                            }}
+                        "
+                    >
+
+                        <i>
+                            {{
+                                $document->status === 'published'
+                                &&
+                                $chunkCount > 0
+                                    ? '✓'
+                                    : '3'
+                            }}
+                        </i>
+
+                        <span>
+                            AI-ready
+                        </span>
+
+                        <strong>
+                            {{
+                                $document->status === 'published'
+                                &&
+                                $chunkCount > 0
+                                    ? 'Yes'
+                                    : 'No'
+                            }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section>
+
+                <strong>
+                    Lifecycle
+                </strong>
+
+                <p>
+                    Draft → Ready → Published.
+                    Archive dipakai sebagai pengganti
+                    hard-delete supaya provenance tetap aman.
+                </p>
+
+            </section>
+
+
+            @if($editing)
+
+                <section>
+
+                    <strong>
+                        Source ID
+                    </strong>
+
+                    <p>
+                        SRC-{{
+                            str_pad(
+                                $document->id,
+                                4,
+                                '0',
+                                STR_PAD_LEFT
+                            )
+                        }}
+                    </p>
+
+                </section>
+
+            @endif
+
+        </aside>
 
     </form>
 
 </section>
+
+
+<script>
+(() => {
+    const initSourcePdfPreview = () => {
+        const wrapper =
+            document.querySelector(
+                '[data-source-upload]'
+            );
+
+        const input =
+            document.querySelector(
+                '[data-source-pdf-input]'
+            );
+
+        const titleInput =
+            document.querySelector(
+                '[data-source-title-input]'
+            );
+
+        const dropzone =
+            document.querySelector(
+                '[data-source-dropzone]'
+            );
+
+        const previewTitle =
+            document.querySelector(
+                '[data-pdf-preview-title]'
+            );
+
+        const previewFile =
+            document.querySelector(
+                '[data-pdf-preview-file]'
+            );
+
+        const previewMeta =
+            document.querySelector(
+                '[data-pdf-preview-meta]'
+            );
+
+        const fileText =
+            document.querySelector(
+                '#source-file-name'
+            );
+
+        if (
+            !wrapper
+            || !input
+            || !titleInput
+            || !previewTitle
+        ) {
+            return;
+        }
+
+
+        let currentFileName =
+            previewFile
+                ?.textContent
+                ?.trim()
+            || '';
+
+
+        const cleanFileName = (name) => {
+            return String(name || '')
+                .replace(
+                    /\.pdf$/i,
+                    ''
+                )
+                .replace(
+                    /[_-]+/g,
+                    ' '
+                )
+                .replace(
+                    /\s+/g,
+                    ' '
+                )
+                .trim();
+        };
+
+
+        const titleForPreview = () => {
+            const typedTitle =
+                titleInput.value.trim();
+
+            if (typedTitle) {
+                return typedTitle;
+            }
+
+            const fromFile =
+                cleanFileName(
+                    currentFileName
+                );
+
+            if (
+                fromFile
+                &&
+                fromFile !==
+                    'Belum ada PDF'
+            ) {
+                return fromFile;
+            }
+
+            return 'Judul Source';
+        };
+
+
+        const syncTitle = () => {
+            previewTitle.textContent =
+                titleForPreview();
+        };
+
+
+        const animateReceived = () => {
+            wrapper.classList.remove(
+                'is-receiving'
+            );
+
+            void wrapper.offsetWidth;
+
+            wrapper.classList.add(
+                'is-receiving'
+            );
+
+            window.setTimeout(
+                () => {
+                    wrapper.classList.remove(
+                        'is-receiving'
+                    );
+                },
+                1000
+            );
+        };
+
+
+        const applyFile = (
+            file,
+            updateInput = false
+        ) => {
+            if (!file) {
+                return;
+            }
+
+
+            const isPdf =
+                file.type ===
+                    'application/pdf'
+                ||
+                /\.pdf$/i.test(
+                    file.name
+                );
+
+
+            if (!isPdf) {
+                window.alert(
+                    'File harus berupa PDF.'
+                );
+
+                return;
+            }
+
+
+            if (updateInput) {
+                try {
+                    const transfer =
+                        new DataTransfer();
+
+                    transfer.items.add(
+                        file
+                    );
+
+                    input.files =
+                        transfer.files;
+                } catch (error) {
+                    /*
+                     * Browser tertentu dapat
+                     * membatasi assignment
+                     * FileList.
+                     */
+                }
+            }
+
+
+            currentFileName =
+                file.name;
+
+
+            const cleanTitle =
+                cleanFileName(
+                    file.name
+                );
+
+
+            if (
+                !titleInput.value.trim()
+                &&
+                cleanTitle
+            ) {
+                titleInput.value =
+                    cleanTitle;
+            }
+
+
+            const sizeMb =
+                (
+                    file.size
+                    / 1024
+                    / 1024
+                ).toFixed(2);
+
+
+            if (previewFile) {
+                previewFile.textContent =
+                    file.name;
+            }
+
+
+            if (previewMeta) {
+                previewMeta.textContent =
+                    `${sizeMb} MB · PDF dipilih`;
+            }
+
+
+            if (fileText) {
+                fileText.textContent =
+                    `${file.name} · ${sizeMb} MB`;
+            }
+
+
+            wrapper.classList.add(
+                'has-file'
+            );
+
+
+            syncTitle();
+
+            animateReceived();
+        };
+
+
+        titleInput.addEventListener(
+            'input',
+            syncTitle
+        );
+
+
+        input.addEventListener(
+            'change',
+            () => {
+                const file =
+                    input.files?.[0];
+
+                if (!file) {
+                    syncTitle();
+
+                    return;
+                }
+
+                applyFile(file);
+            }
+        );
+
+
+        if (dropzone) {
+            [
+                'dragenter',
+                'dragover',
+            ].forEach(
+                (eventName) => {
+                    dropzone.addEventListener(
+                        eventName,
+                        (event) => {
+                            event.preventDefault();
+
+                            dropzone.classList.add(
+                                'is-dragging'
+                            );
+                        }
+                    );
+                }
+            );
+
+
+            [
+                'dragleave',
+                'drop',
+            ].forEach(
+                (eventName) => {
+                    dropzone.addEventListener(
+                        eventName,
+                        () => {
+                            dropzone.classList.remove(
+                                'is-dragging'
+                            );
+                        }
+                    );
+                }
+            );
+
+
+            dropzone.addEventListener(
+                'drop',
+                (event) => {
+                    event.preventDefault();
+
+                    const files =
+                        Array.from(
+                            event.dataTransfer
+                                ?.files
+                                || []
+                        );
+
+                    const pdf =
+                        files.find(
+                            (file) =>
+                                file.type ===
+                                    'application/pdf'
+                                ||
+                                /\.pdf$/i.test(
+                                    file.name
+                                )
+                        );
+
+                    if (!pdf) {
+                        window.alert(
+                            'Drag file PDF ke area upload.'
+                        );
+
+                        return;
+                    }
+
+                    applyFile(
+                        pdf,
+                        true
+                    );
+                }
+            );
+        }
+
+
+        syncTitle();
+    };
+
+
+    if (
+        document.readyState ===
+        'loading'
+    ) {
+        document.addEventListener(
+            'DOMContentLoaded',
+            initSourcePdfPreview,
+            {
+                once: true
+            }
+        );
+    } else {
+        initSourcePdfPreview();
+    }
+})();
+</script>
 
 @endsection

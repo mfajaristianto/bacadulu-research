@@ -1,787 +1,109 @@
 @extends('layouts.admin')
 
-@section(
-    'title',
-    'AI Run #'.$run->id.' — Admin'
-)
+@section('title', 'AI Run #'.$run->id)
+@section('page_title', 'AI Runs')
 
 @section('content')
-
 @php
-    $validCitations =
-        $run
-            ->citations
-            ->where(
-                'is_valid',
-                true
-            );
-
-    $invalidCitations =
-        $run
-            ->citations
-            ->where(
-                'is_valid',
-                false
-            );
-
-    $primaryResult =
-        $run
-            ->results
-            ->firstWhere(
-                'result_type',
-                'primary'
-            );
+    $validCitations = $run->citations->where('is_valid', true);
+    $invalidCitations = $run->citations->where('is_valid', false);
+    $primaryResult = $run->results->firstWhere('result_type', 'primary');
 @endphp
 
 <section class="admin-page">
-
-    <div
-        class="admin-hero compact"
-        data-admin-reveal
-    >
-        <div>
-            <p class="eyebrow">
-                ADMIN / AI RUN AUDIT
-            </p>
-
-            <h1>
-                Run #{{ $run->id }}
-            </h1>
-
-            <p class="admin-run-uuid">
-                {{ $run->uuid }}
-            </p>
+    <header class="bd-admin-page-head">
+        <div class="bd-admin-page-head__copy">
+            <p class="bd-admin-kicker">AI CONTROL / RUN TRACE</p>
+            <h1>RUN-{{ str_pad($run->id, 5, '0', STR_PAD_LEFT) }}</h1>
+            <p>{{ $run->uuid }}</p>
         </div>
+        <div class="bd-admin-page-head__actions"><a href="{{ route('admin.ai-runs.index') }}" class="bd-admin-button bd-admin-button--ghost">← AI Runs</a></div>
+    </header>
 
-        <div class="admin-hero-actions">
-
-            <a
-                href="{{
-                    route(
-                        'admin.ai-runs.index'
-                    )
-                }}"
-                class="btn btn-secondary"
-            >
-                ← AI Runs
-            </a>
-
-        </div>
+    <div class="bd-admin-panels">
+        <article class="bd-admin-panel"><small>STATUS</small><strong>{{ str($run->status)->replace('_',' ')->title() }}</strong><p>{{ $durationMs !== null ? number_format($durationMs / 1000, 2).' sec' : 'Execution timing incomplete' }}</p></article>
+        <article class="bd-admin-panel"><small>RETRIEVAL</small><strong>{{ $run->retrievals->count() }}</strong><p>{{ $run->sources->count() }} contributing sources.</p></article>
+        <article class="bd-admin-panel"><small>CITATIONS</small><strong>{{ $validCitations->count() }}</strong><p>{{ $invalidCitations->count() }} invalid citation.</p></article>
     </div>
 
-    <div class="admin-run-summary">
-
-        <article class="admin-stat-card">
-
-            <span>
-                STATUS
-            </span>
-
-            <strong class="admin-stat-status">
-                {{
-                    str(
-                        $run->status
-                    )
-                        ->replace(
-                            '_',
-                            ' '
-                        )
-                        ->title()
-                }}
-            </strong>
-
-            <small>
-                current execution state
-            </small>
-
-        </article>
-
-        <article class="admin-stat-card">
-
-            <span>
-                RETRIEVAL
-            </span>
-
-            <strong>
-                {{
-                    $run
-                        ->retrievals
-                        ->count()
-                }}
-            </strong>
-
-            <small>
-                evidence chunks selected
-            </small>
-
-        </article>
-
-        <article class="admin-stat-card">
-
-            <span>
-                SOURCES
-            </span>
-
-            <strong>
-                {{
-                    $run
-                        ->sources
-                        ->count()
-                }}
-            </strong>
-
-            <small>
-                documents contributing evidence
-            </small>
-
-        </article>
-
-        <article
-            class="
-                admin-stat-card
-                {{
-                    $invalidCitations
-                        ->isEmpty()
-                    ? 'admin-stat-accent'
-                    : ''
-                }}
-            "
-        >
-
-            <span>
-                CITATIONS
-            </span>
-
-            <strong>
-                {{
-                    $validCitations
-                        ->count()
-                }}
-            </strong>
-
-            <small>
-                {{
-                    $invalidCitations
-                        ->count()
-                }}
-                invalid citation
-            </small>
-
-        </article>
-
-    </div>
-
-    <div class="admin-run-grid">
-
-        <section
-            class="admin-panel-card"
-            data-admin-reveal
-        >
-
-            <div class="admin-panel-head">
-                <div>
-                    <span class="admin-kicker">
-                        EXECUTION
-                    </span>
-
-                    <h2>
-                        Run metadata
-                    </h2>
-                </div>
-            </div>
-
-            <dl class="admin-audit-list">
-
-                <div>
-                    <dt>User</dt>
-
-                    <dd>
-                        {{
-                            $run
-                                ->user
-                                ?->name
-                            ?: '—'
-                        }}
-
-                        <small>
-                            {{
-                                $run
-                                    ->user
-                                    ?->email
-                                ?: ''
-                            }}
-                        </small>
-                    </dd>
-                </div>
-
-                <div>
-                    <dt>Conversation</dt>
-
-                    <dd>
-                        {{
-                            $conversation
-                                ?->title
-                            ?: '—'
-                        }}
-                    </dd>
-                </div>
-
-                <div>
-                    <dt>Research Tool</dt>
-
-                    <dd>
-                        {{
-                            $run
-                                ->aiTool
-                                ?->name
-                            ?: '—'
-                        }}
-
-                        <small>
-                            {{
-                                $run
-                                    ->aiTool
-                                    ?->code
-                                ?: ''
-                            }}
-                        </small>
-                    </dd>
-                </div>
-
-                <div>
-                    <dt>Prompt</dt>
-
-                    <dd>
-                        {{
-                            $run
-                                ->promptTemplate
-                                ?->name
-                            ?: '—'
-                        }}
-
-                        <small>
-                            Version
-                            {{
-                                $run
-                                    ->promptTemplate
-                                    ?->version
-                                ?: '—'
-                            }}
-                        </small>
-                    </dd>
-                </div>
-
-                <div>
-                    <dt>Provider</dt>
-
-                    <dd>
-                        {{
-                            $run
-                                ->model_provider
-                            ?: '—'
-                        }}
-
-                        <small>
-                            {{
-                                $run
-                                    ->model_name
-                                ?: 'Model not recorded'
-                            }}
-                        </small>
-                    </dd>
-                </div>
-
-                <div>
-                    <dt>Started</dt>
-
-                    <dd>
-                        {{
-                            $run
-                                ->started_at
-                                ?->format(
-                                    'd M Y · H:i:s'
-                                )
-                            ?: '—'
-                        }}
-                    </dd>
-                </div>
-
-                <div>
-                    <dt>Finished</dt>
-
-                    <dd>
-                        {{
-                            $run
-                                ->finished_at
-                                ?->format(
-                                    'd M Y · H:i:s'
-                                )
-                            ?: '—'
-                        }}
-                    </dd>
-                </div>
-
-                <div>
-                    <dt>Duration</dt>
-
-                    <dd>
-                        @if(
-                            $durationMs
-                            !== null
-                        )
-                            {{
-                                number_format(
-                                    $durationMs
-                                    / 1000,
-                                    2
-                                )
-                            }}
-                            seconds
-                        @else
-                            —
-                        @endif
-                    </dd>
-                </div>
-
-            </dl>
-
-        </section>
-
-        <section
-            class="admin-panel-card"
-            data-admin-reveal
-        >
-
-            <div class="admin-panel-head">
-                <div>
-                    <span class="admin-kicker">
-                        REQUEST
-                    </span>
-
-                    <h2>
-                        User parameters
-                    </h2>
-                </div>
-            </div>
-
-            <div class="admin-run-question">
-
-                <span>
-                    USER REQUEST
-                </span>
-
-                <p>
-                    {{
-                        data_get(
-                            $parameters,
-                            'user_message',
-                            '—'
-                        )
-                    }}
-                </p>
-
-            </div>
-
-            <dl class="admin-audit-list compact">
-
-                <div>
-                    <dt>
-                        Category
-                    </dt>
-
-                    <dd>
-                        {{
-                            data_get(
-                                $parameters,
-                                'category',
-                                '—'
-                            )
-                        }}
-                    </dd>
-                </div>
-
-                <div>
-                    <dt>
-                        Candidate sources
-                    </dt>
-
-                    <dd>
-                        {{
-                            collect(
-                                data_get(
-                                    $parameters,
-                                    'candidate_document_ids',
-                                    data_get(
-                                        $parameters,
-                                        'document_ids',
-                                        []
-                                    )
-                                )
-                            )->count()
-                        }}
-                    </dd>
-                </div>
-
-                <div>
-                    <dt>
-                        Retrieved sources
-                    </dt>
-
-                    <dd>
-                        {{
-                            collect(
-                                data_get(
-                                    $parameters,
-                                    'retrieved_document_ids',
-                                    []
-                                )
-                            )->count()
-                        }}
-                    </dd>
-                </div>
-
-                <div>
-                    <dt>
-                        Retrieved chunks
-                    </dt>
-
-                    <dd>
-                        {{
-                            collect(
-                                data_get(
-                                    $parameters,
-                                    'retrieved_chunk_ids',
-                                    []
-                                )
-                            )->count()
-                        }}
-                    </dd>
-                </div>
-
-            </dl>
-
-        </section>
-
-    </div>
-
-    @if($run->error_message)
-
-        <section
-            class="
-                admin-panel-card
-                admin-run-error
-            "
-            data-admin-reveal
-        >
-            <span class="admin-kicker">
-                ERROR
-            </span>
-
-            <h2>
-                Execution error
-            </h2>
-
-            <pre>{{
-                $run->error_message
-            }}</pre>
-        </section>
-
-    @endif
-
-    <section
-        class="admin-panel-card"
-        data-admin-reveal
-    >
-
-        <div class="admin-panel-head">
-            <div>
-                <span class="admin-kicker">
-                    RETRIEVAL
-                </span>
-
-                <h2>
-                    Retrieved evidence
-                </h2>
-            </div>
-
-            <span class="admin-panel-count">
-                {{
-                    $run
-                        ->retrievals
-                        ->count()
-                }}
-                chunks
-            </span>
+    <section class="bd-admin-section">
+        <div class="bd-admin-section__head"><div><h2>Execution Trace</h2><p>Urutan provenance run ini.</p></div></div>
+        <div class="bd-admin-trace">
+            <article><span>01</span><div><strong>Request</strong><small>{{ $run->user?->name ?: 'Unknown user' }} · {{ $conversation?->title ?: 'No conversation title' }}</small></div></article>
+            <article><span>02</span><div><strong>Prompt Version</strong><small>{{ $run->promptTemplate ? $run->promptTemplate->name.' · v'.$run->promptTemplate->version : 'Not recorded' }}</small></div></article>
+            <article><span>03</span><div><strong>Retrieval</strong><small>{{ $run->retrievals->count() }} ranked chunks selected</small></div></article>
+            <article><span>04</span><div><strong>Evidence</strong><small>{{ $run->sources->count() }} source documents contributed</small></div></article>
+            <article><span>05</span><div><strong>Provider</strong><small>{{ strtoupper($run->model_provider ?: '—') }} · {{ $run->model_name ?: '—' }}</small></div></article>
+            <article><span>06</span><div><strong>Citation Validation</strong><small>{{ $validCitations->count() }} valid · {{ $invalidCitations->count() }} invalid</small></div></article>
+            <article><span>07</span><div><strong>Result</strong><small>{{ $primaryResult ? 'Primary result stored' : 'No primary result stored' }}</small></div></article>
         </div>
-
-        <div class="admin-evidence-list">
-
-            @forelse(
-                $run
-                    ->retrievals
-                as $retrieval
-            )
-
-                <article class="admin-evidence-item">
-
-                    <div class="admin-evidence-rank">
-
-                        <strong>
-                            {{
-                                $retrieval
-                                    ->citation_key
-                            }}
-                        </strong>
-
-                        <small>
-                            #{{ $retrieval->rank_no }}
-                        </small>
-
-                    </div>
-
-                    <div class="admin-evidence-copy">
-
-                        <div class="admin-evidence-meta">
-
-                            <strong>
-                                {{
-                                    $retrieval
-                                        ->document
-                                        ?->title
-                                    ?: 'Unknown Source'
-                                }}
-                            </strong>
-
-                            <span>
-                                score
-                                {{
-                                    number_format(
-                                        (float)
-                                            $retrieval
-                                                ->score,
-                                        4
-                                    )
-                                }}
-                            </span>
-
-                            <span>
-                                {{
-                                    $retrieval
-                                        ->retrieval_type
-                                }}
-                            </span>
-
-                        </div>
-
-                        <p>
-                            {{
-                                $retrieval
-                                    ->excerpt
-                            }}
-                        </p>
-
-                        <small>
-                            Document ID:
-                            {{
-                                $retrieval
-                                    ->document_id
-                            }}
-
-                            · Chunk ID:
-                            {{
-                                $retrieval
-                                    ->document_chunk_id
-                            }}
-                        </small>
-
-                    </div>
-
-                </article>
-
-            @empty
-
-                <div class="admin-empty">
-                    Run ini tidak memiliki retrieval record.
-                </div>
-
-            @endforelse
-
-        </div>
-
     </section>
 
-    <section
-        class="admin-panel-card"
-        data-admin-reveal
-    >
-
-        <div class="admin-panel-head">
-
-            <div>
-                <span class="admin-kicker">
-                    CITATION VALIDATION
-                </span>
-
-                <h2>
-                    Citation audit
-                </h2>
+    <section class="bd-admin-section">
+        <div class="bd-admin-two-column">
+            <div class="bd-admin-detail-list">
+                <div><span>User</span><strong>{{ $run->user?->name ?: '—' }}</strong></div>
+                <div><span>Email</span><strong>{{ $run->user?->email ?: '—' }}</strong></div>
+                <div><span>Research Tool</span><strong>{{ $run->aiTool?->name ?: '—' }}</strong></div>
+                <div><span>Prompt</span><strong>{{ $run->promptTemplate ? $run->promptTemplate->name.' · v'.$run->promptTemplate->version : '—' }}</strong></div>
+                <div><span>Provider</span><strong>{{ strtoupper($run->model_provider ?: '—') }}</strong></div>
+                <div><span>Model</span><strong>{{ $run->model_name ?: '—' }}</strong></div>
+                <div><span>Started</span><strong>{{ optional($run->started_at)->format('d M Y · H:i:s') ?: '—' }}</strong></div>
+                <div><span>Finished</span><strong>{{ optional($run->finished_at)->format('d M Y · H:i:s') ?: '—' }}</strong></div>
             </div>
 
-            <span class="admin-panel-count">
-                {{
-                    $validCitations
-                        ->count()
-                }}
-                valid
-                /
-                {{
-                    $invalidCitations
-                        ->count()
-                }}
-                invalid
-            </span>
-
+            <aside class="bd-admin-form__aside">
+                <section><strong>Parameters</strong>@forelse($parameters as $key => $value)<p><code>{{ $key }}</code>: {{ is_scalar($value) ? $value : json_encode($value) }}</p>@empty<p>No user parameters recorded.</p>@endforelse</section>
+                @if($run->error_message)<section><strong>Error</strong><p class="admin-danger-text">{{ $run->error_message }}</p></section>@endif
+            </aside>
         </div>
-
-        <div class="admin-citation-audit">
-
-            @forelse(
-                $run
-                    ->citations
-                as $citation
-            )
-
-                <article
-                    class="
-                        admin-citation-audit__item
-                        {{
-                            $citation
-                                ->is_valid
-                            ? 'is-valid'
-                            : 'is-invalid'
-                        }}
-                    "
-                >
-
-                    <div class="admin-citation-audit__head">
-
-                        <strong>
-                            [{{
-                                $citation
-                                    ->citation_key
-                            }}]
-                        </strong>
-
-                        <span>
-                            {{
-                                $citation
-                                    ->is_valid
-                                ? 'VALID'
-                                : 'INVALID'
-                            }}
-                        </span>
-
-                    </div>
-
-                    @if(
-                        $citation
-                            ->claim_label
-                    )
-
-                        <h3>
-                            {{
-                                $citation
-                                    ->claim_label
-                            }}
-                        </h3>
-
-                    @endif
-
-                    @if(
-                        $citation
-                            ->quote_snippet
-                    )
-
-                        <blockquote>
-                            “{{
-                                $citation
-                                    ->quote_snippet
-                            }}”
-                        </blockquote>
-
-                    @endif
-
-                    <div class="admin-citation-audit__meta">
-
-                        <span>
-                            {{
-                                $citation
-                                    ->document
-                                    ?->title
-                                ?: 'No source'
-                            }}
-                        </span>
-
-                        @if(
-                            $citation
-                                ->validation_message
-                        )
-                            <span>
-                                {{
-                                    $citation
-                                        ->validation_message
-                                }}
-                            </span>
-                        @endif
-
-                    </div>
-
-                </article>
-
-            @empty
-
-                <div class="admin-empty">
-                    Belum ada citation validation record.
-                </div>
-
-            @endforelse
-
-        </div>
-
     </section>
 
-    @if($primaryResult)
+    <section class="bd-admin-section">
+        <div class="bd-admin-section__head"><div><h2>Retrieved Evidence</h2><p>Ranked evidence chunks used by the run.</p></div></div>
+        <div class="bd-admin-table-wrap">
+            <table class="bd-admin-table">
+                <thead><tr><th>Rank</th><th>Source</th><th>Chunk</th><th>Score</th></tr></thead>
+                <tbody>
+                @forelse($run->retrievals as $retrieval)
+                    <tr>
+                        <td>#{{ $retrieval->rank_no }}</td>
+                        <td><div class="bd-admin-table__title"><strong>{{ $retrieval->document?->title ?: '—' }}</strong><small>SRC-{{ $retrieval->document_id }}</small></div></td>
+                        <td>{{ $retrieval->document_chunk_id ?: '—' }}</td>
+                        <td>{{ $retrieval->score !== null ? number_format((float) $retrieval->score, 4) : '—' }}</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="4">No retrieval evidence recorded.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-        <section
-            class="admin-panel-card"
-            data-admin-reveal
-        >
+    <section class="bd-admin-section">
+        <div class="bd-admin-section__head"><div><h2>Citations</h2><p>Validation result per citation key.</p></div></div>
+        <div class="bd-admin-table-wrap">
+            <table class="bd-admin-table">
+                <thead><tr><th>Key</th><th>Source</th><th>Chunk</th><th>Validation</th></tr></thead>
+                <tbody>
+                @forelse($run->citations as $citation)
+                    <tr>
+                        <td><code>{{ $citation->citation_key }}</code></td>
+                        <td>{{ $citation->document?->title ?: '—' }}</td>
+                        <td>{{ $citation->document_chunk_id ?: '—' }}</td>
+                        <td><span class="bd-admin-status bd-admin-status--{{ $citation->is_valid ? 'success' : 'failed' }}">{{ $citation->is_valid ? 'Valid' : 'Invalid' }}</span></td>
+                    </tr>
+                @empty
+                    <tr><td colspan="4">No citations recorded.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-            <div class="admin-panel-head">
-                <div>
-                    <span class="admin-kicker">
-                        FINAL OUTPUT
-                    </span>
-
-                    <h2>
-                        Primary result
-                    </h2>
-                </div>
-            </div>
-
-            <div class="admin-primary-result">
-                {!! nl2br(
-                    e(
-                        $primaryResult
-                            ->content
-                    )
-                ) !!}
-            </div>
-
-        </section>
-
-    @endif
-
+    <section class="bd-admin-section">
+        <div class="bd-admin-section__head"><div><h2>Primary Result</h2><p>Stored output from the provider pipeline.</p></div></div>
+        <div class="bd-admin-result"><pre>{{ $primaryResult?->content ?: 'No primary result stored.' }}</pre></div>
+    </section>
 </section>
-
 @endsection

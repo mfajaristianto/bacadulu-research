@@ -45,19 +45,15 @@ class AiRunController extends Controller
                     'retrievals',
                     'results',
 
-                    'citations as valid_citations_count'
-                        => fn ($query) =>
-                            $query->where(
-                                'is_valid',
-                                true
-                            ),
+                    'citations as valid_citations_count' => fn ($query) => $query->where(
+                        'is_valid',
+                        true
+                    ),
 
-                    'citations as invalid_citations_count'
-                        => fn ($query) =>
-                            $query->where(
-                                'is_valid',
-                                false
-                            ),
+                    'citations as invalid_citations_count' => fn ($query) => $query->where(
+                        'is_valid',
+                        false
+                    ),
                 ]);
 
         if (
@@ -105,28 +101,26 @@ class AiRunController extends Controller
                         )
                         ->orWhereHas(
                             'aiTool',
-                            fn ($tool) =>
-                                $tool
-                                    ->where(
-                                        'name',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'code',
-                                        'like',
-                                        "%{$search}%"
-                                    )
+                            fn ($tool) => $tool
+                                ->where(
+                                    'name',
+                                    'like',
+                                    "%{$search}%"
+                                )
+                                ->orWhere(
+                                    'code',
+                                    'like',
+                                    "%{$search}%"
+                                )
                         )
                         ->orWhereHas(
                             'promptTemplate',
-                            fn ($prompt) =>
-                                $prompt
-                                    ->where(
-                                        'name',
-                                        'like',
-                                        "%{$search}%"
-                                    )
+                            fn ($prompt) => $prompt
+                                ->where(
+                                    'name',
+                                    'like',
+                                    "%{$search}%"
+                                )
                         );
                 }
             );
@@ -181,17 +175,14 @@ class AiRunController extends Controller
         return view(
             'admin.ai-runs.index',
             [
-                'runs'
-                    => $runs
-                        ->latest('id')
-                        ->paginate(20)
-                        ->withQueryString(),
+                'runs' => $runs
+                    ->latest('id')
+                    ->paginate(20)
+                    ->withQueryString(),
 
-                'providers'
-                    => $providers,
+                'providers' => $providers,
 
-                'filters'
-                    => $filters,
+                'filters' => $filters,
             ]
         );
     }
@@ -208,41 +199,33 @@ class AiRunController extends Controller
 
             'sources.category',
 
-            'retrievals'
-                => fn ($query) =>
-                    $query
-                        ->with([
-                            'document',
-                            'documentChunk',
-                        ])
-                        ->orderBy(
-                            'rank_no'
-                        ),
+            'retrievals' => fn ($query) => $query
+                ->with([
+                    'document',
+                    'documentChunk',
+                ])
+                ->orderBy(
+                    'rank_no'
+                ),
 
-            'citations'
-                => fn ($query) =>
-                    $query
-                        ->with([
-                            'document',
-                            'documentChunk',
-                        ])
-                        ->orderBy(
-                            'citation_key'
-                        ),
+            'citations' => fn ($query) => $query
+                ->with([
+                    'document',
+                    'documentChunk',
+                ])
+                ->orderBy(
+                    'citation_key'
+                ),
 
-            'results'
-                => fn ($query) =>
-                    $query
-                        ->orderBy(
-                            'id'
-                        ),
+            'results' => fn ($query) => $query
+                ->orderBy(
+                    'id'
+                ),
 
-            'messages'
-                => fn ($query) =>
-                    $query
-                        ->orderBy(
-                            'id'
-                        ),
+            'messages' => fn ($query) => $query
+                ->orderBy(
+                    'id'
+                ),
         ]);
 
         $conversation =
@@ -271,20 +254,16 @@ class AiRunController extends Controller
         return view(
             'admin.ai-runs.show',
             [
-                'run'
-                    => $aiRun,
+                'run' => $aiRun,
 
-                'conversation'
-                    => $conversation,
+                'conversation' => $conversation,
 
-                'durationMs'
-                    => $durationMs,
+                'durationMs' => $durationMs,
 
-                'parameters'
-                    => is_array(
-                        $aiRun
-                            ->user_parameters_json
-                    )
+                'parameters' => is_array(
+                    $aiRun
+                        ->user_parameters_json
+                )
                         ? $aiRun
                             ->user_parameters_json
                         : [],

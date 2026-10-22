@@ -16,14 +16,11 @@ Route::middleware([
     'verified.if.required',
     'profile.complete',
 ])->group(function (): void {
+
     /*
     |--------------------------------------------------------------------------
     | Research Output Presentation
     |--------------------------------------------------------------------------
-    |
-    | Endpoint ini hanya mengirim presentation metadata
-    | milik user sendiri.
-    |
     */
 
     Route::get(
@@ -54,11 +51,23 @@ Route::middleware([
             'saved.presentation'
         );
 
+
     /*
     |--------------------------------------------------------------------------
-    | Document Engine
+    | Documents
     |--------------------------------------------------------------------------
     */
+
+    Route::get(
+        '/documents',
+        [
+            DocumentGenerationController::class,
+            'index',
+        ]
+    )->name(
+        'documents.index'
+    );
+
 
     Route::get(
         '/documents/create',
@@ -69,6 +78,13 @@ Route::middleware([
     )->name(
         'documents.create'
     );
+
+
+    /*
+     * Membuat draft awal.
+     *
+     * BELUM render PDF/DOCX.
+     */
 
     Route::post(
         '/documents',
@@ -84,6 +100,7 @@ Route::middleware([
             'documents.store'
         );
 
+
     Route::get(
         '/documents/{documentGeneration}',
         [
@@ -94,6 +111,11 @@ Route::middleware([
         'documents.show'
     );
 
+
+    /*
+     * Simpan edit manual.
+     */
+
     Route::patch(
         '/documents/{documentGeneration}',
         [
@@ -102,11 +124,68 @@ Route::middleware([
         ]
     )
         ->middleware(
-            'throttle:15,1'
+            'throttle:30,1'
         )
         ->name(
             'documents.update'
         );
+
+
+    /*
+     * Cetak final.
+     *
+     * Baru endpoint ini membuat
+     * PDF atau DOCX.
+     */
+
+    Route::post(
+        '/documents/{documentGeneration}/render',
+        [
+            DocumentGenerationController::class,
+            'render',
+        ]
+    )
+        ->middleware(
+            'throttle:10,1'
+        )
+        ->name(
+            'documents.render'
+        );
+
+
+    /*
+     * PDF inline browser preview.
+     */
+
+    Route::get(
+        '/documents/{documentGeneration}/preview',
+        [
+            DocumentGenerationController::class,
+            'preview',
+        ]
+    )
+        ->middleware(
+            'throttle:60,1'
+        )
+        ->name(
+            'documents.preview'
+        );
+
+
+    Route::delete(
+        '/documents/{documentGeneration}',
+        [
+            DocumentGenerationController::class,
+            'destroy',
+        ]
+    )
+        ->middleware(
+            'throttle:15,1'
+        )
+        ->name(
+            'documents.destroy'
+        );
+
 
     Route::get(
         '/documents/{documentGeneration}/download/{format}',

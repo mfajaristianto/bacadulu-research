@@ -3,6 +3,11 @@
 use App\Http\Controllers\Auth\GoogleController;
 use Illuminate\Support\Facades\Route;
 
+// Pause Google account-linking endpoints without deleting any OAuth code.
+if (! config('research.google_auth_enabled', false)) {
+    return;
+}
+
 /*
 |--------------------------------------------------------------------------
 | Google Account Linking
@@ -29,7 +34,6 @@ Route::middleware(
                 ->name(
                     'google.link.form'
                 );
-
 
             Route::post(
                 '/auth/google/link',

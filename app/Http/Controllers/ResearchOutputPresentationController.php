@@ -61,12 +61,10 @@ class ResearchOutputPresentationController extends Controller
                     route(
                         'workspace.conversation',
                         [
-                            'conversation'
-                                => $conversation,
+                            'conversation' => $conversation,
 
-                            'prompt'
-                                => $nextPrompt
-                                    ->id,
+                            'prompt' => $nextPrompt
+                                ->id,
                         ]
                     );
             } else {
@@ -74,9 +72,8 @@ class ResearchOutputPresentationController extends Controller
                     route(
                         'workspace',
                         [
-                            'prompt'
-                                => $nextPrompt
-                                    ->id,
+                            'prompt' => $nextPrompt
+                                ->id,
                         ]
                     );
             }
@@ -84,101 +81,82 @@ class ResearchOutputPresentationController extends Controller
 
         return response()
             ->json([
-                'run_id'
-                    => $aiRun->id,
+                'run_id' => $aiRun->id,
 
-                'status'
-                    => $aiRun->status,
+                'status' => $aiRun->status,
 
-                'completed'
-                    => $aiRun->status
+                'completed' => $aiRun->status
                         === 'completed',
 
-                'can_save'
-                    => $aiRun->status
+                'can_save' => $aiRun->status
                         === 'completed'
                         && $aiRun
                             ->primaryResult
                         !== null,
 
-                'can_generate'
-                    => $aiRun->status
+                'can_generate' => $aiRun->status
                         === 'completed'
                         && $aiRun
                             ->primaryResult
                         !== null,
 
-                'save'
-                    => [
-                        'saved'
-                            => $savedResult
-                                !== null,
+                'save' => [
+                    'saved' => $savedResult
+                            !== null,
 
-                        'saved_result_id'
-                            => $savedResult
-                                ?->id,
+                    'saved_result_id' => $savedResult
+                        ?->id,
 
-                        'url'
-                            => $savedResult
-                                ? route(
-                                    'saved.show',
-                                    $savedResult
-                                )
-                                : null,
-                    ],
+                    'url' => $savedResult
+                            ? route(
+                                'saved.show',
+                                $savedResult
+                            )
+                            : null,
+                ],
 
-                'generate_url'
-                    => $aiRun->status
+                'generate_url' => $aiRun->status
                         === 'completed'
                         ? route(
                             'documents.create',
                             [
-                                'ai_run'
-                                    => $aiRun
-                                        ->id,
+                                'ai_run' => $aiRun
+                                    ->id,
                             ]
                         )
                         : null,
 
-                'citations'
-                    => $this
-                        ->citationPayload(
-                            $aiRun
-                        ),
+                'citations' => $this
+                    ->citationPayload(
+                        $aiRun
+                    ),
 
-                'next_action'
-                    => $this
-                        ->nextAction(
-                            $aiRun
-                        ),
+                'next_action' => $this
+                    ->nextAction(
+                        $aiRun
+                    ),
 
-                'next_prompt'
-                    => $nextPrompt
+                'next_prompt' => $nextPrompt
                         ? [
-                            'id'
-                                => $nextPrompt
-                                    ->id,
+                            'id' => $nextPrompt
+                                ->id,
 
-                            'name'
-                                => $nextPrompt
-                                    ->display_name,
+                            'name' => $nextPrompt
+                                ->display_name,
 
-                            'description'
-                                => $nextPrompt
-                                    ->short_description
+                            'description' => $nextPrompt
+                                ->short_description
                                     ?: $nextPrompt
                                         ->aiTool
                                         ?->description
                                     ?: '',
 
-                            'tool'
-                                => $nextPrompt
-                                    ->aiTool
-                                    ?->name
+                            'tool' => $nextPrompt
+                                ->aiTool
+                                ?->name
                                     ?: 'Research Tool',
 
-                            'url'
-                                => $nextPromptUrl,
+                            'url' => $nextPromptUrl,
                         ]
                         : null,
             ]);
@@ -228,63 +206,54 @@ class ResearchOutputPresentationController extends Controller
                         DocumentGeneration $document
                     ): array {
                         return [
-                            'id'
-                                => $document
-                                    ->id,
+                            'id' => $document
+                                ->id,
 
-                            'title'
-                                => $document
-                                    ->title,
+                            'title' => $document
+                                ->title,
 
-                            'document_type'
-                                => $document
-                                    ->document_type,
+                            'document_type' => $document
+                                ->document_type,
 
-                            'citation_style'
-                                => $document
-                                    ->citation_style,
+                            'citation_style' => $document
+                                ->citation_style,
 
-                            'status'
-                                => $document
-                                    ->status,
+                            'status' => $document
+                                ->status,
 
-                            'generated_at'
-                                => $document
-                                    ->generated_at
-                                    ?->format(
-                                        'd M Y · H:i'
-                                    ),
-
-                            'show_url'
-                                => route(
-                                    'documents.show',
-                                    $document
+                            'generated_at' => $document
+                                ->generated_at
+                                ?->format(
+                                    'd M Y · H:i'
                                 ),
 
-                            'docx_url'
-                                => $document
-                                    ->status
-                                    === 'completed'
-                                    ? route(
-                                        'documents.download',
-                                        [
-                                            $document,
-                                            'docx',
-                                        ]
-                                    )
+                            'show_url' => route(
+                                'documents.show',
+                                $document
+                            ),
+
+                            'docx_url' => $document
+                                ->status
+                                === 'completed'
+                                ? route(
+                                    'documents.download',
+                                    [
+                                        $document,
+                                        'docx',
+                                    ]
+                                )
                                     : null,
 
-                            'pdf_url'
-                                => $document
-                                    ->status
-                                    === 'completed'
-                                    ? route(
-                                        'documents.download',
-                                        [
-                                            $document,
-                                            'pdf',
-                                        ]
-                                    )
+                            'pdf_url' => $document
+                                ->status
+                                === 'completed'
+                                ? route(
+                                    'documents.download',
+                                    [
+                                        $document,
+                                        'pdf',
+                                    ]
+                                )
                                     : null,
                         ];
                     }
@@ -294,38 +263,32 @@ class ResearchOutputPresentationController extends Controller
 
         return response()
             ->json([
-                'saved_result_id'
-                    => $savedResult
-                        ->id,
+                'saved_result_id' => $savedResult
+                    ->id,
 
-                'run_id'
-                    => $run
-                        ->id,
+                'run_id' => $run
+                    ->id,
 
-                'can_generate'
-                    => $run
-                        ->status
+                'can_generate' => $run
+                    ->status
                         === 'completed'
                         && $run
                             ->primaryResult
                         !== null,
 
-                'generate_url'
-                    => $run
-                        ->status
-                        === 'completed'
-                        ? route(
-                            'documents.create',
-                            [
-                                'saved_result'
-                                    => $savedResult
-                                        ->id,
-                            ]
-                        )
+                'generate_url' => $run
+                    ->status
+                    === 'completed'
+                    ? route(
+                        'documents.create',
+                        [
+                            'saved_result' => $savedResult
+                                ->id,
+                        ]
+                    )
                         : null,
 
-                'documents'
-                    => $documents,
+                'documents' => $documents,
             ]);
     }
 
@@ -344,33 +307,27 @@ class ResearchOutputPresentationController extends Controller
             ->map(
                 function ($citation): array {
                     return [
-                        'key'
-                            => $citation
-                                ->citation_key,
+                        'key' => $citation
+                            ->citation_key,
 
-                        'claim'
-                            => $citation
-                                ->claim_label,
+                        'claim' => $citation
+                            ->claim_label,
 
-                        'quote'
-                            => $citation
-                                ->quote_snippet,
+                        'quote' => $citation
+                            ->quote_snippet,
 
-                        'source'
-                            => $citation
-                                ->document
-                                ?->title
+                        'source' => $citation
+                            ->document
+                            ?->title
                             ?: 'Curated Source',
 
-                        'year'
-                            => $citation
-                                ->document
-                                ?->publication_year,
+                        'year' => $citation
+                            ->document
+                            ?->publication_year,
 
-                        'doi'
-                            => $citation
-                                ->document
-                                ?->doi,
+                        'doi' => $citation
+                            ->document
+                            ?->doi,
                     ];
                 }
             )
@@ -441,28 +398,22 @@ class ResearchOutputPresentationController extends Controller
         */
 
         $chain = [
-            'literature-synthesis'
-                => 'research-gap',
+            'literature-synthesis' => 'research-gap',
 
-            'research-gap'
-                => 'theoretical-mapping',
+            'research-gap' => 'theoretical-mapping',
 
-            'theoretical-mapping'
-                => 'conceptual-framework',
+            'theoretical-mapping' => 'conceptual-framework',
 
-            'conceptual-framework'
-                => 'variable-identification',
+            'conceptual-framework' => 'variable-identification',
 
-            'variable-identification'
-                => 'comparative-analysis',
+            'variable-identification' => 'comparative-analysis',
 
             /*
              * Comparative Analysis dapat mengarah
              * kembali ke Research Gap jika user
              * ingin memperdalam perbedaan temuan.
              */
-            'comparative-analysis'
-                => 'research-gap',
+            'comparative-analysis' => 'research-gap',
         ];
 
         $nextCode =
@@ -482,16 +433,15 @@ class ResearchOutputPresentationController extends Controller
             )
             ->whereHas(
                 'aiTool',
-                fn ($query) =>
-                    $query
-                        ->where(
-                            'code',
-                            $nextCode
-                        )
-                        ->where(
-                            'status',
-                            'active'
-                        )
+                fn ($query) => $query
+                    ->where(
+                        'code',
+                        $nextCode
+                    )
+                    ->where(
+                        'status',
+                        'active'
+                    )
             )
             ->with(
                 'aiTool'

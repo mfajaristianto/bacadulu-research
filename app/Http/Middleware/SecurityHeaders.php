@@ -45,18 +45,18 @@ class SecurityHeaders
                     "style-src 'self' 'unsafe-inline';",
 
                     "img-src 'self' data: blob:"
-                        ." https://*.googleusercontent.com"
-                        ." https://*.google.com"
-                        ." https://*.gstatic.com;",
+                        .' https://*.googleusercontent.com'
+                        .' https://*.google.com'
+                        .' https://*.gstatic.com;',
 
                     "font-src 'self' data:;",
 
                     "connect-src 'self';",
 
                     "frame-src 'self'"
-                        ." https://www.google.com"
-                        ." https://maps.google.com"
-                        ." https://*.google.com;",
+                        .' https://www.google.com'
+                        .' https://maps.google.com'
+                        .' https://*.google.com;',
 
                     "frame-ancestors 'self';",
 
@@ -72,30 +72,30 @@ class SecurityHeaders
                     "default-src 'self';",
 
                     "script-src 'self' 'unsafe-eval'"
-                        ." http://127.0.0.1:*"
-                        ." http://localhost:*;",
+                        .' http://127.0.0.1:*'
+                        .' http://localhost:*;',
 
                     "style-src 'self' 'unsafe-inline'"
-                        ." http://127.0.0.1:*"
-                        ." http://localhost:*;",
+                        .' http://127.0.0.1:*'
+                        .' http://localhost:*;',
 
                     "img-src 'self' data: blob:"
-                        ." https://*.googleusercontent.com"
-                        ." https://*.google.com"
-                        ." https://*.gstatic.com;",
+                        .' https://*.googleusercontent.com'
+                        .' https://*.google.com'
+                        .' https://*.gstatic.com;',
 
                     "font-src 'self' data:;",
 
                     "connect-src 'self'"
-                        ." ws://127.0.0.1:*"
-                        ." ws://localhost:*"
-                        ." http://127.0.0.1:*"
-                        ." http://localhost:*;",
+                        .' ws://127.0.0.1:*'
+                        .' ws://localhost:*'
+                        .' http://127.0.0.1:*'
+                        .' http://localhost:*;',
 
                     "frame-src 'self'"
-                        ." https://www.google.com"
-                        ." https://maps.google.com"
-                        ." https://*.google.com;",
+                        .' https://www.google.com'
+                        .' https://maps.google.com'
+                        .' https://*.google.com;',
 
                     "frame-ancestors 'self';",
 

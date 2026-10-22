@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\LibraryController as AdminLibraryController;
 use App\Http\Controllers\Admin\PromptController as AdminPromptController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\HistoryController;
@@ -17,6 +18,8 @@ use App\Http\Controllers\SavedResultController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+
 
 Route::view(
     '/',
@@ -61,22 +64,39 @@ Route::middleware('guest')
             ->middleware('throttle:register')
             ->name('register.store');
 
-        Route::get(
-            '/auth/google',
-            [
-                GoogleController::class,
-                'redirect',
-            ]
-        )->name('google.redirect');
-
-        Route::get(
-            '/auth/google/callback',
-            [
-                GoogleController::class,
-                'callback',
-            ]
-        )->name('google.callback');
+        if (config('research.google_auth_enabled', false)) {
+            Route::get(
+                '/auth/google',
+                [
+                    GoogleController::class,
+                    'redirect',
+                ]
+            )->name('google.redirect');
+    
+            Route::get(
+                '/auth/google/callback',
+                [
+                    GoogleController::class,
+                    'callback',
+                ]
+            )->name('google.callback');
+        }
     });
+
+/* Password recovery also remains reachable from an authenticated Profile page. */
+Route::get('/forgot-password', [PasswordResetController::class, 'requestForm'])
+    ->name('password.request');
+
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])
+    ->middleware('throttle:3,10')
+    ->name('password.email');
+
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'resetForm'])
+    ->name('password.reset');
+
+Route::post('/reset-password', [PasswordResetController::class, 'reset'])
+    ->middleware('throttle:5,10')
+    ->name('password.update');
 
 Route::post(
     '/logout',
@@ -92,6 +112,17 @@ Route::middleware([
     'auth',
     'active',
 ])->group(function () {
+    Route::view('/register/success', 'auth.register-success')
+        ->name('register.success');
+
+    Route::post('/onboarding/complete', function (Request $request) {
+        $request->user()->forceFill([
+            'onboarding_completed_at' => now(),
+        ])->save();
+
+        return response()->json(['ok' => true]);
+    })->middleware('throttle:10,1')->name('onboarding.complete');
+
     Route::get(
         '/email/verify',
         function () {
@@ -184,6 +215,10 @@ Route::middleware([
         ->middleware('throttle:profile')
         ->name('profile.update');
 
+    Route::patch('/profile/credentials', [ProfileController::class, 'updateCredentials'])
+        ->middleware('throttle:20,15')
+        ->name('profile.credentials.update');
+
     Route::middleware(
         'profile.complete'
     )->group(function () {
@@ -266,59 +301,67 @@ Route::middleware([
             ]
         )->name('history.index');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Saved Results
-        |--------------------------------------------------------------------------
-        */
+            /*
+|--------------------------------------------------------------------------
+| Saved Results
+|--------------------------------------------------------------------------
+*/
 
-        Route::get(
-            '/saved',
-            [
-                SavedResultController::class,
-                'index',
-            ]
-        )->name('saved.index');
+Route::get(
+    '/saved',
+    [
+        SavedResultController::class,
+        'index',
+    ]
+)->name('saved.index');
 
-        Route::post(
-            '/saved',
-            [
-                SavedResultController::class,
-                'store',
-            ]
-        )->name('saved.store');
+Route::post(
+    '/saved',
+    [
+        SavedResultController::class,
+        'store',
+    ]
+)->name('saved.store');
 
-        Route::get(
-            '/saved/{savedResult}',
-            [
-                SavedResultController::class,
-                'show',
-            ]
-        )->name('saved.show');
+Route::get(
+    '/saved/{savedResult}',
+    [
+        SavedResultController::class,
+        'show',
+    ]
+)
+    ->whereNumber('savedResult')
+    ->name('saved.show');
 
-        Route::patch(
-            '/saved/{savedResult}',
-            [
-                SavedResultController::class,
-                'update',
-            ]
-        )->name('saved.update');
+Route::patch(
+    '/saved/{savedResult}',
+    [
+        SavedResultController::class,
+        'update',
+    ]
+)
+    ->whereNumber('savedResult')
+    ->name('saved.update');
 
-        Route::patch(
-            '/saved/{savedResult}/favorite',
-            [
-                SavedResultController::class,
-                'toggleFavorite',
-            ]
-        )->name('saved.favorite');
+Route::patch(
+    '/saved/{savedResult}/favorite',
+    [
+        SavedResultController::class,
+        'toggleFavorite',
+    ]
+)
+    ->whereNumber('savedResult')
+    ->name('saved.favorite');
 
-        Route::delete(
-            '/saved/{savedResult}',
-            [
-                SavedResultController::class,
-                'destroy',
-            ]
-        )->name('saved.destroy');
+Route::delete(
+    '/saved/{savedResult}',
+    [
+        SavedResultController::class,
+        'destroy',
+    ]
+)
+    ->whereNumber('savedResult')
+    ->name('saved.destroy');
 
         /*
         |--------------------------------------------------------------------------

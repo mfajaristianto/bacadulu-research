@@ -15,15 +15,24 @@ class DocumentTemplate extends Model
         'document_type',
         'description',
         'schema_json',
+        'version',
+        'is_default',
         'status',
         'created_by',
+        'updated_by',
     ];
 
     protected function casts(): array
     {
         return [
-            'schema_json'
-                => 'array',
+            'schema_json' =>
+                'array',
+
+            'version' =>
+                'integer',
+
+            'is_default' =>
+                'boolean',
         ];
     }
 
@@ -32,6 +41,14 @@ class DocumentTemplate extends Model
         return $this->belongsTo(
             User::class,
             'created_by'
+        );
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(
+            User::class,
+            'updated_by'
         );
     }
 
@@ -48,6 +65,25 @@ class DocumentTemplate extends Model
         return $query->where(
             'status',
             'active'
+        );
+    }
+
+    public function scopeForType(
+        Builder $query,
+        string $documentType
+    ): Builder {
+        return $query->where(
+            'document_type',
+            $documentType
+        );
+    }
+
+    public function scopeDefault(
+        Builder $query
+    ): Builder {
+        return $query->where(
+            'is_default',
+            true
         );
     }
 }

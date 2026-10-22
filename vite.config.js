@@ -7,16 +7,44 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
-                'resources/css/pages/research-output.css',
+
+                /*
+                |--------------------------------------------------------------------------
+                | Admin styles (loaded by the admin layouts instead of app.css)
+                |--------------------------------------------------------------------------
+                */
+
+                'resources/css/admin.css',
 
                 'resources/js/app.js',
+
+                /*
+                |--------------------------------------------------------------------------
+                | Workspace UI
+                |--------------------------------------------------------------------------
+                */
+
+                'resources/js/workspace-ui.js',
+
+                /*
+                |--------------------------------------------------------------------------
+                | Landing motion
+                |--------------------------------------------------------------------------
+                */
+
+                'resources/js/landing-motion.js',
+
                 'resources/js/research-output.js',
+
                 'resources/js/auth-research.js',
+
+                'resources/js/bacadulu-onboarding.js',
             ],
 
             refresh: true,
 
-            hotFile: 'storage/framework/vite.hot',
+            hotFile:
+                'storage/framework/vite.hot',
         }),
 
         tailwindcss(),
@@ -29,4 +57,4 @@ export default defineConfig({
             ],
         },
     },
-});
+});     

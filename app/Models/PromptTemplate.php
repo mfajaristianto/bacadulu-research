@@ -15,6 +15,7 @@ class PromptTemplate extends Model
         'name',
         'indonesian_name',
         'short_description',
+        'question_template',
         'meaning',
         'when_to_use',
         'when_not_to_use',
@@ -31,7 +32,9 @@ class PromptTemplate extends Model
 
     public function aiTool(): BelongsTo
     {
-        return $this->belongsTo(AiTool::class);
+        return $this->belongsTo(
+            AiTool::class
+        );
     }
 
     public function creator(): BelongsTo
@@ -44,12 +47,18 @@ class PromptTemplate extends Model
 
     public function aiRuns(): HasMany
     {
-        return $this->hasMany(AiRun::class);
+        return $this->hasMany(
+            AiRun::class
+        );
     }
 
     public function getDisplayNameAttribute(): string
     {
-        if (filled($this->indonesian_name)) {
+        if (
+            filled(
+                $this->indonesian_name
+            )
+        ) {
             return $this->name
                 .' — '
                 .$this->indonesian_name;

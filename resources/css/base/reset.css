@@ -18,7 +18,7 @@ button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 main { min-height: calc(100vh - var(--header-height)); }
 ::selection { color: var(--bd-navy); background: rgba(33, 166, 160, .28); }
-:focus-visible { outline: 2px solid var(--bd-teal); outline-offset: 3px; }
+:focus-visible { outline: var(--focus-outline); outline-offset: var(--focus-offset); }
 .skip-link {
     position: fixed;
     z-index: 9999;

@@ -12,12 +12,18 @@ class LibraryController extends Controller
     | Legacy User Library
     |--------------------------------------------------------------------------
     |
-    | Library penuh sekarang merupakan knowledge layer Admin.
+    | Raw Library adalah knowledge layer internal untuk Admin.
     |
-    | Route lama tetap dipertahankan sementara sebagai compatibility
-    | redirect agar bookmark/link existing tidak langsung 404.
+    | Route user lama tetap dipertahankan hanya sebagai compatibility
+    | redirect supaya bookmark/link lama tidak langsung menjadi 404.
     |
-    | User diarahkan kembali ke Research Workspace.
+    | Endpoint ini:
+    |
+    | - tidak menampilkan daftar raw source;
+    | - tidak menampilkan metadata internal;
+    | - tidak mengirim PDF;
+    | - tidak mengirim extracted text;
+    | - tidak mengirim chunks.
     |
     */
 
@@ -29,7 +35,7 @@ class LibraryController extends Controller
             )
             ->with(
                 'success',
-                'Source Library sekarang digunakan sebagai knowledge layer internal. Gunakan Research Workspace untuk bekerja dengan evidence.'
+                'Source Library digunakan sebagai knowledge layer internal. Gunakan Research Workspace untuk bekerja dengan evidence.'
             );
     }
 
@@ -37,19 +43,18 @@ class LibraryController extends Controller
         Document $document
     ): RedirectResponse {
         /*
-         * Tidak expose metadata/raw source melalui
-         * endpoint Library lama.
-         *
-         * Relevant source metadata tetap dapat
-         * diberikan melalui evidence hasil research.
+         * Model binding boleh menemukan Document,
+         * tetapi tidak ada data document yang dikirim
+         * kepada user dari endpoint legacy ini.
          */
+
         return redirect()
             ->route(
                 'workspace'
             )
             ->with(
                 'success',
-                'Source context tersedia melalui evidence pada Research Workspace.'
+                'Source context tersedia melalui evidence yang tervalidasi pada Research Workspace.'
             );
     }
 }

@@ -8,21 +8,43 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'admin_path'
-        => env(
-            'BACADULU_ADMIN_PATH',
-            'panel-adminbaca-research'
-        ),
+    'admin_path' => env(
+        'BACADULU_ADMIN_PATH',
+        'panel-adminbaca-research'
+    ),
 
-    'admin_email'
-        => env(
-            'ADMIN_EMAIL'
-        ),
+    'admin_email' => env(
+        'ADMIN_EMAIL'
+    ),
 
-    'admin_password'
-        => env(
-            'ADMIN_PASSWORD'
-        ),
+    /*
+    | Prefer ADMIN_PASSWORD_HASH (generate with `php artisan research:admin-password-hash`).
+    | ADMIN_PASSWORD (plaintext) is only a fallback for installs that have not
+    | migrated yet, and is ignored once a hash is configured.
+    */
+
+    'admin_password_hash' => env(
+        'ADMIN_PASSWORD_HASH'
+    ),
+
+    'admin_password' => env(
+        'ADMIN_PASSWORD'
+    ),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Google OAuth (disabled by default; source code remains intact)
+    |--------------------------------------------------------------------------
+    |
+    | Set RESEARCH_GOOGLE_AUTH_ENABLED=true to reactivate Google sign-in.
+    | The login/register interface itself is unchanged.
+    |
+    */
+
+    'google_auth_enabled' => (bool) env(
+        'RESEARCH_GOOGLE_AUTH_ENABLED',
+        false
+    ),
 
     /*
     |--------------------------------------------------------------------------
@@ -30,17 +52,18 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'profile_gate'
-        => (int) env(
-            'RESEARCH_PROFILE_GATE',
-            80
-        ),
+    'profile_gate' => (int) env(
+        'RESEARCH_PROFILE_GATE',
+        80
+    ),
 
-    'require_email_verification'
-        => (bool) env(
-            'RESEARCH_REQUIRE_EMAIL_VERIFICATION',
-            false
-        ),
+    // Full profile remains encouraged, but the signup fields are enough to start research.
+    'profile_fields_optional' => (bool) env('RESEARCH_PROFILE_FIELDS_OPTIONAL', true),
+
+    'require_email_verification' => (bool) env(
+        'RESEARCH_REQUIRE_EMAIL_VERIFICATION',
+        false
+    ),
 
     /*
     |--------------------------------------------------------------------------
@@ -48,38 +71,34 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'ai_provider'
-        => env(
-            'AI_PROVIDER',
-            'mock'
+    'ai_provider' => env(
+        'AI_PROVIDER',
+        'mock'
+    ),
+
+    'ai_model' => env(
+        'AI_MODEL',
+        ''
+    ),
+
+    'ai' => [
+
+        'timeout' => (int) env(
+            'AI_TIMEOUT',
+            90
         ),
 
-    'ai_model'
-        => env(
-            'AI_MODEL',
-            ''
+        'max_output_tokens' => (int) env(
+            'AI_MAX_OUTPUT_TOKENS',
+            3500
         ),
 
-    'ai'
-        => [
-            'timeout'
-                => (int) env(
-                    'AI_TIMEOUT',
-                    90
-                ),
+        'context_messages' => (int) env(
+            'AI_CONTEXT_MESSAGES',
+            8
+        ),
 
-            'max_output_tokens'
-                => (int) env(
-                    'AI_MAX_OUTPUT_TOKENS',
-                    3500
-                ),
-
-            'context_messages'
-                => (int) env(
-                    'AI_CONTEXT_MESSAGES',
-                    8
-                ),
-        ],
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -87,56 +106,50 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'ingestion'
-        => [
-            'disk'
-                => env(
-                    'RESEARCH_SOURCE_DISK',
-                    'research_sources'
-                ),
+    'ingestion' => [
 
-            'max_upload_kb'
-                => (int) env(
-                    'RESEARCH_SOURCE_MAX_KB',
-                    51200
-                ),
+        'disk' => env(
+            'RESEARCH_SOURCE_DISK',
+            'research_sources'
+        ),
 
-            /*
-             * Optional.
-             *
-             * Kalau pdftotext tidak ada,
-             * native PDF extractor akan dicoba.
-             */
-            'pdftotext_binary'
-                => env(
-                    'PDFTOTEXT_BINARY',
-                    'pdftotext'
-                ),
+        'max_upload_kb' => (int) env(
+            'RESEARCH_SOURCE_MAX_KB',
+            102400
+        ),
 
-            'parser_timeout'
-                => (int) env(
-                    'PDFTOTEXT_TIMEOUT',
-                    60
-                ),
+        /*
+         * Optional.
+         *
+         * Jika pdftotext tidak tersedia,
+         * PdfTextExtractor dapat memakai fallback parser.
+         */
+        'pdftotext_binary' => env(
+            'PDFTOTEXT_BINARY',
+            'pdftotext'
+        ),
 
-            'chunk_words'
-                => (int) env(
-                    'RESEARCH_CHUNK_WORDS',
-                    500
-                ),
+        'parser_timeout' => (int) env(
+            'PDFTOTEXT_TIMEOUT',
+            60
+        ),
 
-            'chunk_overlap_words'
-                => (int) env(
-                    'RESEARCH_CHUNK_OVERLAP_WORDS',
-                    75
-                ),
+        'chunk_words' => (int) env(
+            'RESEARCH_CHUNK_WORDS',
+            500
+        ),
 
-            'minimum_chunk_words'
-                => (int) env(
-                    'RESEARCH_MINIMUM_CHUNK_WORDS',
-                    60
-                ),
-        ],
+        'chunk_overlap_words' => (int) env(
+            'RESEARCH_CHUNK_OVERLAP_WORDS',
+            75
+        ),
+
+        'minimum_chunk_words' => (int) env(
+            'RESEARCH_MINIMUM_CHUNK_WORDS',
+            60
+        ),
+
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -144,44 +157,73 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'retrieval'
-        => [
-            'candidate_limit'
-                => (int) env(
-                    'RESEARCH_RETRIEVAL_CANDIDATE_LIMIT',
-                    400
-                ),
+    'retrieval' => [
 
-            'evidence_limit'
-                => (int) env(
-                    'RESEARCH_EVIDENCE_LIMIT',
-                    8
-                ),
+        'candidate_limit' => (int) env(
+            'RESEARCH_RETRIEVAL_CANDIDATE_LIMIT',
+            400
+        ),
 
-            'max_per_document'
-                => (int) env(
-                    'RESEARCH_EVIDENCE_MAX_PER_DOCUMENT',
-                    3
-                ),
+        'evidence_limit' => (int) env(
+            'RESEARCH_EVIDENCE_LIMIT',
+            8
+        ),
 
-            'minimum_evidence'
-                => (int) env(
-                    'RESEARCH_MINIMUM_EVIDENCE',
-                    2
-                ),
+        'max_per_document' => (int) env(
+            'RESEARCH_EVIDENCE_MAX_PER_DOCUMENT',
+            3
+        ),
 
-            'minimum_score'
-                => (float) env(
-                    'RESEARCH_MINIMUM_RETRIEVAL_SCORE',
-                    0.15
-                ),
+        'minimum_evidence' => (int) env(
+            'RESEARCH_MINIMUM_EVIDENCE',
+            2
+        ),
 
-            'excerpt_length'
-                => (int) env(
-                    'RESEARCH_EVIDENCE_EXCERPT_LENGTH',
-                    900
-                ),
-        ],
+        'minimum_score' => (float) env(
+            'RESEARCH_MINIMUM_RETRIEVAL_SCORE',
+            0.15
+        ),
+
+        'excerpt_length' => (int) env(
+            'RESEARCH_EVIDENCE_EXCERPT_LENGTH',
+            900
+        ),
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Queue + Live Processing
+    |--------------------------------------------------------------------------
+    */
+
+    'queue' => [
+
+        /*
+         * AI Research queue.
+         */
+        'research_queue' => env(
+            'RESEARCH_QUEUE_NAME',
+            'research'
+        ),
+
+        /*
+         * Kita pakai ini di #6B untuk PDF ingestion.
+         */
+        'ingestion_queue' => env(
+            'RESEARCH_INGESTION_QUEUE_NAME',
+            'ingestion'
+        ),
+
+        /*
+         * Auto-refresh Workspace selama AI Run pending.
+         */
+        'live_refresh_seconds' => (int) env(
+            'RESEARCH_LIVE_REFRESH_SECONDS',
+            2
+        ),
+
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -189,41 +231,33 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'documents'
-        => [
-            /*
-             * Private disk.
-             *
-             * DOCX/PDF tidak diletakkan langsung
-             * di public storage.
-             */
-            'disk'
-                => env(
-                    'RESEARCH_OUTPUT_DISK',
-                    'research_outputs'
-                ),
+    'documents' => [
 
-            'types'
-                => [
-                    'Research Article',
-                    'Literature Review',
-                    'Research Proposal',
-                    'Research Background',
-                    'Research Gap',
-                    'Theory Review',
-                    'Variable Definition',
-                    'Hypothesis Development',
-                    'Conference Paper',
-                    'Book Chapter',
-                    'Research Report',
-                ],
+        'disk' => env(
+            'RESEARCH_OUTPUT_DISK',
+            'research_outputs'
+        ),
 
-            'citation_styles'
-                => [
-                    'APA 7',
-                    'IEEE',
-                    'Harvard',
-                ],
+        'types' => [
+            'Research Article',
+            'Literature Review',
+            'Research Proposal',
+            'Research Background',
+            'Research Gap',
+            'Theory Review',
+            'Variable Definition',
+            'Hypothesis Development',
+            'Conference Paper',
+            'Book Chapter',
+            'Research Report',
         ],
+
+        'citation_styles' => [
+            'APA 7',
+            'IEEE',
+            'Harvard',
+        ],
+
+    ],
 
 ];

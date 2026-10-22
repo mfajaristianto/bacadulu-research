@@ -1,0 +1,401 @@
+/* ============================================================
+   BACADULU RESEARCH
+   REGISTER ENHANCEMENTS
+   ============================================================ */
+
+.research-auth__form label > span small {
+    margin-left: 3px;
+    color: #97929a;
+    font-size: 5.8px;
+    font-weight: 650;
+}
+
+/* ============================================================
+   SELECT
+   ============================================================ */
+
+.research-auth__select {
+    position: relative;
+}
+
+.research-auth__select select {
+    width: 100%;
+    min-height: 35px;
+    padding: 7px 30px 7px 10px;
+    color: #252431;
+    border: 1px solid rgba(190, 183, 174, .61);
+    border-radius: 7px;
+    outline: 0;
+    appearance: none;
+    background: rgba(255, 255, 255, .48);
+    font: inherit;
+    font-size: 8.5px;
+    cursor: pointer;
+    transition:
+        border-color .22s ease,
+        background .22s ease,
+        box-shadow .22s ease;
+}
+
+.research-auth__select select:focus {
+    border-color: var(--bd-coral);
+    background: rgba(255, 255, 255, .72);
+    box-shadow: 0 0 0 3px rgba(245, 101, 73, .08);
+}
+
+.research-auth__select > svg {
+    position: absolute;
+    top: 50%;
+    right: 9px;
+    width: 13px;
+    height: 13px;
+    color: #88838b;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+/* ============================================================
+   VALID FIELDS
+   ============================================================ */
+
+.research-auth__input,
+.research-auth__select {
+    transition:
+        transform .28s cubic-bezier(.22, 1, .36, 1);
+}
+
+.research-auth__input.is-filled-valid,
+.research-auth__select.is-filled-valid {
+    transform: translateY(-1px);
+}
+
+.research-auth__input.is-filled-valid input,
+.research-auth__select.is-filled-valid select {
+    border-color: rgba(32, 170, 166, .34);
+    background: rgba(244, 253, 251, .72);
+    box-shadow: 0 0 0 3px rgba(32, 170, 166, .045);
+}
+
+/* ============================================================
+   DOMICILE SEARCH
+   ============================================================ */
+
+.research-auth__combo {
+    position: relative;
+}
+
+.research-auth__combo-panel {
+    position: absolute;
+    z-index: 80;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    border: 1px solid rgba(186, 179, 171, .56);
+    border-radius: 9px;
+    background: rgba(255, 253, 249, .98);
+    box-shadow: 0 16px 40px rgba(23, 23, 43, .13);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.research-auth__combo-status {
+    padding: 8px 10px;
+    color: #817d85;
+    border-bottom: 1px solid rgba(190, 183, 174, .32);
+    font-size: 6.3px;
+    line-height: 1.4;
+}
+
+.research-auth__combo-results {
+    max-height: 168px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+
+.research-auth__combo-option {
+    display: flex;
+    width: 100%;
+    min-height: 33px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 10px;
+    color: #34323d;
+    border: 0;
+    border-bottom: 1px solid rgba(196, 190, 183, .23);
+    background: transparent;
+    font: inherit;
+    font-size: 7.3px;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        background .18s ease,
+        color .18s ease;
+}
+
+.research-auth__combo-option:last-child {
+    border-bottom: 0;
+}
+
+.research-auth__combo-option:hover,
+.research-auth__combo-option.is-active {
+    color: var(--bd-teal-dark);
+    background: rgba(32, 170, 166, .08);
+}
+
+.research-auth__combo-option small {
+    flex: 0 0 auto;
+    color: #aaa49d;
+    font-size: 5.4px;
+}
+
+/* ============================================================
+   RESEARCH INTEREST MULTI SELECT
+   ============================================================ */
+
+.research-auth__multi {
+    position: relative;
+}
+
+.research-auth__multi-trigger {
+    display: flex;
+    width: 100%;
+    min-height: 35px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 9px 7px 10px;
+    color: #77727a;
+    border: 1px solid rgba(190, 183, 174, .61);
+    border-radius: 7px;
+    background: rgba(255, 255, 255, .48);
+    font: inherit;
+    font-size: 8.5px;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        border-color .22s ease,
+        background .22s ease,
+        box-shadow .22s ease;
+}
+
+.research-auth__multi-trigger:hover,
+.research-auth__multi-trigger[aria-expanded="true"] {
+    border-color: rgba(32, 170, 166, .38);
+    background: rgba(255, 255, 255, .68);
+    box-shadow: 0 0 0 3px rgba(32, 170, 166, .05);
+}
+
+.research-auth__multi-trigger.has-value {
+    color: #252431;
+}
+
+.research-auth__multi-trigger svg {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
+    transition: transform .2s ease;
+}
+
+.research-auth__multi-trigger[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+}
+
+.research-auth__multi-panel {
+    position: absolute;
+    z-index: 90;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    border: 1px solid rgba(186, 179, 171, .56);
+    border-radius: 9px;
+    background: rgba(255, 253, 249, .98);
+    box-shadow: 0 16px 40px rgba(23, 23, 43, .13);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.research-auth__multi-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(190, 183, 174, .32);
+}
+
+.research-auth__multi-head strong {
+    color: var(--bd-navy);
+    font-size: 6.8px;
+}
+
+.research-auth__multi-head small {
+    color: var(--bd-teal-dark);
+    font-size: 6px;
+    font-weight: 760;
+}
+
+.research-auth__multi-options {
+    max-height: 185px;
+    overflow-y: auto;
+    padding: 4px;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+
+.research-auth__multi-options label {
+    display: flex;
+    min-height: 29px;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 7px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .17s ease;
+}
+
+.research-auth__multi-options label:hover {
+    background: rgba(32, 170, 166, .07);
+}
+
+.research-auth__multi-options input {
+    width: 12px;
+    height: 12px;
+    margin: 0;
+    accent-color: var(--bd-teal);
+}
+
+.research-auth__multi-options label > span {
+    color: #494650 !important;
+    font-size: 6.7px !important;
+    font-weight: 680 !important;
+}
+
+.research-auth__multi-options input:disabled + span {
+    opacity: .38;
+}
+
+/* ============================================================
+   REGISTER PROGRESS
+   ============================================================ */
+
+.research-auth__signup-progress {
+    position: relative;
+    overflow: hidden;
+    transition:
+        border-color .35s ease,
+        background .35s ease,
+        box-shadow .35s ease,
+        transform .35s cubic-bezier(.22, 1, .36, 1);
+}
+
+.research-auth__signup-progress::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .5;
+    background:
+        linear-gradient(
+            110deg,
+            transparent 20%,
+            rgba(255, 255, 255, .68) 48%,
+            transparent 76%
+        );
+    transform: translateX(-135%);
+}
+
+.research-auth__signup-progress.is-minimum {
+    border-color: rgba(32, 170, 166, .34);
+    background: rgba(222, 248, 246, .42);
+}
+
+.research-auth__signup-progress.is-complete {
+    border-color: rgba(32, 170, 166, .46);
+    background: rgba(211, 249, 245, .56);
+    box-shadow: 0 9px 24px rgba(32, 170, 166, .08);
+}
+
+.research-auth__signup-progress.is-complete::after {
+    animation: researchProgressShine .82s ease forwards;
+}
+
+.research-auth__signup-progress-ring {
+    box-shadow: 0 6px 18px rgba(32, 170, 166, .10);
+}
+
+.research-auth__signup-progress-ring strong {
+    min-width: 28px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   REGISTER SUBMIT
+   ============================================================ */
+
+.research-auth__submit[data-register-submit] {
+    transition:
+        opacity .22s ease,
+        transform .22s ease,
+        background .22s ease,
+        box-shadow .22s ease;
+}
+
+.research-auth__submit[data-register-submit]:disabled {
+    color: rgba(77, 73, 81, .58);
+    background: rgba(190, 186, 181, .42);
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.research-auth__submit[data-register-submit]:not(:disabled):hover {
+    transform: translateY(-1px);
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 620px) {
+    .research-auth__combo-panel,
+    .research-auth__multi-panel {
+        position: static;
+        margin-top: 5px;
+    }
+
+    .research-auth__combo-results,
+    .research-auth__multi-options {
+        max-height: 155px;
+    }
+}
+
+/* ============================================================
+   MOTION
+   ============================================================ */
+
+@keyframes researchProgressShine {
+    from {
+        transform: translateX(-135%);
+    }
+
+    to {
+        transform: translateX(135%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .research-auth__signup-progress.is-complete::after {
+        animation: none;
+    }
+
+    .research-auth__input,
+    .research-auth__select,
+    .research-auth__multi-trigger,
+    .research-auth__submit[data-register-submit] {
+        transition: none;
+    }
+}

@@ -1,29 +1,186 @@
+/*
+|--------------------------------------------------------------------------
+| Buttons — design system v2
+|--------------------------------------------------------------------------
+| Base: .btn  (md, 44px)
+| Variants: .btn--primary | --secondary | --ghost | --danger | --light
+| Sizes: .btn--sm (36px) | .btn--lg (52px) | .btn--icon (square)
+| Modifiers: .btn--block
+| States: :disabled / [aria-disabled="true"], [aria-busy="true"] (loading)
+|
+| Legacy class names (.btn-primary, .btn-secondary, .btn-ghost, .btn-light,
+| .btn-full) are kept as aliases of the v2 variants.
+*/
+
 .btn {
-    min-height: 46px;
+    min-height: var(--control-md);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 9px;
-    padding: 11px 18px;
+    gap: var(--space-2);
+    padding: 0 18px;
     border: 1px solid transparent;
-    border-radius: 10px;
-    font-weight: 720;
-    line-height: 1;
+    border-radius: var(--radius-control);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: 650;
+    line-height: 1.2;
     text-decoration: none;
+    white-space: nowrap;
     cursor: pointer;
-    transition: transform .18s var(--ease-out), box-shadow .18s ease, background .18s ease, border-color .18s ease;
+    transition:
+        transform var(--duration-micro) var(--ease-out),
+        box-shadow var(--duration-ui) ease,
+        background-color var(--duration-micro) ease,
+        border-color var(--duration-micro) ease,
+        color var(--duration-micro) ease;
 }
+
 .btn:hover { transform: translateY(-1px); }
-.btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-.btn-primary { color: #fff; background: var(--bd-orange); border-color: var(--bd-orange); }
-.btn-primary:hover { background: var(--bd-orange-deep); border-color: var(--bd-orange-deep); box-shadow: 0 12px 28px rgba(217, 90, 66, .18); }
-.btn-secondary { color: var(--bd-navy); background: rgba(255, 252, 247, .76); border-color: var(--line-strong); }
-.btn-secondary:hover { background: var(--bd-paper); border-color: #B8AFA2; }
-.btn-ghost { color: var(--bd-navy); background: transparent; border-color: transparent; }
+.btn:active { transform: translateY(1px); }
+
+.btn:focus-visible {
+    outline: var(--focus-outline);
+    outline-offset: var(--focus-offset);
+}
+
+.btn svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+}
+
+/* Variants */
+
+.btn--primary,
+.btn-primary {
+    color: #fff;
+    background: var(--orange-600);
+    border-color: var(--orange-600);
+}
+
+.btn--primary:hover,
+.btn-primary:hover {
+    background: var(--orange-700);
+    border-color: var(--orange-700);
+    box-shadow: 0 10px 24px rgba(194, 74, 44, .2);
+}
+
+.btn--secondary,
+.btn-secondary {
+    color: var(--navy-900);
+    background: var(--paper);
+    border-color: var(--line-strong);
+}
+
+.btn--secondary:hover,
+.btn-secondary:hover {
+    background: #fff;
+    border-color: var(--navy-500);
+}
+
+.btn--ghost,
+.btn-ghost {
+    color: var(--navy-900);
+    background: transparent;
+    border-color: transparent;
+}
+
+.btn--ghost:hover,
 .btn-ghost:hover { background: rgba(23, 23, 43, .06); }
-.btn-light { color: var(--bd-navy); background: var(--bd-paper); border-color: var(--bd-paper); }
+
+.btn--danger {
+    color: #fff;
+    background: var(--danger);
+    border-color: var(--danger);
+}
+
+.btn--danger:hover {
+    background: #9E3636;
+    border-color: #9E3636;
+}
+
+.btn--light,
+.btn-light {
+    color: var(--navy-900);
+    background: var(--paper);
+    border-color: var(--paper);
+}
+
+/* Sizes */
+
+.btn--sm {
+    min-height: var(--control-sm);
+    padding: 0 12px;
+    font-size: var(--text-label);
+}
+
+.btn--lg {
+    min-height: var(--control-lg);
+    padding: 0 24px;
+    font-size: var(--text-body);
+}
+
+.btn--icon {
+    width: var(--control-md);
+    padding: 0;
+}
+
+.btn--icon.btn--sm { width: var(--control-sm); }
+
+.btn--block,
 .btn-full { width: 100%; }
-.text-button { padding: 4px; border: 0; background: transparent; color: var(--info); cursor: pointer; font-weight: 680; }
+
+/* States */
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+    opacity: .5;
+    pointer-events: none;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn[aria-busy="true"] {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+}
+
+.btn[aria-busy="true"]::after {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border: 2px solid currentColor;
+    border-color: rgba(255, 255, 255, .9) rgba(255, 255, 255, .9) transparent transparent;
+    border-radius: 50%;
+    animation: btn-spin .7s linear infinite;
+}
+
+.btn--secondary[aria-busy="true"]::after,
+.btn--ghost[aria-busy="true"]::after,
+.btn-secondary[aria-busy="true"]::after,
+.btn-ghost[aria-busy="true"]::after {
+    border-color: var(--navy-900) var(--navy-900) transparent transparent;
+}
+
+@keyframes btn-spin {
+    to { transform: rotate(360deg); }
+}
+
+.text-button {
+    padding: 4px;
+    border: 0;
+    background: transparent;
+    color: var(--info);
+    cursor: pointer;
+    font-weight: 650;
+}
+
+/* Pointer-follow glow kept for legacy [data-motion-button] hooks */
 
 [data-motion-button] {
     position: relative;
@@ -50,4 +207,9 @@
 [data-motion-button]:focus-visible::before {
     opacity: 1;
     transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn:hover,
+    .btn:active { transform: none; }
 }

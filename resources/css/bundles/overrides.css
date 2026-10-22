@@ -1,0 +1,39 @@
+/*
+|--------------------------------------------------------------------------
+| Legacy override layers that load AFTER the admin styles
+|--------------------------------------------------------------------------
+| Shared by app.css and admin.css. mobile-polish.css contains admin rules,
+| so admin.css must keep importing this file after the admin styles.
+| These files are retired page by page as each area is redesigned.
+*/
+
+@import '../pages/research-design.css';
+@import '../pages/auth-portal.css';
+
+/* FINAL DESIGN OVERRIDES */
+
+@import '../pages/workspace-premium.css';
+@import '../pages/workspace-premium-sections.css';
+
+@import '../pages/research-sidebar.css';
+@import '../pages/mobile-polish.css';
+@import '../pages/workspace-fixes.css';
+
+@import '../pages/workspace-topbar.css';
+@import '../pages/saved-research.css';
+
+@import '../pages/profile-research.css';
+
+@import '../pages/research-prd-phases.css';
+
+/* QA OVERRIDES */
+
+@import '../pages/research-final-revisions.css';
+
+@import '../pages/research-ux-round2.css';
+
+/* DOCUMENT FLOW FINAL — must stay last; does not touch sidebar styling */
+
+@import '../pages/research-document-flow-final.css';
+@import '../pages/research-document-editor-final.css';
+@import '../pages/bacadulu-ux-integration.css';
