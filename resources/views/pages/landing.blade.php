@@ -49,22 +49,21 @@
                     <div><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v5h5"></path><path d="M9 12h6M9 16h5"></path></svg><span>PROSIDING</span></div>
                 </div>
 
-                <svg class="br-evidence-panel__connectors" viewBox="0 0 420 190" preserveAspectRatio="none" aria-hidden="true">
-                    <path d="M76 38 C165 38, 145 95, 215 95"></path>
-                    <path d="M76 95 H215"></path>
-                    <path d="M76 152 C165 152, 145 95, 215 95"></path>
-                    <path d="M270 95 H386"></path>
-                </svg>
+                <div class="br-flow__join" aria-hidden="true"><i class="br-flow__dot"></i></div>
+                <i class="br-flow__link br-flow__link--in" aria-hidden="true"></i>
 
                 <div class="br-analysis-node">
-                    <span class="br-analysis-node__halo"></span>
+                    <span class="br-analysis-node__halo" aria-hidden="true"></span>
                     <svg viewBox="0 0 60 60"><path d="M16 12h25l6 6v30H16z"></path><path d="M41 12v8h8"></path><path d="M22 27h18M22 33h18M22 39h13"></path></svg>
                     <small>ANALISIS<br>EVIDENCE</small>
+                    <i class="br-flow__dot" aria-hidden="true"></i>
                 </div>
 
+                <i class="br-flow__link br-flow__link--out" aria-hidden="true"></i>
                 <div class="br-insight-node">
                     <svg viewBox="0 0 54 54"><path d="M11 8h24l8 8v30H11z"></path><path d="M35 8v10h10"></path><path d="M17 29h5v10h-5zM25 24h5v15h-5zM33 19h5v20h-5z"></path></svg>
                     <small>INSIGHT SIAP</small>
+                    <i class="br-flow__dot" aria-hidden="true"></i>
                 </div>
             </div>
 

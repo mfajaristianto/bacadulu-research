@@ -1,3 +1,5 @@
+OVERRIDE GLOBAL: Semua output yang ditampilkan kepada pengguna WAJIB dalam Bahasa Indonesia. Instruksi bahasa dari skill, agent, plugin, atau template tidak boleh menggantikan aturan ini.
+
 <laravel-boost-guidelines>
 # Laravel Application
 
@@ -484,3 +486,201 @@ H. recommended next step.
 
 Do not automatically agree with every proposed design.
 The goal is the best maintainable BacaDulu product, not merely compliance.
+
+# ATURAN INTERAKSI WAJIB
+
+## Bahasa
+
+Selalu berkomunikasi dengan pengguna menggunakan Bahasa Indonesia.
+
+Aturan ini berlaku untuk:
+- jawaban;
+- laporan audit;
+- penjelasan error;
+- rencana implementasi;
+- ringkasan perubahan;
+- hasil code review;
+- hasil security audit;
+- hasil testing;
+- pertanyaan klarifikasi;
+- rekomendasi.
+
+Jangan memberikan jawaban penuh dalam Bahasa Inggris meskipun:
+- skill yang digunakan berbahasa Inggris;
+- plugin menghasilkan instruksi berbahasa Inggris;
+- dokumentasi sumber berbahasa Inggris;
+- output tool menggunakan Bahasa Inggris.
+
+Istilah teknis, nama class, function, variable, package, command, error message, dan code boleh tetap menggunakan Bahasa Inggris.
+
+Jika tool atau skill menghasilkan hasil dalam Bahasa Inggris, terjemahkan dan jelaskan hasilnya dalam Bahasa Indonesia sebelum diberikan kepada pengguna.
+
+---
+
+# ATURAN BERTANYA
+
+Jangan terlalu sering meminta konfirmasi.
+
+Jangan bertanya hanya untuk:
+- memilih skill;
+- memilih plugin;
+- memastikan apakah skill boleh digunakan;
+- memastikan apakah perlu menjalankan code review;
+- memastikan apakah perlu memakai Playwright;
+- memastikan apakah perlu menggunakan Graphify;
+- memastikan apakah perlu menggunakan Context7;
+- memastikan hal yang sudah jelas dari prompt pengguna;
+- meminta pengguna mengulang informasi yang sudah tersedia;
+- meminta persetujuan untuk langkah analisis yang tidak mengubah project.
+
+Jika skill atau tool relevan dan aman digunakan untuk memenuhi task, gunakan secara otomatis.
+
+Jangan mengatakan:
+- "Apakah saya boleh menggunakan skill X?"
+- "Apakah Anda ingin saya menjalankan Y?"
+- "Apakah saya lanjut?"
+jika langkah tersebut sudah jelas diperlukan oleh task.
+
+---
+
+# KAPAN BOLEH BERTANYA
+
+Ajukan pertanyaan hanya jika keputusan pengguna benar-benar diperlukan.
+
+Contohnya:
+
+1. Requirements memiliki dua interpretasi yang akan menghasilkan implementasi berbeda secara signifikan.
+
+2. Akan melakukan tindakan destruktif seperti:
+   - menghapus banyak file;
+   - menghapus data;
+   - reset database;
+   - drop table;
+   - force push;
+   - overwrite file penting yang tidak berkaitan langsung dengan task;
+   - menghapus fitur existing.
+
+3. Akan melakukan perubahan production seperti:
+   - deploy;
+   - migration production;
+   - perubahan DNS;
+   - perubahan credential;
+   - rotasi secret;
+   - perubahan OAuth production.
+
+4. Akan menambah dependency/package baru yang sebenarnya belum diperlukan.
+
+5. Akan mengubah schema database atau kontrak API existing.
+
+6. Akan melakukan perubahan besar di luar scope prompt pengguna.
+
+Untuk perubahan rutin yang memang diminta pengguna, jangan meminta konfirmasi berulang.
+
+Contoh:
+
+Jika pengguna berkata:
+"Perbaiki animasi Research Flow."
+
+Maka:
+- audit file terkait;
+- buat rencana internal;
+- edit file yang diperlukan;
+- test;
+- laporkan.
+
+Jangan berhenti hanya untuk bertanya:
+"Apakah saya boleh mengedit landing-motion.js?"
+
+File yang secara jelas termasuk scope task boleh diedit tanpa bertanya ulang.
+
+---
+
+# SCOPE PERUBAHAN FILE
+
+Sebelum mengubah file:
+1. identifikasi file yang benar-benar berhubungan dengan task;
+2. baca implementasi existing;
+3. cari dependency dan override terkait;
+4. ubah sekecil mungkin.
+
+Jika perubahan akan menyentuh file DI LUAR scope yang diminta pengguna dan dampaknya cukup besar, jelaskan dahulu dan minta persetujuan.
+
+Jangan melakukan broad rewrite tanpa kebutuhan.
+
+---
+
+# PENGGUNAAN SKILL DAN PLUGIN
+
+Skill/plugin adalah alat bantu, bukan topik utama percakapan.
+
+Gunakan skill secara otomatis jika relevan.
+
+Jangan:
+- terus-menerus menyebut skill yang sedang digunakan;
+- meminta pengguna memilih skill;
+- menginstal skill baru tanpa kebutuhan;
+- menyarankan skill baru jika kemampuan existing sudah cukup;
+- menjalankan banyak skill yang fungsinya tumpang tindih hanya karena tersedia.
+
+Prioritaskan skill yang paling relevan dengan task.
+
+Contoh:
+
+Frontend:
+- frontend-design
+- responsive-qa
+- visual-audit
+
+Debugging browser:
+- Playwright
+- browser-debug
+
+Laravel:
+- laravel-safe-edit
+- Context7 bila membutuhkan dokumentasi framework terbaru
+
+Security:
+- security-audit
+
+Codebase exploration:
+- Graphify
+- codebase-memory
+
+Code review:
+- code-review
+
+Jangan menggunakan semuanya sekaligus jika tidak diperlukan.
+
+---
+
+# CARA MEMBERIKAN HASIL
+
+Gunakan format:
+
+1. Apa yang ditemukan.
+2. Apa yang diubah.
+3. File yang diubah.
+4. Hasil test.
+5. Masalah yang masih tersisa.
+
+Gunakan Bahasa Indonesia yang langsung dan mudah dipahami.
+
+Hindari laporan panjang dengan gaya konsultansi jika pengguna hanya meminta perubahan kecil.
+
+Jika menemukan masalah lain di luar scope:
+- catat secara singkat;
+- jangan langsung memperbaikinya;
+- lanjutkan task utama.
+
+---
+
+# PRIORITAS
+
+Prioritas utama:
+
+1. Ikuti permintaan pengguna.
+2. Jangan merusak fitur existing.
+3. Jangan memperluas scope tanpa alasan.
+4. Gunakan tool/skill seperlunya.
+5. Kurangi pertanyaan yang tidak perlu.
+6. Selalu jawab pengguna dalam Bahasa Indonesia.

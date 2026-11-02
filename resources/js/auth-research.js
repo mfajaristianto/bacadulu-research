@@ -17,13 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupResearchInterestSelector(root);
     setupSignupProgress(root, reduceMotion);
     setupAuthSwitch(root, reduceMotion);
-    setupJourneyLoops(root, reduceMotion);
-
-    if (!reduceMotion) {
-        setupAmbientMotion(root);
-        setupLoginMotion(root);
-        setupRegisterMotion(root);
-    }
 });
 
 /* ============================================================
@@ -843,705 +836,366 @@ function setupSignupProgress(root, reduceMotion) {
 }
 
 /* ============================================================
-   LOGIN ↔ REGISTER SLIDE
+   LOGIN ↔ REGISTER — PAPER TEAR (vertikal di semua device)
+   Satu sumber state: root.dataset.view. Tab, link bawah form, dock mobile,
+   keyboard, dan tombol back browser semuanya memanggil requestView().
+   Saat pindah, form lama di-clone jadi dua lembar (kiri/kanan) yang dipotong
+   zig-zag di tengah. View langsung diganti sehingga form baru sudah ada di
+   lapisan bawah; seam tergambar dari atas ke bawah, kedua lembar terbuka,
+   lalu memudar dan form baru settle. Tidak ada loop/timer di luar saat
+   berpindah.
+
+   Siklus hidup: finishSwitch() idempoten (dipanggil oleh onComplete,
+   onInterrupt, watchdog, dan saat tab tersembunyi) dan SELALU menghapus
+   clone, mereset lock, lalu menjalankan target terakhir dari klik cepat.
    ============================================================ */
 
-function setupAuthSwitch(root, reduceMotion) {
-    const shell =
-        root.querySelector('.research-auth__shell');
+// Offset zig-zag seam (px) sepanjang sobekan; sama untuk kedua sisi.
+const TEAR_SEAM = [0, 5, -4, 6, -3, 5, -6, 4, -5, 6, -3, 4, 0];
 
-    if (!shell) {
-        return;
-    }
+// Total ≈ 1 dtk: seam 0,2 → buka 0,5 (mulai 0,13) → memudar + settle 0,34–0,4.
+const TEAR = {
+    seam: .2,
+    open: .5,
+    fade: .34,
+    settle: .4,
+};
 
-    let wave =
-        shell.querySelector(
-            '.research-auth__transition-wave'
-        );
+const AUTH_LABEL = {
+    signin: 'Masuk',
+    signup: 'Daftar',
+};
 
-    if (!wave) {
-        wave =
-            document.createElement('div');
+function tearPolygons() {
+    const last = TEAR_SEAM.length - 1;
 
-        wave.className =
-            'research-auth__transition-wave';
+    const seam = TEAR_SEAM
+        .map((offset, index) => `calc(50% + ${offset}px) ${(index / last) * 100}%`)
+        .join(', ');
 
-        wave.setAttribute(
-            'aria-hidden',
-            'true'
-        );
+    return [
+        `polygon(0 0, ${seam}, 0 100%)`,
+        `polygon(100% 0, ${seam}, 100% 100%)`,
+    ];
+}
 
-        shell.appendChild(wave);
-    }
+function seamLine(width, height) {
+    const last = TEAR_SEAM.length - 1;
+    const ns = 'http://www.w3.org/2000/svg';
 
-    let switching = false;
+    const points = TEAR_SEAM
+        .map((offset, index) => `${width / 2 + offset},${(index / last) * height}`)
+        .join(' ');
 
-    root.querySelectorAll(
-        '[data-auth-switch]'
-    ).forEach((link) => {
-        link.addEventListener(
-            'click',
-            (event) => {
-                event.preventDefault();
+    const svg = document.createElementNS(ns, 'svg');
+    const line = document.createElementNS(ns, 'polyline');
 
-                changeView(
-                    link.dataset.authSwitch,
-                    true
-                );
-            }
-        );
+    svg.setAttribute('class', 'research-auth__tear-seam');
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    svg.setAttribute('aria-hidden', 'true');
+
+    line.setAttribute('points', points);
+    line.setAttribute('fill', 'none');
+    line.setAttribute('stroke', 'currentColor');
+    line.setAttribute('stroke-width', '1.5');
+    line.setAttribute('vector-effect', 'non-scaling-stroke');
+
+    svg.appendChild(line);
+
+    return svg;
+}
+
+// cloneNode tidak menyalin nilai yang sedang diketik; salin ke atribut.
+function copyLiveValues(source, clone) {
+    const from = source.querySelectorAll('input, select');
+    const to = clone.querySelectorAll('input, select');
+
+    from.forEach((field, index) => {
+        const twin = to[index];
+
+        if (!twin) {
+            return;
+        }
+
+        if (field.type === 'checkbox' || field.type === 'radio') {
+            twin.toggleAttribute('checked', field.checked);
+
+            return;
+        }
+
+        if (field.tagName === 'SELECT') {
+            twin.value = field.value;
+
+            return;
+        }
+
+        twin.setAttribute('value', field.value);
+    });
+}
+
+function buildTear(forms, pane) {
+    const rect = forms.getBoundingClientRect();
+
+    // Form Daftar di mobile bisa >1000px; lembar cukup setinggi layar agar
+    // layer komposit tetap kecil (yang di luar layar memang tidak terlihat).
+    const width = rect.width;
+    const height = Math.min(rect.height, window.innerHeight);
+
+    const tear = document.createElement('div');
+
+    tear.className = 'research-auth__tear';
+    tear.setAttribute('aria-hidden', 'true');
+    tear.inert = true;
+    tear.style.width = `${width}px`;
+    tear.style.height = `${height}px`;
+
+    const halves = tearPolygons().map((path) => {
+        const half = document.createElement('div');
+        const sheet = document.createElement('div');
+        const clone = pane.cloneNode(true);
+
+        half.className = 'research-auth__tear-half';
+        sheet.className = 'research-auth__tear-sheet';
+        sheet.style.clipPath = path;
+
+        clone.removeAttribute('data-auth-pane');
+        clone.classList.add('research-auth__tear-pane');
+
+        clone.querySelectorAll('[id]').forEach((node) => node.removeAttribute('id'));
+        clone.querySelectorAll('[name]').forEach((node) => node.removeAttribute('name'));
+
+        copyLiveValues(pane, clone);
+
+        sheet.appendChild(clone);
+        half.appendChild(sheet);
+        tear.appendChild(half);
+
+        return half;
     });
 
-    window.addEventListener(
-        'popstate',
-        () => {
-            const target =
-                location.pathname.includes('/register')
-                    ? 'signup'
-                    : 'signin';
+    tear.appendChild(seamLine(width, height));
 
-            changeView(target, false);
+    forms.appendChild(tear);
+
+    return {
+        tear,
+        halves,
+        seam: tear.querySelector('.research-auth__tear-seam'),
+    };
+}
+
+function setupAuthSwitch(root, reduceMotion) {
+    const forms = root.querySelector('.research-auth__forms');
+    const nextButton = root.querySelector('[data-auth-next]');
+    const status = root.querySelector('[data-auth-status]');
+    const mobile = window.matchMedia('(max-width: 900px)');
+
+    let switching = false;
+    let pending = null;
+    let active = null;
+
+    const urlFor = (view) =>
+        view === 'signup'
+            ? root.dataset.registerUrl
+            : root.dataset.loginUrl;
+
+    // Menyelaraskan tab, dock, dan pengumuman screen reader dengan data-view.
+    const syncView = () => {
+        const view = root.dataset.view;
+        const next = view === 'signin' ? 'signup' : 'signin';
+
+        root.querySelectorAll('.research-auth__tab, .research-auth__dock-mode').forEach((item) => {
+            if (item.dataset.authSwitch === view) {
+                item.setAttribute('aria-current', 'page');
+            } else {
+                item.removeAttribute('aria-current');
+            }
+        });
+
+        if (nextButton) {
+            nextButton.href = urlFor(next);
+            nextButton.setAttribute('aria-label', `Pindah ke ${AUTH_LABEL[next]}`);
         }
-    );
 
-    function changeView(
-        target,
-        updateHistory = true
-    ) {
-        if (
-            !['signin', 'signup'].includes(target)
-        ) {
+        if (status) {
+            status.textContent = `Mode ${AUTH_LABEL[view]}`;
+        }
+    };
+
+    // Idempoten: aman dipanggil berkali-kali dari jalur mana pun.
+    function finishSwitch() {
+        if (!active) {
             return;
         }
 
-        const current =
-            root.dataset.view;
+        const { timeline, guard, targets } = active;
 
-        if (
-            current === target ||
-            switching
-        ) {
+        active = null;
+
+        timeline.kill();
+        guard.kill();
+
+        root.querySelectorAll('.research-auth__tear').forEach((node) => node.remove());
+
+        gsap.set(targets, { clearProps: 'transform,opacity' });
+
+        switching = false;
+
+        if (pending) {
+            const next = pending;
+
+            pending = null;
+
+            requestView(next.target, next.updateHistory);
+        }
+    }
+
+    function requestView(target, updateHistory = true) {
+        if (!['signin', 'signup'].includes(target)) {
             return;
         }
 
-        const oldHero =
-            root.querySelector(
-                `[data-auth-hero="${current}"]`
-            );
+        if (switching) {
+            pending = { target, updateHistory };
 
-        const newHero =
-            root.querySelector(
-                `[data-auth-hero="${target}"]`
-            );
-
-        const oldPane =
-            root.querySelector(
-                `[data-auth-pane="${current}"]`
-            );
-
-        const newPane =
-            root.querySelector(
-                `[data-auth-pane="${target}"]`
-            );
-
-        if (
-            !oldHero ||
-            !newHero ||
-            !oldPane ||
-            !newPane
-        ) {
             return;
         }
 
-        const direction =
-            target === 'signup'
-                ? 1
-                : -1;
+        if (root.dataset.view === target) {
+            return;
+        }
 
-        const url =
-            target === 'signup'
-                ? root.dataset.registerUrl
-                : root.dataset.loginUrl;
+        const current = root.dataset.view;
+        const oldPane = root.querySelector(`[data-auth-pane="${current}"]`);
+        const newPane = root.querySelector(`[data-auth-pane="${target}"]`);
+        const newIntro = root.querySelector(`[data-auth-hero="${target}"] .research-auth__intro`);
 
-        if (reduceMotion) {
+        if (!forms || !oldPane || !newPane) {
+            return;
+        }
+
+        const commit = () => {
             root.dataset.view = target;
 
-            newPane.scrollTop = 0;
+            syncView();
 
-            if (
-                updateHistory &&
-                url
-            ) {
-                history.pushState(
-                    {},
-                    '',
-                    url
-                );
+            const url = urlFor(target);
+
+            if (updateHistory && url) {
+                history.pushState({ authView: target }, '', url);
             }
+        };
+
+        // Sisa clone dari kondisi tak terduga tidak boleh menumpuk.
+        root.querySelectorAll('.research-auth__tear').forEach((node) => node.remove());
+
+        if (reduceMotion) {
+            commit();
+
+            gsap.fromTo(
+                [newPane, newIntro],
+                { opacity: 0 },
+                { opacity: 1, duration: .18, clearProps: 'opacity' }
+            );
 
             return;
         }
 
         switching = true;
 
-        gsap.set(
-            [newHero, newPane],
-            {
-                visibility: 'visible',
-                pointerEvents: 'none',
-            }
-        );
+        // Dari dock di bawah halaman: bawa form ke atas agar sobekan terlihat.
+        const top = forms.getBoundingClientRect().top;
 
-        gsap.set(
-            newHero,
-            {
-                x: 86 * direction,
-                opacity: 0,
-                filter: 'blur(4px)',
-            }
-        );
+        if (top < 0) {
+            window.scrollTo({ top: window.scrollY + top - 72, behavior: 'instant' });
+        }
 
-        gsap.set(
-            newPane,
-            {
-                x: 65 * direction,
-                opacity: 0,
-                filter: 'blur(3px)',
-            }
-        );
+        const { halves, seam } = buildTear(forms, oldPane);
+        const [left, right] = halves;
+        const gap = mobile.matches ? 12 : 18;
+        const tilt = mobile.matches ? .5 : .8;
 
-        gsap.set(
-            wave,
-            {
-                opacity: 0,
-                xPercent:
-                    direction === 1
-                        ? -145
-                        : 245,
-            }
-        );
+        commit();
 
-        const timeline =
-            gsap.timeline({
-                defaults: {
-                    ease: 'power3.inOut',
-                },
+        const timeline = gsap.timeline({
+            defaults: { ease: 'power2.inOut' },
+            onComplete: finishSwitch,
+            onInterrupt: finishSwitch,
+        });
 
-                onComplete: () => {
-                    root.dataset.view = target;
-
-                    gsap.set(
-                        [
-                            oldHero,
-                            oldPane,
-                            newHero,
-                            newPane,
-                        ],
-                        {
-                            clearProps:
-                                'transform,opacity,visibility,pointerEvents,filter',
-                        }
-                    );
-
-                    gsap.set(
-                        wave,
-                        {
-                            opacity: 0,
-                        }
-                    );
-
-                    newPane.scrollTop = 0;
-
-                    if (
-                        updateHistory &&
-                        url
-                    ) {
-                        history.pushState(
-                            {
-                                authView: target,
-                            },
-                            '',
-                            url
-                        );
-                    }
-
-                    switching = false;
-                },
-            });
+        const open = TEAR.seam * .65;
+        const fadeAt = open + TEAR.open * .9;
 
         timeline
-            .to(
-                wave,
-                {
-                    opacity: .94,
-                    duration: .1,
-                },
+            // 1. seam tergambar dari atas ke bawah
+            .fromTo(
+                seam,
+                { opacity: 1, clipPath: 'inset(0% 0% 100% 0%)' },
+                { clipPath: 'inset(0% 0% 0% 0%)', duration: TEAR.seam, ease: 'power1.out' },
                 0
             )
+            // 2. lembar terbuka ke kiri dan kanan
+            .to(left, { x: -gap, rotation: -tilt, duration: TEAR.open, ease: 'power3.inOut' }, open)
+            .to(right, { x: gap, rotation: tilt, duration: TEAR.open, ease: 'power3.inOut' }, open)
+            .to(seam, { opacity: 0, duration: .24, ease: 'power1.in' }, open + TEAR.open * .45)
+            // 3. potongan lama memudar, form baru settle
+            .to(halves, { opacity: 0, duration: TEAR.fade, ease: 'power1.in' }, fadeAt)
+            .fromTo(newPane, { y: 10 }, { y: 0, duration: TEAR.settle, ease: 'power3.out' }, fadeAt)
+            .fromTo(newIntro, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: TEAR.settle, ease: 'power3.out' }, fadeAt - .1);
 
-            .to(
-                wave,
-                {
-                    xPercent:
-                        direction === 1
-                            ? 245
-                            : -145,
-                    duration: .72,
-                    ease: 'power2.inOut',
-                },
-                0
-            )
-
-            .to(
-                wave,
-                {
-                    opacity: 0,
-                    duration: .17,
-                },
-                .56
-            )
-
-            .to(
-                oldHero,
-                {
-                    x: -90 * direction,
-                    opacity: 0,
-                    filter: 'blur(4px)',
-                    duration: .33,
-                },
-                .03
-            )
-
-            .to(
-                oldPane,
-                {
-                    x: -68 * direction,
-                    opacity: 0,
-                    filter: 'blur(3px)',
-                    duration: .30,
-                },
-                .04
-            )
-
-            .to(
-                newHero,
-                {
-                    x: 0,
-                    opacity: 1,
-                    filter: 'blur(0px)',
-                    duration: .42,
-                    ease: 'power3.out',
-                },
-                .22
-            )
-
-            .to(
-                newPane,
-                {
-                    x: 0,
-                    opacity: 1,
-                    filter: 'blur(0px)',
-                    duration: .39,
-                    ease: 'power3.out',
-                },
-                .25
-            );
-    }
-}
-
-/* ============================================================
-   JOURNEY
-   ============================================================ */
-
-function setupJourneyLoops(
-    root,
-    reduceMotion
-) {
-    root.querySelectorAll(
-        '[data-auth-journey]'
-    ).forEach((journey) => {
-        const steps = [
-            ...journey.querySelectorAll(
-                '[data-auth-journey-step]'
-            ),
-        ];
-
-        const progress =
-            journey.querySelector(
-                '[data-auth-journey-progress]'
-            );
-
-        if (!steps.length) {
-            return;
-        }
-
-        let index = 0;
-
-        const render = () => {
-            const percentage =
-                steps.length > 1
-                    ? (
-                        index /
-                        (steps.length - 1)
-                    ) * 100
-                    : 0;
-
-            if (progress) {
-                progress.style.width =
-                    `${percentage}%`;
-            }
-
-            steps.forEach((step, stepIndex) => {
-                step.classList.toggle(
-                    'is-past',
-                    stepIndex < index
-                );
-
-                step.classList.toggle(
-                    'is-current',
-                    stepIndex === index
-                );
-
-                step.classList.toggle(
-                    'is-future',
-                    stepIndex > index
-                );
-            });
-
-            if (
-                !reduceMotion &&
-                steps[index]
-            ) {
-                const dot =
-                    steps[index].querySelector('i');
-
-                if (dot) {
-                    gsap.fromTo(
-                        dot,
-                        {
-                            scale: .76,
-                        },
-                        {
-                            scale: 1.2,
-                            duration: .34,
-                            ease: 'back.out(2)',
-                            clearProps: 'transform',
-                        }
-                    );
-                }
-            }
+        // Watchdog: kalau timeline tak pernah selesai (mis. tab di background),
+        // lock tetap dilepas dan clone dihapus.
+        active = {
+            timeline,
+            guard: gsap.delayedCall(timeline.duration() + .8, finishSwitch),
+            targets: [newPane, newIntro],
         };
+    }
 
-        render();
+    root.querySelectorAll('[data-auth-switch]').forEach((link) => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
 
-        if (!reduceMotion) {
-            window.setInterval(
-                () => {
-                    index =
-                        (index + 1) %
-                        steps.length;
+            requestView(link.dataset.authSwitch, true);
+        });
+    });
 
-                    render();
-                },
-                1450
-            );
+    nextButton?.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        requestView(root.dataset.view === 'signin' ? 'signup' : 'signin', true);
+    });
+
+    window.addEventListener('popstate', () => {
+        requestView(
+            location.pathname.includes('/register') ? 'signup' : 'signin',
+            false
+        );
+    });
+
+    // Tab di background menghentikan rAF; selesaikan seketika agar tidak menggantung.
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && active) {
+            active.timeline.progress(1);
         }
     });
-}
 
-/* ============================================================
-   AMBIENT MOTION
-   ============================================================ */
+    // Keyboard mobile: sembunyikan dock saat mengetik agar tidak menutupi input.
+    const TYPING = 'input:not([type="checkbox"]), select, textarea';
 
-function setupAmbientMotion(root) {
-    animateBlob(
-        root,
-        '.research-auth__blob--coral',
-        20,
-        16,
-        7
-    );
-
-    animateBlob(
-        root,
-        '.research-auth__blob--teal',
-        -20,
-        15,
-        6.3
-    );
-
-    animateBlob(
-        root,
-        '.research-auth__blob--blue',
-        -23,
-        19,
-        8
-    );
-
-    animateBlob(
-        root,
-        '.research-auth__blob--peach',
-        -18,
-        -16,
-        9
-    );
-
-    gsap.to(
-        root.querySelectorAll(
-            '.research-auth__particle'
-        ),
-        {
-            y: -10,
-            x: 4,
-            rotation: 8,
-            duration: 3.1,
-            stagger: .32,
-            repeat: -1,
-            yoyo: true,
-            ease: 'sine.inOut',
+    root.addEventListener('focusin', (event) => {
+        if (event.target.matches(TYPING)) {
+            root.classList.add('is-typing');
         }
-    );
-
-    const grid =
-        root.querySelector(
-            '[data-auth-grid]'
-        );
-
-    if (grid) {
-        gsap.to(
-            grid,
-            {
-                backgroundPosition:
-                    '39px 39px',
-                duration: 15,
-                repeat: -1,
-                ease: 'none',
-            }
-        );
-    }
-}
-
-function animateBlob(
-    root,
-    selector,
-    x,
-    y,
-    duration
-) {
-    const element =
-        root.querySelector(selector);
-
-    if (!element) {
-        return;
-    }
-
-    gsap.to(
-        element,
-        {
-            x,
-            y,
-            duration,
-            repeat: -1,
-            yoyo: true,
-            ease: 'sine.inOut',
-        }
-    );
-}
-
-/* ============================================================
-   LOGIN VISUAL MOTION
-   ============================================================ */
-
-function setupLoginMotion(root) {
-    const workspace =
-        root.querySelector(
-            '[data-login-workspace]'
-        );
-
-    const search =
-        root.querySelector(
-            '[data-search-orb]'
-        );
-
-    const evidence =
-        root.querySelector(
-            '[data-evidence-card]'
-        );
-
-    const navigation =
-        root.querySelector(
-            '[data-evidence-nav]'
-        );
-
-    if (workspace) {
-        gsap.to(
-            workspace,
-            {
-                y: -7,
-                duration: 3.2,
-                repeat: -1,
-                yoyo: true,
-                ease: 'sine.inOut',
-            }
-        );
-    }
-
-    if (search) {
-        gsap.to(
-            search,
-            {
-                x: 3,
-                y: -8,
-                rotation: 8,
-                scale: 1.04,
-                duration: 2.5,
-                repeat: -1,
-                yoyo: true,
-                ease: 'sine.inOut',
-            }
-        );
-    }
-
-    if (navigation) {
-        gsap.to(
-            navigation,
-            {
-                x: 2,
-                duration: 1.7,
-                repeat: -1,
-                yoyo: true,
-                ease: 'sine.inOut',
-            }
-        );
-    }
-
-    if (evidence) {
-        gsap.timeline({
-            repeat: -1,
-            repeatDelay: .45,
-        })
-            .to(
-                evidence,
-                {
-                    x: 3,
-                    backgroundColor:
-                        'rgba(32,170,166,.15)',
-                    duration: .55,
-                }
-            )
-            .to(
-                evidence,
-                {
-                    x: 0,
-                    backgroundColor:
-                        'rgba(32,170,166,.09)',
-                    duration: .60,
-                }
-            );
-    }
-
-    root.querySelectorAll(
-        '[data-source-lines] span'
-    ).forEach((line, index) => {
-        gsap.to(
-            line,
-            {
-                scaleX:
-                    index === 0
-                        ? .84
-                        : .90,
-
-                opacity: .70,
-
-                duration:
-                    1.55 +
-                    (index * .20),
-
-                repeat: -1,
-                yoyo: true,
-                ease: 'sine.inOut',
-            }
-        );
-    });
-}
-
-/* ============================================================
-   REGISTER VISUAL MOTION
-   ============================================================ */
-
-function setupRegisterMotion(root) {
-    root.querySelectorAll(
-        '[data-flow-path]'
-    ).forEach((path, index) => {
-        gsap.set(
-            path,
-            {
-                strokeDashoffset:
-                    40 +
-                    (index * 4),
-            }
-        );
-
-        gsap.to(
-            path,
-            {
-                strokeDashoffset: 0,
-                duration:
-                    1.8 +
-                    (index * .12),
-                repeat: -1,
-                ease: 'none',
-            }
-        );
     });
 
-    root.querySelectorAll(
-        '[data-flow-card]'
-    ).forEach((card, index) => {
-        gsap.to(
-            card,
-            {
-                y:
-                    index % 2 === 0
-                        ? -5
-                        : 5,
-
-                x:
-                    index % 2 === 0
-                        ? 2
-                        : -2,
-
-                rotation:
-                    index % 2 === 0
-                        ? -.6
-                        : .6,
-
-                duration:
-                    2.8 +
-                    (index * .25),
-
-                repeat: -1,
-                yoyo: true,
-                ease: 'sine.inOut',
+    root.addEventListener('focusout', () => {
+        window.setTimeout(() => {
+            if (!document.activeElement?.matches?.(TYPING)) {
+                root.classList.remove('is-typing');
             }
-        );
+        }, 80);
     });
 
-    const note =
-        root.querySelector(
-            '[data-research-note]'
-        );
-
-    if (note) {
-        gsap.to(
-            note,
-            {
-                y: -6,
-                duration: 3.25,
-                repeat: -1,
-                yoyo: true,
-                ease: 'sine.inOut',
-            }
-        );
-    }
+    syncView();
 }

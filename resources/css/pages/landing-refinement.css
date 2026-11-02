@@ -735,301 +735,311 @@
 
 /* ==========================================================================
    EVIDENCE FLOW
+   Satu state machine untuk desktop (horizontal) dan mobile (vertikal).
+   landing-motion.js hanya mengganti data-flow-state pada .br-evidence-panel
+   (loop saat panel terlihat): idle → sources → line-in → evidence → line-out
+   → insight → idle. Tanpa atribut = tampilan final (no-JS / reduced motion).
+   --s1..--s3 = node aktif, --l1/--l2 = garis terisi (0|1). Visual diturunkan
+   dari variabel itu, hanya transform + opacity. Delay antar-segmen dikali
+   variabelnya sendiri, jadi saat reset (nilai 0) delay otomatis hilang.
+   Jadwal state ada di EVIDENCE_FLOW_SCHEDULE (landing-motion.js).
    ========================================================================== */
 
-.landing-reference-page
+.br-evidence-panel { --s1: 1; --l1: 1; --s2: 1; --l2: 1; --s3: 1; }
+.br-evidence-panel[data-flow-state] { --s1: 0; --l1: 0; --s2: 0; --l2: 0; --s3: 0; }
+.br-evidence-panel[data-flow-state="sources"] { --s1: 1; }
+.br-evidence-panel[data-flow-state="line-in"] { --s1: 1; --l1: 1; }
+.br-evidence-panel[data-flow-state="evidence"] { --s1: 1; --l1: 1; --s2: 1; }
+.br-evidence-panel[data-flow-state="line-out"] { --s1: 1; --l1: 1; --s2: 1; --l2: 1; }
+.br-evidence-panel[data-flow-state="insight"] { --s1: 1; --l1: 1; --s2: 1; --l2: 1; --s3: 1; }
+
 .br-evidence-panel__flow {
+    --track: rgba(255, 255, 255, 0.26);
+    --lit: #fff;
     position: relative;
-
-    min-height: 195px;
-
-    margin-top: 17px;
-
-    overflow: hidden;
-}
-
-
-/* Sources default redup */
-
-.landing-reference-page
-.br-source-stack {
-    z-index: 4;
-
-    width: 118px;
-}
-
-.landing-reference-page
-.br-source-stack > div {
-    min-height: 40px;
-
-    padding: 0 10px;
-
-    color:
-        rgba(255, 255, 255, 0.5);
-
-    border-color:
-        rgba(255, 255, 255, 0.15);
-
-    background:
-        rgba(87, 53, 40, 0.08);
-
-    opacity: 0.72;
-
-    filter: saturate(0.5);
-
-    box-shadow: none;
-
-    transition:
-        color 0.32s ease,
-        opacity 0.32s ease,
-        filter 0.32s ease,
-        background 0.32s ease,
-        border-color 0.32s ease,
-        transform 0.32s var(--br-ease),
-        box-shadow 0.32s ease;
-}
-
-.landing-reference-page
-.br-source-stack > div span {
-    font-size: 0.7rem;
-}
-
-.landing-reference-page
-.br-source-stack > div.is-active {
-    color: #fff;
-
-    opacity: 1;
-
-    filter: saturate(1);
-
-    transform: translateX(4px);
-
-    border-color:
-        rgba(255, 255, 255, 0.42);
-
-    background:
-        rgba(255, 255, 255, 0.115);
-
-    box-shadow:
-        0 9px 21px
-        rgba(104, 38, 11, 0.14);
-}
-
-
-/* Garis default redup */
-
-.landing-reference-page
-.br-evidence-panel__connectors {
     z-index: 2;
-
-    overflow: visible;
+    display: grid;
+    grid-template-columns: 116px 36px minmax(24px, 1fr) 78px minmax(24px, 1fr) 108px;
+    align-items: center;
+    margin-top: 17px;
+    padding: 18px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    background: rgba(128, 50, 17, 0.18);
 }
 
-.landing-reference-page
-.br-evidence-panel__connectors path {
-    opacity: 1;
-
-    stroke:
-        rgba(255, 255, 255, 0.18);
-
-    stroke-width: 1.7;
-
-    stroke-dasharray: 6 8;
-
-    transition:
-        stroke 0.28s ease,
-        opacity 0.28s ease,
-        stroke-width 0.28s ease;
+/* Stage 1 — sumber (+ konektor ke bus) */
+.br-source-stack {
+    display: grid;
+    gap: 10px;
 }
 
-.landing-reference-page
-.br-evidence-panel__connectors
-path.is-flow {
-    stroke:
-        rgba(255, 255, 255, 0.94);
-
-    stroke-width: 2.2;
-
-    opacity: 1;
-
-    animation:
-        brEvidenceDashCompact
-        0.7s
-        linear
-        infinite;
+.br-source-stack > div {
+    position: relative;
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    align-items: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 8px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    opacity: calc(0.5 + 0.5 * var(--s1));
+    transform: translateX(calc(-6px * (1 - var(--s1))));
+    transition: opacity 0.24s ease, transform 0.24s var(--br-ease);
+    transition-delay: calc(var(--i, 0) * 80ms * var(--s1));
 }
 
+.br-source-stack > div:nth-child(2) { --i: 1; }
+.br-source-stack > div:nth-child(3) { --i: 2; }
 
-/* Titik animasi */
+.br-source-stack svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+}
 
-.landing-reference-page .br-flow-dot {
+.br-source-stack span {
+    font-size: 0.62rem;
+    font-weight: 850;
+    letter-spacing: 0.06em;
+}
+
+/* Garis (di belakang card): track statis + isi yang di-scale. */
+.br-source-stack > div::before,
+.br-source-stack > div::after {
+    content: "";
     position: absolute;
+    z-index: -1;
+    top: 50%;
+    left: 100%;
+    width: 36px;
+    height: 2px;
+    margin-top: -1px;
+    background: var(--track);
+}
 
-    z-index: 8;
+.br-source-stack > div::after {
+    background: var(--lit);
+    transform-origin: left;
+    transform: scaleX(var(--l1));
+    transition: transform 0.15s linear;
+}
 
-    left: -30px;
-    top: -30px;
+.br-flow__join {
+    --on: var(--l1);
+    position: relative;
+    align-self: stretch;
+}
 
-    width: 10px;
-    height: 10px;
+.br-flow__join::before,
+.br-flow__join::after {
+    content: "";
+    position: absolute;
+    right: -1px;
+    top: 20px;
+    bottom: 20px;
+    width: 2px;
+    background: var(--track);
+}
 
-    border:
-        2px solid
-        rgba(255, 255, 255, 0.88);
+.br-flow__join::after {
+    background: var(--lit);
+    transform: scaleY(var(--l1));
+    transition: transform 0.14s linear calc(0.15s * var(--l1));
+}
 
+.br-flow__link {
+    position: relative;
+    height: 2px;
+    background: var(--track);
+}
+
+.br-flow__link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--lit);
+    transform-origin: left;
+    transform: scaleX(var(--on));
+}
+
+.br-flow__link--in { --on: var(--l1); }
+.br-flow__link--in::after { transition: transform 0.16s linear calc(0.29s * var(--l1)); }
+
+.br-flow__link--out { --on: var(--l2); }
+.br-flow__link--out::after { transition: transform 0.42s linear; }
+
+/* Node (bulet) tiap tahap: selalu terlihat, terisi saat tahap tercapai. */
+.br-flow__dot {
+    position: absolute;
+    z-index: 2;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.6);
     border-radius: 50%;
-
-    background:
-        rgba(255, 196, 139, 0.96);
-
-    opacity: 0;
-
-    pointer-events: none;
-
-    box-shadow:
-        0 0 0 4px
-        rgba(255, 255, 255, 0.08);
-
-    transform:
-        translate(-50%, -50%)
-        scale(0.8);
-
-    transition:
-        opacity 0.16s ease,
-        transform 0.18s ease,
-        background 0.22s ease,
-        box-shadow 0.22s ease;
+    background: #ec5a25;
+    font-style: normal;
 }
 
-.landing-reference-page
-.br-flow-dot.is-visible {
-    opacity: 1;
-
-    transform:
-        translate(-50%, -50%)
-        scale(1);
-}
-
-.landing-reference-page
-.br-flow-dot.is-arrived {
+.br-flow__dot::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: 50%;
     background: #fff;
-
-    box-shadow:
-        0 0 0 5px
-        rgba(255, 255, 255, 0.12),
-        0 0 20px
-        rgba(255, 255, 255, 0.45);
+    transform: scale(var(--on));
+    transition: transform 0.2s var(--br-ease) calc(0.15s * var(--on));
 }
 
+.br-flow__join .br-flow__dot { right: -7px; top: 50%; margin-top: -7px; }
 
-/* Analysis default redup */
-
-.landing-reference-page
+/* Stage 2 — analisis evidence */
 .br-analysis-node {
-    opacity: 0.44;
-
-    filter:
-        saturate(0.46)
-        brightness(0.84);
-
-    transform-origin: center;
-
-    transition:
-        opacity 0.32s ease,
-        filter 0.32s ease,
-        transform 0.32s var(--br-ease);
+    --on: var(--s2);
+    position: relative;
+    z-index: 3;
+    width: 78px;
+    height: 78px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    text-align: center;
+    opacity: calc(0.5 + 0.5 * var(--on));
+    transform: scale(calc(1 + 0.04 * var(--on)));
+    transition: opacity 0.38s ease, transform 0.38s var(--br-ease);
 }
 
-.landing-reference-page
 .br-analysis-node__halo {
-    opacity: 0.12;
-
-    animation: none;
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.07);
+    transform: scale(calc(0.82 + 0.18 * var(--on)));
+    transition: transform 0.38s var(--br-ease);
 }
 
-.landing-reference-page
-.br-analysis-node.is-active {
-    opacity: 1;
-
-    filter:
-        saturate(1)
-        brightness(1.08);
-
-    transform: scale(1.045);
+.br-analysis-node svg {
+    position: relative;
+    z-index: 2;
+    width: 50px;
+    height: 50px;
+    fill: rgba(255, 255, 255, 0.12);
+    stroke: #fff;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
-.landing-reference-page
-.br-analysis-node.is-active
-.br-analysis-node__halo {
-    opacity: 1;
-
-    animation:
-        brAnalysisHaloCompact
-        1.5s
-        ease-in-out
-        infinite;
+.br-analysis-node small,
+.br-insight-node small {
+    font-size: 0.58rem;
+    font-weight: 850;
+    letter-spacing: 0.13em;
+    line-height: 1.25;
 }
 
+.br-analysis-node small {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    white-space: nowrap;
+    transform: translateX(-50%);
+}
 
-/* Insight default redup */
+.br-analysis-node .br-flow__dot,
+.br-insight-node .br-flow__dot { left: -7px; top: 50%; margin-top: -7px; }
 
-.landing-reference-page
+/* Stage 3 — insight siap */
 .br-insight-node {
-    opacity: 0.38;
-
-    filter:
-        saturate(0.4)
-        brightness(0.82);
-
-    transition:
-        opacity 0.32s ease,
-        filter 0.32s ease,
-        transform 0.32s var(--br-ease),
-        box-shadow 0.32s ease;
+    --on: var(--s3);
+    position: relative;
+    z-index: 3;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    text-align: center;
+    opacity: calc(0.5 + 0.5 * var(--on));
+    transform: scale(calc(1 + 0.04 * var(--on)));
+    transition: opacity 0.4s ease, transform 0.4s var(--br-ease);
 }
 
-.landing-reference-page
-.br-insight-node.is-active {
-    opacity: 1;
-
-    filter:
-        saturate(1)
-        brightness(1.1);
-
-    transform: scale(1.045);
-
-    box-shadow:
-        0 0 28px
-        rgba(255, 255, 255, 0.08);
+.br-insight-node svg {
+    width: 46px;
+    height: 46px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
+/* Pulse kecil satu kali saat node aktif (properti `scale` terpisah dari transform). */
+@keyframes br-flow-pulse {
+    50% { scale: 1.1; }
+}
 
-/* Legend */
+.br-evidence-panel[data-flow-state="evidence"] .br-analysis-node__halo,
+.br-evidence-panel[data-flow-state="insight"] .br-insight-node {
+    animation: br-flow-pulse 0.45s ease-out;
+}
 
-.landing-reference-page
+/* Legend mengikuti tahap yang sama */
 .br-evidence-panel__legend {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 14px;
     padding-top: 9px;
 }
 
-.landing-reference-page
 .br-evidence-panel__legend span {
-    opacity: 0.4;
-
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #fff;
     font-size: 0.59rem;
-
-    transition:
-        opacity 0.25s ease,
-        transform 0.25s ease,
-        color 0.25s ease;
+    opacity: calc(0.45 + 0.55 * var(--on));
+    transition: opacity 0.3s ease;
 }
 
-.landing-reference-page
-.br-evidence-panel__legend span.is-active {
-    opacity: 1;
+.br-evidence-panel__legend span:nth-child(1) { --on: var(--s1); }
+.br-evidence-panel__legend span:nth-child(2) { --on: var(--s2); }
+.br-evidence-panel__legend span:nth-child(3) { --on: var(--s3); }
 
-    transform: translateY(-1px);
+.br-evidence-panel__legend i {
+    width: 12px;
+    height: 12px;
+    border: 3px solid rgba(255, 255, 255, 0.75);
+    border-radius: 50%;
+    background: #ff8c33;
+    font-style: normal;
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .br-evidence-panel__flow *,
+    .br-evidence-panel__flow *::before,
+    .br-evidence-panel__flow *::after,
+    .br-evidence-panel__legend span {
+        transition: none;
+        animation: none;
+    }
+}
 
 /* ==========================================================================
    FOCUS STRIP
@@ -1851,33 +1861,6 @@ li.is-active {
 }
 
 
-@keyframes brEvidenceDashCompact {
-    from {
-        stroke-dashoffset: 44;
-    }
-
-    to {
-        stroke-dashoffset: 0;
-    }
-}
-
-
-@keyframes brAnalysisHaloCompact {
-    0%,
-    100% {
-        transform: scale(0.96);
-
-        opacity: 0.32;
-    }
-
-    50% {
-        transform: scale(1.11);
-
-        opacity: 0.82;
-    }
-}
-
-
 @keyframes brDocumentFloatCompact {
     0%,
     100% {
@@ -2358,88 +2341,91 @@ li.is-active {
     }
 
 
-    .landing-reference-page
-    .br-evidence-panel__flow {
-        min-height: 410px;
 
-        margin-top: 18px;
+    /* Flow mobile: timeline vertikal dengan state yang sama dengan desktop. */
+    .br-evidence-panel__flow {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        padding: 16px 14px 20px;
     }
 
+    .br-source-stack {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        width: 100%;
+    }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Mobile flow vertical.
-    |--------------------------------------------------------------------------
-    */
+    .br-source-stack > div {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        align-content: center;
+        gap: 3px;
+        height: 56px;
+        padding: 0 4px;
+        transform: translateY(calc(-6px * (1 - var(--s1))));
+    }
 
-    .landing-reference-page
-    .br-evidence-panel__connectors,
-
-    .landing-reference-page
-    .br-flow-dot {
+    .br-source-stack > div::before,
+    .br-source-stack > div::after,
+    .br-flow__join::before,
+    .br-flow__join::after {
         display: none;
     }
 
-
-    .landing-reference-page
-    .br-source-stack {
-        position: relative;
-
-        left: auto;
-        right: auto;
-        top: auto;
-
-        width: 100%;
-
-        display: grid;
-
-        gap: 8px;
+    .br-flow__join {
+        --on: var(--s1);
+        align-self: auto;
+        width: 14px;
+        height: 14px;
+        margin-top: 8px;
     }
 
+    .br-flow__join .br-flow__dot { right: auto; left: 0; top: 0; margin: 0; }
 
-    .landing-reference-page
-    .br-source-stack > div {
-        min-height: 44px;
+    .br-flow__link {
+        width: 2px;
+        height: 24px;
     }
 
+    .br-flow__link::after {
+        transform-origin: top;
+        transform: scaleY(var(--on));
+    }
 
-    .landing-reference-page
+    .br-flow__link--in::after,
+    .br-flow__link--out::after { transition: transform 0.43s linear; }
+
     .br-analysis-node {
-        position: relative;
-
-        left: auto;
-        right: auto;
-        top: auto;
-
-        width: 116px;
-
-        margin:
-            22px
-            auto
-            18px;
+        height: auto;
+        padding-bottom: 16px;
     }
 
+    .br-analysis-node__halo {
+        inset: 0 0 auto;
+        height: 78px;
+    }
 
-    .landing-reference-page
+    .br-analysis-node svg {
+        margin-top: 14px;
+        align-self: start;
+    }
+
+    .br-analysis-node small {
+        position: static;
+        margin-top: 20px;
+        transform: none;
+    }
+
     .br-insight-node {
-        position: relative;
-
-        left: auto;
-        right: auto;
-        top: auto;
-
-        width: 160px;
-
-        margin:
-            0
-            auto;
+        width: min(100%, 180px);
+        height: 92px;
     }
 
+    .br-analysis-node .br-flow__dot,
+    .br-insight-node .br-flow__dot { left: 50%; top: auto; bottom: -7px; margin: 0 0 0 -7px; }
 
-    .landing-reference-page
     .br-evidence-panel__legend {
         grid-template-columns: 1fr;
-
         gap: 8px;
     }
 

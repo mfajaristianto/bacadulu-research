@@ -95,6 +95,12 @@ onReady(
                 .matches;
 
 
+        initEvidenceFlow(
+            page,
+            reduceMotion,
+        );
+
+
         if (reduceMotion) {
             return;
         }
@@ -104,7 +110,6 @@ onReady(
         window.setTimeout(() => {
             if (document.hidden || !page.isConnected) return;
             initHeroLoop(page);
-            initEvidenceLoop(page);
             initWorkflowLoop(page);
             initDocumentLoop(page);
         }, 350);
@@ -513,11 +518,29 @@ function initHeroLoop(
 
 
 /* ==========================================================================
-   EVIDENCE PANEL
+   EVIDENCE FLOW
+   Satu-satunya orkestrasi untuk desktop dan mobile: satu IntersectionObserver
+   menjalankan satu rantai timer yang mengganti data-flow-state pada
+   .br-evidence-panel. Garis, node, dan legend diturunkan dari state itu di
+   landing-refinement.css. Loop hanya berjalan saat panel
+   terlihat dan tab aktif; di luar itu timer dihentikan dan state kembali idle.
    ========================================================================== */
 
-function initEvidenceLoop(
+// [state, ms sampai state berikutnya]. Total satu siklus ≈ 3,1 dtk:
+// sumber 0–400 → garis 400–830 → evidence 830–1210 → garis 1210–1630
+// → insight 1630–2030 → hold ~750 → reset 300.
+const EVIDENCE_FLOW_SCHEDULE = [
+    ['sources', 400],
+    ['line-in', 430],
+    ['evidence', 380],
+    ['line-out', 420],
+    ['insight', 1150],
+    ['idle', 300],
+];
+
+function initEvidenceFlow(
     page,
+    reduceMotion,
 ) {
 
     const panel =
@@ -526,751 +549,85 @@ function initEvidenceLoop(
             page,
         );
 
-
-    if (!panel) {
-        return;
-    }
-
-
-    const flow =
-        q(
-            '.br-evidence-panel__flow',
-            panel,
-        );
-
-
-    const connector =
-        q(
-            '.br-evidence-panel__connectors',
-            panel,
-        );
-
-
-    const sourceCards =
-        qa(
-            '.br-source-stack > div',
-            panel,
-        );
-
-
-    const paths =
-        qa(
-            '.br-evidence-panel__connectors path',
-            panel,
-        );
-
-
-    const analysisNode =
-        q(
-            '.br-analysis-node',
-            panel,
-        );
-
-
-    const insightNode =
-        q(
-            '.br-insight-node',
-            panel,
-        );
-
-
-    const legends =
-        qa(
-            '.br-evidence-panel__legend span',
-            panel,
-        );
-
-
+    // Tanpa data-flow-state, CSS menampilkan tampilan final.
     if (
-        !flow
+        !panel
         ||
-        !sourceCards.length
+        reduceMotion
+        ||
+        !('IntersectionObserver' in window)
     ) {
         return;
     }
 
+    let timer = 0;
+    let inView = false;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Kalau Blade versi lama/baru sudah punya dots,
-    | hapus dulu biar tidak dobel.
-    |--------------------------------------------------------------------------
-    */
+    const stop = () => {
 
-    qa(
-        '.br-flow-dot',
-        flow,
-    )
-        .forEach(
-            (
-                dot,
-            ) => {
+        window.clearTimeout(timer);
 
-                dot.remove();
+        timer = 0;
 
-            },
-        );
+        panel.dataset.flowState = 'idle';
 
+    };
 
-    const dots = [];
+    const step = (index) => {
 
+        const [state, duration] =
+            EVIDENCE_FLOW_SCHEDULE[index];
 
-    for (
-        let index = 0;
-        index < 4;
-        index += 1
-    ) {
+        panel.dataset.flowState = state;
 
-        const dot =
-            document
-                .createElement(
-                    'span',
-                );
-
-
-        dot.className =
-            'br-flow-dot';
-
-
-        dot.dataset
-            .flowDot =
-            String(index);
-
-
-        flow
-            .appendChild(
-                dot,
+        timer =
+            window.setTimeout(
+                () => step(
+                    (index + 1) % EVIDENCE_FLOW_SCHEDULE.length,
+                ),
+                duration,
             );
 
+    };
 
-        dots.push(
-            dot,
-        );
+    const sync = () => {
 
-    }
+        const shouldRun = inView && !document.hidden;
 
+        if (shouldRun && !timer) {
+            step(0);
+        } else if (!shouldRun && timer) {
+            stop();
+        }
 
-    const mobileMedia =
-        window
-            .matchMedia(
-                '(max-width: 760px)',
-            );
+    };
 
+    panel.dataset.flowState = 'idle';
 
-    const clearStates =
-        () => {
+    new IntersectionObserver(
+        (entries) => {
 
-            sourceCards
-                .forEach(
-                    (
-                        card,
-                    ) => {
+            const entry = entries[entries.length - 1];
 
-                        card
-                            .classList
-                            .remove(
-                                'is-active',
-                            );
-
-                    },
-                );
-
-
-            paths
-                .forEach(
-                    (
-                        path,
-                    ) => {
-
-                        path
-                            .classList
-                            .remove(
-                                'is-flow',
-                            );
-
-                    },
-                );
-
-
-            dots
-                .forEach(
-                    (
-                        dot,
-                    ) => {
-
-                        dot
-                            .classList
-                            .remove(
-                                'is-visible',
-                                'is-arrived',
-                            );
-
-
-                        dot.style.left =
-                            '-40px';
-
-
-                        dot.style.top =
-                            '-40px';
-
-                    },
-                );
-
-
-            analysisNode
-                ?.classList
-                .remove(
-                    'is-active',
-                );
-
-
-            insightNode
-                ?.classList
-                .remove(
-                    'is-active',
-                );
-
-
-            legends
-                .forEach(
-                    (
-                        legend,
-                    ) => {
-
-                        legend
-                            .classList
-                            .remove(
-                                'is-active',
-                            );
-
-                    },
-                );
-
-        };
-
-
-    const svgPointToFlow =
-        (
-            point,
-        ) => {
-
-            if (!connector) {
-
-                return {
-                    x: 0,
-                    y: 0,
-                };
-
+            // Mulai di ±30% terlihat; berhenti hanya saat benar-benar keluar.
+            if (entry.intersectionRatio >= 0.3) {
+                inView = true;
+            } else if (!entry.isIntersecting) {
+                inView = false;
             }
 
-
-            const viewBox =
-                connector
-                    .viewBox
-                    .baseVal;
-
-
-            const scaleX =
-                connector
-                    .clientWidth
-                /
-                viewBox
-                    .width;
-
-
-            const scaleY =
-                connector
-                    .clientHeight
-                /
-                viewBox
-                    .height;
-
-
-            return {
-
-                x:
-                    point.x
-                    *
-                    scaleX,
-
-                y:
-                    point.y
-                    *
-                    scaleY,
-
-            };
-
-        };
-
-
-    const setDotPosition =
-        (
-            dot,
-            point,
-            offsetY = 0,
-        ) => {
-
-            const converted =
-                svgPointToFlow(
-                    point,
-                );
-
-
-            dot.style.left =
-                `${converted.x}px`;
-
-
-            dot.style.top =
-                `${
-                    converted.y
-                    +
-                    offsetY
-                }px`;
-
-        };
-
-
-    const animateAlongPath =
-        (
-            path,
-            dot,
-            duration,
-            parkOffsetY = 0,
-        ) => {
-
-            return new Promise(
-                (
-                    resolve,
-                ) => {
-
-                    if (
-                        !path
-                        ||
-                        !dot
-                        ||
-                        mobileMedia.matches
-                    ) {
-
-                        resolve();
-                        return;
-                    }
-
-
-                    const totalLength =
-                        path
-                            .getTotalLength();
-
-
-                    let startTime =
-                        null;
-
-
-                    path
-                        .classList
-                        .add(
-                            'is-flow',
-                        );
-
-
-                    dot
-                        .classList
-                        .add(
-                            'is-visible',
-                        );
-
-
-                    const frame =
-                        (
-                            timestamp,
-                        ) => {
-
-                            if (
-                                startTime
-                                ===
-                                null
-                            ) {
-
-                                startTime =
-                                    timestamp;
-
-                            }
-
-
-                            const elapsed =
-                                timestamp
-                                -
-                                startTime;
-
-
-                            const progress =
-                                Math.min(
-                                    elapsed
-                                    /
-                                    duration,
-                                    1,
-                                );
-
-
-                            const eased =
-                                1
-                                -
-                                Math.pow(
-                                    1
-                                    -
-                                    progress,
-                                    3,
-                                );
-
-
-                            const point =
-                                path
-                                    .getPointAtLength(
-                                        totalLength
-                                        *
-                                        eased,
-                                    );
-
-
-                            setDotPosition(
-                                dot,
-                                point,
-                            );
-
-
-                            if (
-                                progress
-                                <
-                                1
-                            ) {
-
-                                window
-                                    .requestAnimationFrame(
-                                        frame,
-                                    );
-
-
-                                return;
-                            }
-
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | Source 1/2/3 berhenti di area tengah,
-                            | tapi sedikit dipisah biar tidak menumpuk persis.
-                            |--------------------------------------------------------------------------
-                            */
-
-                            const finalPoint =
-                                path
-                                    .getPointAtLength(
-                                        totalLength,
-                                    );
-
-
-                            setDotPosition(
-                                dot,
-                                finalPoint,
-                                parkOffsetY,
-                            );
-
-
-                            dot
-                                .classList
-                                .add(
-                                    'is-arrived',
-                                );
-
-
-                            resolve();
-
-                        };
-
-
-                    window
-                        .requestAnimationFrame(
-                            frame,
-                        );
-
-                },
-            );
-
-        };
-
-
-    const runDesktopCycle =
-        async () => {
-
-            clearStates();
-
-
-            legends[0]
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 1 — Jurnal
-            |--------------------------------------------------------------------------
-            */
-
-            sourceCards[0]
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            await animateAlongPath(
-                paths[0],
-                dots[0],
-                820,
-                -11,
-            );
-
-
-            await wait(
-                180,
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 2 — Buku
-            |--------------------------------------------------------------------------
-            */
-
-            sourceCards[1]
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            await animateAlongPath(
-                paths[1],
-                dots[1],
-                760,
-                0,
-            );
-
-
-            await wait(
-                180,
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 3 — Prosiding
-            |--------------------------------------------------------------------------
-            */
-
-            sourceCards[2]
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            await animateAlongPath(
-                paths[2],
-                dots[2],
-                820,
-                11,
-            );
-
-
-            await wait(
-                250,
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Semua source sampai.
-            | Analysis node baru menyala.
-            |--------------------------------------------------------------------------
-            */
-
-            analysisNode
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            legends[1]
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            await wait(
-                650,
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Analysis → Insight
-            |--------------------------------------------------------------------------
-            */
-
-            await animateAlongPath(
-                paths[3],
-                dots[3],
-                950,
-                0,
-            );
-
-
-            insightNode
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            legends[2]
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            await wait(
-                1400,
-            );
-
-        };
-
-
-    const runMobileCycle =
-        async () => {
-
-            clearStates();
-
-
-            legends[0]
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            for (
-                let index = 0;
-                index < sourceCards.length;
-                index += 1
-            ) {
-
-                sourceCards[index]
-                    ?.classList
-                    .add(
-                        'is-active',
-                    );
-
-
-                await wait(
-                    650,
-                );
-
-            }
-
-
-            analysisNode
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            legends[1]
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            await wait(
-                850,
-            );
-
-
-            insightNode
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            legends[2]
-                ?.classList
-                .add(
-                    'is-active',
-                );
-
-
-            await wait(
-                1200,
-            );
-
-        };
-
-
-    const loop =
-        async () => {
-
-            while (
-                document
-                    .documentElement
-                    .contains(
-                        panel,
-                    )
-            ) {
-
-                if (
-                    document.hidden
-                ) {
-
-                    await wait(
-                        700,
-                    );
-
-
-                    continue;
-
-                }
-
-
-                if (
-                    mobileMedia
-                        .matches
-                ) {
-
-                    await runMobileCycle();
-
-                } else {
-
-                    await runDesktopCycle();
-
-                }
-
-
-                await wait(
-                    350,
-                );
-
-            }
-
-        };
-
-
-    loop();
+            sync();
+
+        },
+        {
+            threshold: [0, 0.3],
+        },
+    ).observe(panel);
+
+    document.addEventListener(
+        'visibilitychange',
+        sync,
+    );
 
 }
 

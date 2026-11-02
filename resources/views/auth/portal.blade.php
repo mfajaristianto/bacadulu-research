@@ -55,18 +55,6 @@
     data-login-url="{{ route('login') }}"
     data-register-url="{{ route('register') }}"
 >
-    <div class="research-auth__ambient" aria-hidden="true">
-        <span class="research-auth__blob research-auth__blob--coral"></span>
-        <span class="research-auth__blob research-auth__blob--teal"></span>
-        <span class="research-auth__blob research-auth__blob--blue"></span>
-        <span class="research-auth__blob research-auth__blob--peach"></span>
-
-        <span class="research-auth__particle research-auth__particle--1"></span>
-        <span class="research-auth__particle research-auth__particle--2"></span>
-        <span class="research-auth__particle research-auth__particle--3"></span>
-        <span class="research-auth__particle research-auth__particle--4"></span>
-    </div>
-
     <div class="research-auth__page">
         <div class="research-auth__top">
             <a href="{{ route('home') }}" class="research-auth__back">
@@ -99,6 +87,7 @@
                         href="{{ route('login') }}"
                         class="research-auth__tab"
                         data-auth-switch="signin"
+                        @if ($initialView === 'signin') aria-current="page" @endif
                     >
                         Masuk
                     </a>
@@ -107,6 +96,7 @@
                         href="{{ route('register') }}"
                         class="research-auth__tab"
                         data-auth-switch="signup"
+                        @if ($initialView === 'signup') aria-current="page" @endif
                     >
                         Daftar
                     </a>
@@ -118,25 +108,30 @@
                      LEFT VISUAL
                 ====================================================== --}}
                 <section class="research-auth__visual">
-                    <div
-                        class="research-auth__grid"
-                        data-auth-grid
-                        aria-hidden="true"
-                    ></div>
-
                     {{-- LOGIN --}}
                     <div
                         class="research-auth__hero"
                         data-auth-hero="signin"
                     >
+                        <div class="research-auth__stage">
+                            <img
+                                class="research-auth__mascot"
+                                src="{{ asset('assets/mascot/mascot-reading.png') }}"
+                                alt=""
+                                width="280"
+                                height="280"
+                                decoding="async"
+                            >
+                        </div>
+
                         <div class="research-auth__intro">
                             <p class="research-auth__eyebrow">
                                 BACADULU RESEARCH
                             </p>
 
                             <h1>
-                                Lanjutkan research,
-                                <span>bukan mulai dari nol.</span>
+                                Research with evidence,
+                                <span>not guesswork.</span>
                             </h1>
 
                             <p>
@@ -145,181 +140,41 @@
                             </p>
                         </div>
 
-                        <div
-                            class="research-auth__journey"
-                            data-auth-journey
-                        >
-                            <div class="research-auth__journey-track">
-                                <span data-auth-journey-progress></span>
-                            </div>
-
-                            <article data-auth-journey-step>
-                                <i></i>
-                                <small>01</small>
-                                <strong>Question</strong>
-                            </article>
-
-                            <article data-auth-journey-step>
-                                <i></i>
-                                <small>02</small>
-                                <strong>Retrieval</strong>
-                            </article>
-
-                            <article data-auth-journey-step>
-                                <i></i>
-                                <small>03</small>
-                                <strong>Analysis</strong>
-                            </article>
-
-                            <article data-auth-journey-step>
-                                <i></i>
-                                <small>04</small>
-                                <strong>Output</strong>
-                            </article>
-                        </div>
-
-                        <div
-                            class="research-auth__workspace-stage"
-                            data-login-stage
-                        >
-                            <article
-                                class="research-auth__workspace"
-                                data-login-workspace
-                            >
-                                <header class="research-auth__workspace-head">
-                                    <div>
-                                        <small>RESEARCH SESSION</small>
-                                        <strong>ESG &amp; Firm Value</strong>
-                                    </div>
-
-                                    <span class="research-auth__workspace-status">
-                                        <i></i>
-                                        Evidence ready
-                                    </span>
-                                </header>
-
-                                <div class="research-auth__workspace-body">
-                                    <nav>
-                                        <span>
-                                            <svg
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                stroke-width="1.8"
-                                            >
-                                                <circle cx="12" cy="12" r="8"/>
-                                                <path d="M9 12h6"/>
-                                            </svg>
-
-                                            Question
-                                        </span>
-
-                                        <span
-                                            class="is-active"
-                                            data-evidence-nav
-                                        >
-                                            <svg
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                stroke-width="1.8"
-                                            >
-                                                <rect
-                                                    x="5"
-                                                    y="4"
-                                                    width="14"
-                                                    height="16"
-                                                    rx="2"
-                                                />
-                                                <path d="M9 9h6"/>
-                                                <path d="M9 13h6"/>
-                                            </svg>
-
-                                            Evidence
-                                        </span>
-
-                                        <span>
-                                            <svg
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                stroke-width="1.8"
-                                            >
-                                                <path d="M5 17l4-5 4 2 6-8"/>
-                                                <path d="M16 6h3v3"/>
-                                            </svg>
-
-                                            Analysis
-                                        </span>
-
-                                        <span>
-                                            <svg
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                stroke-width="1.8"
-                                            >
-                                                <path d="M7 3h7l4 4v14H7z"/>
-                                                <path d="M14 3v5h5"/>
-                                            </svg>
-
-                                            Output
-                                        </span>
-                                    </nav>
-
-                                    <div class="research-auth__workspace-main">
-                                        <small>
-                                            RELEVANT ACADEMIC SOURCES
-                                        </small>
-
-                                        <div
-                                            class="research-auth__source-lines"
-                                            data-source-lines
-                                        >
-                                            <span></span>
-                                            <span></span>
-                                            <span></span>
-                                        </div>
-
-                                        <article
-                                            class="research-auth__evidence"
-                                            data-evidence-card
-                                        >
-                                            <b>E01</b>
-
-                                            <div>
-                                                <small>CURATED SOURCE</small>
-                                                <strong>
-                                                    Relevant academic evidence
-                                                </strong>
-                                            </div>
-                                        </article>
-
-                                        <div class="research-auth__chips">
-                                            <span>PDF</span>
-                                            <span>Journal</span>
-                                            <span>Dataset</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </article>
-
-                            <div
-                                class="research-auth__search"
-                                data-search-orb
-                                aria-hidden="true"
-                            >
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <circle cx="10.5" cy="10.5" r="5.5"/>
-                                    <path d="M15 15l4 4"/>
+                        <p class="research-auth__ribbon" aria-label="Source, Evidence, Insight">
+                            <span class="research-auth__ribbon-step">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M7 3h7l4 4v14H7z"/>
+                                    <path d="M14 3v5h5"/>
+                                    <path d="M10 13h5M10 17h5"/>
                                 </svg>
-                            </div>
-                        </div>
+                                Source
+                            </span>
+
+                            <svg class="research-auth__ribbon-link" viewBox="0 0 24 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M1 4h20M17.5 1l3.5 3-3.5 3"/>
+                            </svg>
+
+                            <span class="research-auth__ribbon-step is-core">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M12 3l9 4.5-9 4.5-9-4.5z"/>
+                                    <path d="M3 12l9 4.5 9-4.5"/>
+                                    <path d="M3 16.5L12 21l9-4.5"/>
+                                </svg>
+                                Evidence
+                            </span>
+
+                            <svg class="research-auth__ribbon-link" viewBox="0 0 24 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M1 4h20M17.5 1l3.5 3-3.5 3"/>
+                            </svg>
+
+                            <span class="research-auth__ribbon-step">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M9 18h6M10 21h4"/>
+                                    <path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>
+                                </svg>
+                                Insight
+                            </span>
+                        </p>
                     </div>
 
                     {{-- REGISTER --}}
@@ -327,6 +182,17 @@
                         class="research-auth__hero"
                         data-auth-hero="signup"
                     >
+                        <div class="research-auth__stage">
+                            <img
+                                class="research-auth__mascot"
+                                src="{{ asset('assets/mascot/mascot-reading.png') }}"
+                                alt=""
+                                width="280"
+                                height="280"
+                                decoding="async"
+                            >
+                        </div>
+
                         <div class="research-auth__intro">
                             <p class="research-auth__eyebrow">
                                 MULAI DI BACADULU RESEARCH
@@ -343,178 +209,41 @@
                             </p>
                         </div>
 
-                        <div
-                            class="research-auth__journey"
-                            data-auth-journey
-                        >
-                            <div class="research-auth__journey-track">
-                                <span data-auth-journey-progress></span>
-                            </div>
+                        <p class="research-auth__ribbon" aria-label="Source, Evidence, Insight">
+                            <span class="research-auth__ribbon-step">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M7 3h7l4 4v14H7z"/>
+                                    <path d="M14 3v5h5"/>
+                                    <path d="M10 13h5M10 17h5"/>
+                                </svg>
+                                Source
+                            </span>
 
-                            <article data-auth-journey-step>
-                                <i></i>
-                                <small>01</small>
-                                <strong>Daftar</strong>
-                            </article>
-
-                            <article data-auth-journey-step>
-                                <i></i>
-                                <small>02</small>
-                                <strong>Verifikasi</strong>
-                            </article>
-
-                            <article data-auth-journey-step>
-                                <i></i>
-                                <small>03</small>
-                                <strong>Atur profil</strong>
-                            </article>
-
-                            <article data-auth-journey-step>
-                                <i></i>
-                                <small>04</small>
-                                <strong>Mulai riset</strong>
-                            </article>
-                        </div>
-
-                        <div
-                            class="research-auth__flow"
-                            data-register-flow
-                        >
-                            <svg
-                                class="research-auth__flow-lines"
-                                viewBox="0 0 600 300"
-                                preserveAspectRatio="none"
-                                aria-hidden="true"
-                            >
-                                <path
-                                    data-flow-path
-                                    d="M125 62 C190 80 240 112 285 142"
-                                />
-
-                                <path
-                                    data-flow-path
-                                    d="M475 62 C410 80 360 112 315 142"
-                                />
-
-                                <path
-                                    data-flow-path
-                                    d="M285 165 C230 195 185 218 125 240"
-                                />
-
-                                <path
-                                    data-flow-path
-                                    d="M315 165 C370 195 415 218 475 240"
-                                />
+                            <svg class="research-auth__ribbon-link" viewBox="0 0 24 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M1 4h20M17.5 1l3.5 3-3.5 3"/>
                             </svg>
 
-                            <article
-                                class="research-auth__flow-card flow-source"
-                                data-flow-card
-                            >
-                                <span class="is-teal">
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.8"
-                                    >
-                                        <path d="M7 3h7l4 4v14H7z"/>
-                                        <path d="M14 3v5h5"/>
-                                        <path d="M10 12h5"/>
-                                        <path d="M10 16h5"/>
-                                    </svg>
-                                </span>
+                            <span class="research-auth__ribbon-step is-core">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M12 3l9 4.5-9 4.5-9-4.5z"/>
+                                    <path d="M3 12l9 4.5 9-4.5"/>
+                                    <path d="M3 16.5L12 21l9-4.5"/>
+                                </svg>
+                                Evidence
+                            </span>
 
-                                <div>
-                                    <strong>Curated Sources</strong>
-                                    <small>Jurnal, dataset, laporan</small>
-                                </div>
-                            </article>
+                            <svg class="research-auth__ribbon-link" viewBox="0 0 24 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M1 4h20M17.5 1l3.5 3-3.5 3"/>
+                            </svg>
 
-                            <article
-                                class="research-auth__flow-card flow-ai"
-                                data-flow-card
-                            >
-                                <span class="is-purple">
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.8"
-                                    >
-                                        <path d="M12 3l1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1L6.5 8.5l4.1-1.4L12 3z"/>
-                                        <path d="M18 14l.8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8L18 14z"/>
-                                    </svg>
-                                </span>
-
-                                <div>
-                                    <strong>AI Research Assistant</strong>
-                                    <small>Analisis berbasis evidence</small>
-                                </div>
-                            </article>
-
-                            <article
-                                class="research-auth__research-note"
-                                data-research-note
-                            >
-                                <header>
-                                    <i></i>
-                                    <small>RESEARCH NOTE</small>
-                                </header>
-
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                                <span></span>
-
-                                <b></b>
-                                <em></em>
-                            </article>
-
-                            <article
-                                class="research-auth__flow-card flow-evidence"
-                                data-flow-card
-                            >
-                                <span class="is-teal">
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.8"
-                                    >
-                                        <circle cx="10.5" cy="10.5" r="5"/>
-                                        <path d="M14.5 14.5L19 19"/>
-                                        <path d="M8.5 10.5l1.3 1.3 2.5-2.7"/>
-                                    </svg>
-                                </span>
-
-                                <div>
-                                    <small>VALIDATED</small>
-                                    <strong>Evidence</strong>
-                                </div>
-                            </article>
-
-                            <article
-                                class="research-auth__flow-card flow-workspace"
-                                data-flow-card
-                            >
-                                <span class="is-coral">
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.8"
-                                    >
-                                        <path d="M3 7h7l2 2h9v10H3z"/>
-                                    </svg>
-                                </span>
-
-                                <div>
-                                    <small>PERSONAL</small>
-                                    <strong>Workspace</strong>
-                                </div>
-                            </article>
-                        </div>
+                            <span class="research-auth__ribbon-step">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M9 18h6M10 21h4"/>
+                                    <path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>
+                                </svg>
+                                Insight
+                            </span>
+                        </p>
                     </div>
                 </section>
 
@@ -741,7 +470,7 @@
                                 @csrf
 
                                 {{-- NAME --}}
-                                <label class="is-full">
+                                <label>
                                     <span>Nama lengkap</span>
 
                                     <div class="research-auth__input">
@@ -770,7 +499,7 @@
                                 </label>
 
                                 {{-- EMAIL --}}
-                                <label class="is-full">
+                                <label>
                                     <span>Email</span>
 
                                     <div class="research-auth__input">
@@ -1145,6 +874,66 @@
                 </section>
             </div>
         </div>
+
+        {{-- Dock mobile: kembali / pilih mode (Masuk, Daftar) / pindah mode. State dari data-view. --}}
+        <nav class="research-auth__dock" aria-label="Navigasi cepat autentikasi">
+            <a
+                href="{{ route('home') }}"
+                class="research-auth__dock-btn"
+                aria-label="Kembali ke situs"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M14.5 6l-6 6 6 6"/>
+                </svg>
+            </a>
+
+            <div class="research-auth__dock-modes">
+                <span class="research-auth__dock-pill" aria-hidden="true"></span>
+
+                <a
+                    href="{{ route('login') }}"
+                    class="research-auth__dock-mode"
+                    data-auth-switch="signin"
+                    @if ($initialView === 'signin') aria-current="page" @endif
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/>
+                        <path d="M14 8l4 4-4 4"/>
+                        <path d="M18 12H9"/>
+                    </svg>
+                    <span>Masuk</span>
+                </a>
+
+                <a
+                    href="{{ route('register') }}"
+                    class="research-auth__dock-mode"
+                    data-auth-switch="signup"
+                    @if ($initialView === 'signup') aria-current="page" @endif
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="10" cy="8" r="3.5"/>
+                        <path d="M3.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/>
+                        <path d="M19 8v6M16 11h6"/>
+                    </svg>
+                    <span>Daftar</span>
+                </a>
+            </div>
+
+            <a
+                href="{{ $initialView === 'signin' ? route('register') : route('login') }}"
+                class="research-auth__dock-btn"
+                data-auth-next
+                aria-label="{{ $initialView === 'signin' ? 'Pindah ke Daftar' : 'Pindah ke Masuk' }}"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.5 6l6 6-6 6"/>
+                </svg>
+            </a>
+
+            <span class="research-auth__sr" role="status" data-auth-status>
+                Mode {{ $initialView === 'signin' ? 'Masuk' : 'Daftar' }}
+            </span>
+        </nav>
 
         <footer class="research-auth__footer">
             <span>

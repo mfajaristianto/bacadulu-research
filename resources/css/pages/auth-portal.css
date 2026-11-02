@@ -1,7 +1,46 @@
 /* ============================================================
    BACADULU RESEARCH
-   AUTH PORTAL — FINAL
+   AUTH PORTAL (Masuk / Daftar)
+
+   Layout: tanpa tinggi tetap dan tanpa absolute untuk konten aktif.
+   Pane/hero yang aktif berada di normal flow, jadi shell tumbuh mengikuti
+   isi (form Daftar panjang, pesan error) dan halaman scroll natural.
+   Hanya pane/hero yang TIDAK aktif yang di-absolute (tersembunyi) supaya
+   transisi GSAP di auth-research.js tetap bisa menumpuknya.
+   Desktop: split view. <= 900px: satu kolom vertikal.
    ============================================================ */
+
+@font-face {
+    font-family: "Poppins Auth";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/poppins-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Poppins Auth";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("/fonts/poppins-latin-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Poppins Auth";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("/fonts/poppins-latin-600-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Poppins Auth";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/fonts/poppins-latin-700-normal.woff2") format("woff2");
+}
 
 .research-auth,
 .research-auth *,
@@ -25,1792 +64,528 @@ body {
    ============================================================ */
 
 .research-auth {
-    --bd-navy: #17172b;
-    --bd-navy-soft: #292a43;
+    --bd-navy: #170f38;
+    --bd-navy-soft: #241b52;
 
-    --bd-coral: #f56549;
-    --bd-coral-dark: #df5038;
+    --bd-coral: #ef5843;
+    --bd-coral-dark: #d4402c;
+    --bd-gold: #f7aa35;
 
     --bd-teal: #20aaa6;
     --bd-teal-dark: #087f7c;
 
-    --bd-blue: #568ae9;
-    --bd-purple: #746aed;
-
     --bd-paper: #fffdf9;
-    --bd-muted: #716d75;
+    --bd-cream: #fff6ee;
+    --bd-line: #eadfd5;
+    --bd-muted: #6b6578;
+    --bd-paper-solid: #fffcf8;
 
     position: relative;
 
     width: 100%;
-    min-height: 100svh;
+    min-height: 100vh;
+    min-height: 100dvh;
 
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow-x: clip;
 
     color: var(--bd-navy);
 
     background:
-        radial-gradient(
-            circle at -3% 1%,
-            rgba(255, 113, 80, .30),
-            transparent 24rem
-        ),
-        radial-gradient(
-            circle at 63% -10%,
-            rgba(32, 190, 185, .25),
-            transparent 24rem
-        ),
-        radial-gradient(
-            circle at 103% 5%,
-            rgba(86, 138, 233, .27),
-            transparent 28rem
-        ),
-        radial-gradient(
-            circle at 84% 112%,
-            rgba(255, 159, 116, .17),
-            transparent 29rem
-        ),
-        #f7f6f3;
+        radial-gradient(circle at 8% 0%, rgba(247, 170, 53, .08), transparent 22rem),
+        radial-gradient(circle at 100% 100%, rgba(239, 88, 67, .06), transparent 24rem),
+        #fbf8f4;
+
+    font-family:
+        "Poppins Auth",
+        "Plus Jakarta Sans",
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        sans-serif;
 }
 
-.research-auth::before {
-    content: "";
-
-    position: fixed;
-    inset: 0;
-
-    pointer-events: none;
-
-    opacity: .38;
-
-    background-image:
-        linear-gradient(
-            rgba(23, 23, 43, .036) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(23, 23, 43, .036) 1px,
-            transparent 1px
-        );
-
-    background-size: 48px 48px;
+.research-auth input,
+.research-auth select,
+.research-auth button {
+    font-family: inherit;
 }
 
 
 /* ============================================================
-   AMBIENT
-   ============================================================ */
-
-.research-auth__ambient {
-    position: fixed;
-    inset: 0;
-
-    pointer-events: none;
-}
-
-.research-auth__blob,
-.research-auth__particle {
-    position: absolute;
-
-    display: block;
-
-    border-radius: 999px;
-
-    will-change: transform;
-}
-
-.research-auth__blob--coral {
-    top: -165px;
-    left: -145px;
-
-    width: 360px;
-    height: 360px;
-
-    background:
-        rgba(245, 101, 73, .24);
-}
-
-.research-auth__blob--teal {
-    top: -165px;
-    right: 27%;
-
-    width: 275px;
-    height: 275px;
-
-    background:
-        rgba(32, 170, 166, .22);
-}
-
-.research-auth__blob--blue {
-    top: -165px;
-    right: -150px;
-
-    width: 405px;
-    height: 405px;
-
-    background:
-        rgba(86, 138, 233, .22);
-}
-
-.research-auth__blob--peach {
-    right: 7%;
-    bottom: -275px;
-
-    width: 430px;
-    height: 430px;
-
-    background:
-        rgba(245, 101, 73, .12);
-}
-
-.research-auth__particle {
-    box-shadow:
-        inset 0 2px 7px rgba(255, 255, 255, .7),
-        0 9px 20px rgba(23, 23, 43, .11);
-}
-
-.research-auth__particle--1 {
-    top: 28px;
-    left: 27%;
-
-    width: 17px;
-    height: 17px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #c5ccff,
-            #6776ee
-        );
-}
-
-.research-auth__particle--2 {
-    top: 26%;
-    left: 48%;
-
-    width: 12px;
-    height: 12px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #baf1ec,
-            #20aaa6
-        );
-}
-
-.research-auth__particle--3 {
-    top: 35%;
-    right: 2%;
-
-    width: 26px;
-    height: 26px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #ffc4ae,
-            #fa7658
-        );
-}
-
-.research-auth__particle--4 {
-    left: 14%;
-    bottom: 5%;
-
-    width: 9px;
-    height: 9px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #d7d0ff,
-            #7368eb
-        );
-}
-
-
-/* ============================================================
-   PAGE
+   PAGE / TOP
    ============================================================ */
 
 .research-auth__page {
     position: relative;
-    z-index: 2;
 
-    width:
-        min(
-            calc(100% - 96px),
-            1030px
-        );
-
-    min-height: 100svh;
+    width: min(calc(100% - 64px), 1120px);
+    min-height: 100vh;
+    min-height: 100dvh;
 
     margin: 0 auto;
-
-    padding:
-        18px
-        0
-        18px;
+    padding: 14px 0 12px;
 
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
-
-/* ============================================================
-   TOP
-   ============================================================ */
-
 .research-auth__top {
     display: flex;
-
-    min-height: 26px;
-
     align-items: center;
     justify-content: flex-end;
-
     margin-bottom: 6px;
 }
 
 .research-auth__back {
     display: inline-flex;
-
     align-items: center;
-
     gap: 6px;
-
-    padding:
-        4px
-        7px;
-
-    color: #625f68;
-
+    min-height: 32px;
+    padding: 4px 10px;
+    color: var(--bd-muted);
     border-radius: 999px;
-
-    font-size: 9px;
-    font-weight: 720;
-
+    font-size: 13px;
+    font-weight: 500;
     text-decoration: none;
-
-    transition:
-        transform .18s ease,
-        background .18s ease,
-        color .18s ease;
+    transition: color .18s ease, background .18s ease;
 }
 
 .research-auth__back svg {
-    width: 13px;
-    height: 13px;
+    width: 16px;
+    height: 16px;
 }
 
 .research-auth__back:hover {
     color: var(--bd-navy);
-
-    background:
-        rgba(255, 255, 255, .45);
-
-    transform:
-        translateX(-2px);
+    background: rgba(23, 15, 56, .05);
 }
 
 
 /* ============================================================
-   SHELL
+   SHELL + HEADER
    ============================================================ */
 
-/*
- * Layout: no fixed heights. The active form pane sits in normal flow, so
- * the shell grows with its content (long sign-up form, validation errors)
- * and the page scrolls naturally instead of clipping.
- */
 .research-auth__shell {
     position: relative;
 
     width: 100%;
 
-    overflow: hidden;
+    overflow: clip;
 
-    border:
-        1px solid
-        rgba(255, 255, 255, .72);
+    border: 1px solid rgba(239, 88, 67, .14);
+    border-radius: 20px;
 
-    border-radius: 18px;
-
-    background:
-        rgba(255, 253, 250, .40);
+    background: rgba(255, 249, 244, .84);
 
     box-shadow:
-        0
-        28px
-        75px
-        rgba(23, 23, 43, .105);
+        inset 0 1px 0 rgba(255, 255, 255, .85),
+        0 18px 48px rgba(23, 15, 56, .07);
 
-    backdrop-filter:
-        blur(22px)
-        saturate(138%);
-
-    -webkit-backdrop-filter:
-        blur(22px)
-        saturate(138%);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
-
-
-/* ============================================================
-   SLIDE WAVE
-   ============================================================ */
-
-.research-auth__transition-wave {
-    position: absolute;
-
-    z-index: 100;
-
-    top: 50px;
-    bottom: 0;
-
-    left: 0;
-
-    width: 43%;
-
-    pointer-events: none;
-
-    opacity: 0;
-
-    transform:
-        translateX(-140%)
-        skewX(-10deg);
-
-    background:
-        linear-gradient(
-            115deg,
-            rgba(245, 101, 73, 0) 0%,
-            rgba(245, 101, 73, .12) 10%,
-            rgba(245, 101, 73, .64) 34%,
-            rgba(32, 170, 166, .56) 57%,
-            rgba(86, 138, 233, .49) 77%,
-            rgba(86, 138, 233, 0) 100%
-        );
-
-    filter: blur(2px);
-
-    will-change:
-        transform,
-        opacity;
-}
-
-.research-auth__transition-wave::before {
-    content: "";
-
-    position: absolute;
-    inset: 0;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, .32),
-            transparent
-        );
-}
-
-.research-auth__transition-wave::after {
-    content: "";
-
-    position: absolute;
-
-    top: 0;
-    right: 14%;
-
-    width: 3px;
-    height: 100%;
-
-    border-radius: 999px;
-
-    background:
-        linear-gradient(
-            180deg,
-            transparent,
-            var(--bd-coral),
-            var(--bd-teal),
-            var(--bd-blue),
-            transparent
-        );
-
-    box-shadow:
-        0 0 23px
-        rgba(32, 170, 166, .28);
-}
-
-
-/* ============================================================
-   HEADER
-   ============================================================ */
 
 .research-auth__header {
-    position: relative;
-    z-index: 20;
-
     display: flex;
-
-    height: 50px;
-    min-height: 50px;
-
+    min-height: 60px;
     align-items: center;
     justify-content: space-between;
-
-    padding:
-        6px
-        18px;
-
-    border-bottom:
-        1px solid
-        rgba(196, 187, 177, .37);
-
-    background:
-        rgba(255, 253, 249, .29);
+    padding: 8px 20px;
+    border-bottom: 1px solid rgba(239, 88, 67, .12);
 }
 
 .research-auth__brand {
     display: inline-flex;
-
     align-items: baseline;
-
-    gap: 4px;
-
+    gap: 5px;
     text-decoration: none;
 }
 
 .research-auth__brand span {
     color: var(--bd-coral);
-
-    font-size: 14px;
-    font-weight: 880;
+    font-size: 18px;
+    font-weight: 700;
 }
 
 .research-auth__brand strong {
     color: var(--bd-navy);
-
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 16px;
+    font-weight: 600;
 }
-
-
-/* ============================================================
-   TABS
-   ============================================================ */
 
 .research-auth__tabs {
     display: grid;
-
-    grid-template-columns:
-        repeat(
-            2,
-            84px
-        );
-
+    grid-template-columns: repeat(2, 96px);
     padding: 3px;
-
-    border:
-        1px solid
-        rgba(192, 184, 175, .46);
-
-    border-radius: 11px;
-
-    background:
-        rgba(255, 255, 255, .23);
+    border: 1px solid var(--bd-line);
+    border-radius: 12px;
+    background: var(--bd-cream);
 }
 
 .research-auth__tab {
-    position: relative;
-
     display: grid;
-
-    min-height: 29px;
-
+    min-height: 36px;
     place-items: center;
-
-    color: #77737b;
-
-    border-radius: 8px;
-
-    font-size: 9px;
-    font-weight: 760;
-
+    color: var(--bd-muted);
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 600;
     text-decoration: none;
+    transition: color .18s ease, background .18s ease;
 }
 
-.research-auth__tab::after {
-    content: "";
-
-    position: absolute;
-
-    left: 50%;
-    bottom: 2px;
-
-    width: 0;
-    height: 2px;
-
-    border-radius: 999px;
-
+.research-auth[data-view="signin"] .research-auth__tab[data-auth-switch="signin"],
+.research-auth[data-view="signup"] .research-auth__tab[data-auth-switch="signup"] {
+    color: #fff;
     background: var(--bd-coral);
-
-    transform:
-        translateX(-50%);
-
-    transition:
-        width .18s ease;
-}
-
-.research-auth[data-view="signin"]
-.research-auth__tab[data-auth-switch="signin"],
-.research-auth[data-view="signup"]
-.research-auth__tab[data-auth-switch="signup"] {
-    color: var(--bd-navy);
-
-    background:
-        rgba(255, 235, 211, .68);
-}
-
-.research-auth[data-view="signin"]
-.research-auth__tab[data-auth-switch="signin"]::after,
-.research-auth[data-view="signup"]
-.research-auth__tab[data-auth-switch="signup"]::after {
-    width: 31px;
 }
 
 
 /* ============================================================
-   BODY
+   BODY (desktop: visual | forms)
    ============================================================ */
 
 .research-auth__body {
-    position: relative;
-
     display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
 
-    grid-template-columns:
-        1fr
-        1fr;
-
-    min-height: 460px;
+    /* Setinggi form Daftar, supaya pindah Masuk ↔ Daftar tidak menggeser layout. */
+    min-height: 641px;
 }
-
-
-/* ============================================================
-   LEFT
-   ============================================================ */
 
 .research-auth__visual {
     position: relative;
 
+    display: flex;
     min-width: 0;
-    min-height: 460px;
 
-    overflow: hidden;
+    border-right: 1px solid rgba(239, 88, 67, .12);
 
-    border-right:
-        1px solid
-        rgba(196, 187, 177, .29);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255, 249, 239, .29),
-            rgba(246, 240, 231, .13)
-        );
+    background: rgba(255, 240, 226, .5);
 }
-
-.research-auth__grid {
-    position: absolute;
-    inset: 0;
-
-    pointer-events: none;
-
-    opacity: .47;
-
-    background-image:
-        linear-gradient(
-            rgba(23, 23, 43, .043) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(23, 23, 43, .043) 1px,
-            transparent 1px
-        );
-
-    background-size:
-        39px
-        39px;
-}
-
-
-/* ============================================================
-   HERO
-   ============================================================ */
 
 .research-auth__hero {
     position: absolute;
     inset: 0;
 
-    padding:
-        14px
-        27px
-        12px;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 12px;
+
+    padding: 28px 36px;
 
     opacity: 0;
-
     visibility: hidden;
-
     pointer-events: none;
-
-    transform:
-        translateX(38px);
 }
 
-.research-auth[data-view="signin"]
-.research-auth__hero[data-auth-hero="signin"],
-.research-auth[data-view="signup"]
-.research-auth__hero[data-auth-hero="signup"] {
+.research-auth[data-view="signin"] .research-auth__hero[data-auth-hero="signin"],
+.research-auth[data-view="signup"] .research-auth__hero[data-auth-hero="signup"] {
+    position: relative;
+    display: flex;
+    width: 100%;
+
     opacity: 1;
-
     visibility: visible;
-
     pointer-events: auto;
-
-    transform:
-        translateX(0);
 }
-
-
-/* ============================================================
-   INTRO
-   ============================================================ */
 
 .research-auth__intro {
-    position: relative;
-    z-index: 6;
+    order: 1;
+    align-self: flex-start;
+    max-width: 400px;
+}
 
-    max-width: 425px;
+/* Panel ilustrasi sendiri: mascot dipusatkan terhadap panel, bukan teks. */
+.research-auth__stage {
+    order: 2;
+    position: relative;
+    display: grid;
+    align-self: stretch;
+    place-items: center;
+    padding: 6px 0;
+}
+
+/* Lingkaran sangat samar di belakang mascot (hanya dekorasi). */
+.research-auth__stage::before,
+.research-auth__stage::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.research-auth__stage::before {
+    width: 74%;
+    aspect-ratio: 1;
+    max-width: 250px;
+    background: radial-gradient(circle, rgba(247, 170, 53, .2), rgba(247, 170, 53, 0) 70%);
+}
+
+.research-auth__stage::after {
+    width: 46%;
+    aspect-ratio: 1;
+    max-width: 150px;
+    transform: translate(38%, 30%);
+    background: radial-gradient(circle, rgba(239, 88, 67, .14), rgba(239, 88, 67, 0) 70%);
+}
+
+.research-auth__mascot {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: clamp(240px, 19vw, 280px);
+    height: auto;
+    max-width: 100%;
+}
+
+/* Mini research ribbon: Source → Evidence → Insight. */
+.research-auth__ribbon {
+    order: 3;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0 0;
+    padding: 6px 12px;
+
+    color: var(--bd-navy);
+    border: 1px solid rgba(239, 88, 67, .16);
+    border-radius: 999px;
+
+    background: rgba(255, 250, 245, .82);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .85),
+        0 6px 16px rgba(190, 90, 50, .09);
+
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.research-auth__ribbon-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: 999px;
+}
+
+.research-auth__ribbon-step svg {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 17px;
+}
+
+/* Evidence = inti value proposition: sedikit lebih menonjol. */
+.research-auth__ribbon-step.is-core {
+    padding: 4px 11px 4px 9px;
+    background: rgba(239, 88, 67, .1);
+    font-weight: 700;
+}
+
+.research-auth__ribbon-step.is-core svg {
+    color: var(--bd-coral);
+}
+
+.research-auth__ribbon-link {
+    width: 18px;
+    height: 8px;
+    flex: 0 0 18px;
+    color: var(--bd-coral);
 }
 
 .research-auth__eyebrow {
     margin: 0;
-
-    color: var(--bd-teal-dark);
-
-    font-size: 7.3px;
-    font-weight: 880;
-
-    letter-spacing: .16em;
-
+    color: var(--bd-coral);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .14em;
     text-transform: uppercase;
 }
 
-.research-auth__eyebrow.is-coral {
-    color: var(--bd-coral);
-}
-
 .research-auth__intro h1 {
-    max-width: 430px;
-
-    margin:
-        7px
-        0
-        0;
-
+    margin: 8px 0 0;
     color: var(--bd-navy);
-
-    font-size:
-        clamp(
-            1.72rem,
-            2.2vw,
-            2.25rem
-        );
-
-    line-height: .98;
-
-    font-weight: 860;
-
-    letter-spacing: -.052em;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.18;
+    letter-spacing: -.02em;
 }
 
 .research-auth__intro h1 span {
     display: block;
-
     color: var(--bd-coral);
 }
 
 .research-auth__intro > p:last-child {
-    max-width: 415px;
-
-    margin:
-        8px
-        0
-        0;
-
-    color: #68646c;
-
-    font-size: 9px;
-
-    line-height: 1.48;
+    margin: 10px 0 0;
+    color: var(--bd-muted);
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 
 /* ============================================================
-   JOURNEY
-   ============================================================ */
-
-.research-auth__journey {
-    position: relative;
-    z-index: 6;
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(
-            4,
-            1fr
-        );
-
-    margin-top: 13px;
-}
-
-.research-auth__journey-track {
-    position: absolute;
-
-    top: 4px;
-    left: 6px;
-    right: 6px;
-
-    height: 1px;
-
-    background-image:
-        linear-gradient(
-            90deg,
-            #9d9890 50%,
-            transparent 50%
-        );
-
-    background-size:
-        7px
-        1px;
-}
-
-.research-auth__journey-track > span {
-    display: block;
-
-    width: 0;
-    height: 1px;
-
-    background:
-        linear-gradient(
-            90deg,
-            var(--bd-teal),
-            var(--bd-coral)
-        );
-}
-
-.research-auth__journey article {
-    position: relative;
-    z-index: 2;
-
-    display: grid;
-
-    gap: 2px;
-}
-
-.research-auth__journey article:not(:first-of-type) {
-    padding-left: 8px;
-}
-
-.research-auth__journey article i {
-    display: block;
-
-    width: 9px;
-    height: 9px;
-
-    margin-bottom: 2px;
-
-    border:
-        3px solid
-        #f8f3eb;
-
-    border-radius: 50%;
-
-    background: #99948d;
-
-    box-shadow:
-        0 0 0 1px #aaa49d;
-}
-
-.research-auth__journey small {
-    color: #88847d;
-
-    font-size: 6px;
-    font-weight: 820;
-}
-
-.research-auth__journey strong {
-    color: var(--bd-navy);
-
-    font-size: 6.7px;
-    font-weight: 760;
-}
-
-.research-auth__journey article.is-past i {
-    background: var(--bd-teal);
-
-    box-shadow:
-        0 0 0 1px
-        var(--bd-teal);
-}
-
-.research-auth__journey article.is-past small,
-.research-auth__journey article.is-past strong {
-    color: var(--bd-teal-dark);
-}
-
-.research-auth__journey article.is-current i {
-    background: var(--bd-coral);
-
-    box-shadow:
-        0 0 0 1px var(--bd-coral),
-        0 0 0 4px rgba(245, 101, 73, .10),
-        0 0 15px rgba(245, 101, 73, .20);
-}
-
-.research-auth__journey article.is-current small,
-.research-auth__journey article.is-current strong {
-    color: var(--bd-coral-dark);
-}
-
-.research-auth__journey article.is-future {
-    opacity: .58;
-}
-
-
-/* ============================================================
-   LOGIN VISUAL
-   LEBIH BESAR + LEBIH NAIK
-   ============================================================ */
-
-.research-auth__workspace-stage {
-    position: absolute;
-
-    top: 164px;
-    left: 50%;
-
-    width:
-        min(
-            94%,
-            470px
-        );
-
-    height: 250px;
-
-    transform:
-        translateX(-50%);
-}
-
-.research-auth__workspace {
-    position: absolute;
-
-    left: 50%;
-    top: 12px;
-
-    width:
-        min(
-            97%,
-            445px
-        );
-
-    overflow: hidden;
-
-    border:
-        1px solid
-        rgba(255, 255, 255, .76);
-
-    border-radius: 13px;
-
-    background:
-        rgba(255, 255, 255, .54);
-
-    box-shadow:
-        0
-        18px
-        45px
-        rgba(23, 23, 43, .09);
-
-    backdrop-filter: blur(13px);
-    -webkit-backdrop-filter: blur(13px);
-
-    transform:
-        translateX(-50%);
-}
-
-.research-auth__workspace-head {
-    display: flex;
-
-    min-height: 45px;
-
-    align-items: center;
-    justify-content: space-between;
-
-    padding:
-        8px
-        11px;
-
-    border-bottom:
-        1px solid
-        rgba(205, 198, 190, .45);
-}
-
-.research-auth__workspace-head > div {
-    display: grid;
-    gap: 2px;
-}
-
-.research-auth__workspace-head small {
-    color: #8e8983;
-
-    font-size: 5.2px;
-    font-weight: 830;
-}
-
-.research-auth__workspace-head strong {
-    color: var(--bd-navy);
-
-    font-size: 9px;
-}
-
-.research-auth__workspace-status {
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 4px;
-
-    color: var(--bd-teal-dark);
-
-    font-size: 5.1px;
-    font-weight: 760;
-}
-
-.research-auth__workspace-status i {
-    width: 6px;
-    height: 6px;
-
-    border-radius: 50%;
-
-    background: var(--bd-teal);
-}
-
-.research-auth__workspace-body {
-    display: grid;
-
-    grid-template-columns:
-        90px
-        minmax(0, 1fr);
-}
-
-.research-auth__workspace-body nav {
-    display: grid;
-
-    align-content: start;
-
-    gap: 3px;
-
-    padding: 7px;
-
-    background:
-        rgba(242, 239, 234, .43);
-}
-
-.research-auth__workspace-body nav span {
-    display: flex;
-
-    min-height: 27px;
-
-    align-items: center;
-
-    gap: 6px;
-
-    padding:
-        0
-        6px;
-
-    color: #77736d;
-
-    border-radius: 6px;
-
-    font-size: 5.7px;
-    font-weight: 710;
-}
-
-.research-auth__workspace-body nav span.is-active {
-    color: var(--bd-navy);
-
-    background:
-        rgba(219, 228, 247, .72);
-}
-
-.research-auth__workspace-body nav svg {
-    width: 11px;
-    height: 11px;
-}
-
-.research-auth__workspace-main {
-    display: grid;
-
-    gap: 7px;
-
-    padding:
-        9px
-        10px;
-}
-
-.research-auth__workspace-main > small {
-    color: #89847e;
-
-    font-size: 4.8px;
-    font-weight: 830;
-}
-
-.research-auth__source-lines {
-    display: grid;
-
-    gap: 3px;
-
-    width: 77%;
-}
-
-.research-auth__source-lines span {
-    height: 4px;
-
-    border-radius: 999px;
-
-    background:
-        rgba(214, 208, 200, .78);
-
-    transform-origin: left center;
-}
-
-.research-auth__source-lines span:nth-child(2) {
-    width: 86%;
-}
-
-.research-auth__source-lines span:nth-child(3) {
-    width: 69%;
-}
-
-.research-auth__evidence {
-    display: grid;
-
-    grid-template-columns:
-        27px
-        1fr;
-
-    align-items: center;
-
-    gap: 7px;
-
-    padding: 7px;
-
-    border-left:
-        2px solid
-        var(--bd-teal);
-
-    background:
-        rgba(32, 170, 166, .09);
-}
-
-.research-auth__evidence > b {
-    display: grid;
-
-    width: 25px;
-    height: 25px;
-
-    place-items: center;
-
-    color: var(--bd-teal-dark);
-
-    border:
-        1px solid
-        rgba(32, 170, 166, .26);
-
-    border-radius: 5px;
-
-    font-size: 5px;
-}
-
-.research-auth__evidence small {
-    color: #8c8780;
-
-    font-size: 4.2px;
-}
-
-.research-auth__evidence strong {
-    font-size: 6.2px;
-}
-
-.research-auth__chips {
-    display: flex;
-
-    gap: 4px;
-}
-
-.research-auth__chips span {
-    padding:
-        2px
-        6px;
-
-    color: #7e7973;
-
-    border:
-        1px solid
-        rgba(185, 178, 170, .45);
-
-    border-radius: 999px;
-
-    font-size: 4.2px;
-}
-
-.research-auth__search {
-    position: absolute;
-
-    z-index: 8;
-
-    right: 4px;
-    top: 115px;
-
-    display: grid;
-
-    width: 40px;
-    height: 40px;
-
-    place-items: center;
-
-    color: #fff;
-
-    border:
-        6px solid
-        rgba(255, 255, 255, .64);
-
-    border-radius: 50%;
-
-    background: var(--bd-teal);
-
-    box-shadow:
-        0
-        10px
-        24px
-        rgba(32, 170, 166, .24);
-}
-
-.research-auth__search svg {
-    width: 14px;
-    height: 14px;
-}
-
-
-/* ============================================================
-   REGISTER VISUAL
-   LEBIH BESAR + NAIK
-   ============================================================ */
-
-.research-auth__flow {
-    position: absolute;
-
-    top: 168px;
-    left: 50%;
-
-    width:
-        min(
-            94%,
-            470px
-        );
-
-    height: 245px;
-
-    overflow: hidden;
-
-    border:
-        1px solid
-        rgba(255, 255, 255, .62);
-
-    border-radius: 14px;
-
-    background:
-        rgba(255, 255, 255, .16);
-
-    box-shadow:
-        inset 0 1px 0
-        rgba(255, 255, 255, .30);
-
-    backdrop-filter: blur(9px);
-    -webkit-backdrop-filter: blur(9px);
-
-    transform:
-        translateX(-50%);
-}
-
-.research-auth__flow-lines {
-    position: absolute;
-    inset: 0;
-
-    z-index: 1;
-
-    width: 100%;
-    height: 100%;
-}
-
-.research-auth__flow-lines path {
-    fill: none;
-
-    stroke:
-        rgba(32, 170, 166, .70);
-
-    stroke-width: 1.8;
-
-    stroke-dasharray:
-        7
-        9;
-}
-
-.research-auth__flow-card {
-    position: absolute;
-    z-index: 4;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    padding:
-        8px
-        9px;
-
-    border:
-        1px solid
-        rgba(255, 255, 255, .70);
-
-    border-radius: 10px;
-
-    background:
-        rgba(255, 255, 255, .57);
-
-    box-shadow:
-        0
-        10px
-        24px
-        rgba(23, 23, 43, .07);
-
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-
-.research-auth__flow-card > span {
-    display: grid;
-
-    width: 31px;
-    height: 31px;
-
-    flex: 0 0 31px;
-
-    place-items: center;
-
-    border-radius: 8px;
-}
-
-.research-auth__flow-card > span svg {
-    width: 16px;
-    height: 16px;
-}
-
-.research-auth__flow-card > span.is-teal {
-    color: var(--bd-teal-dark);
-
-    background:
-        rgba(32, 170, 166, .10);
-}
-
-.research-auth__flow-card > span.is-purple {
-    color: var(--bd-purple);
-
-    background:
-        rgba(116, 106, 237, .10);
-}
-
-.research-auth__flow-card > span.is-coral {
-    color: var(--bd-coral-dark);
-
-    background:
-        rgba(245, 101, 73, .10);
-}
-
-.research-auth__flow-card > div {
-    display: grid;
-    gap: 1px;
-}
-
-.research-auth__flow-card strong {
-    color: var(--bd-navy);
-
-    font-size: 6.4px;
-}
-
-.research-auth__flow-card small {
-    color: #8c8781;
-
-    font-size: 4.4px;
-}
-
-.flow-source {
-    top: 16px;
-    left: 16px;
-}
-
-.flow-ai {
-    top: 16px;
-    right: 16px;
-}
-
-.flow-evidence {
-    left: 16px;
-    bottom: 16px;
-}
-
-.flow-workspace {
-    right: 16px;
-    bottom: 16px;
-}
-
-.research-auth__research-note {
-    position: absolute;
-
-    z-index: 4;
-
-    top: 72px;
-    left: 50%;
-
-    width: 178px;
-    height: 112px;
-
-    padding: 11px;
-
-    border:
-        1px solid
-        rgba(255, 255, 255, .70);
-
-    border-radius: 9px;
-
-    background:
-        rgba(255, 255, 255, .58);
-
-    box-shadow:
-        0
-        11px
-        27px
-        rgba(23, 23, 43, .07);
-
-    backdrop-filter: blur(13px);
-    -webkit-backdrop-filter: blur(13px);
-
-    transform:
-        translateX(-50%);
-}
-
-.research-auth__research-note header {
-    display: flex;
-
-    align-items: center;
-
-    gap: 5px;
-
-    margin-bottom: 9px;
-}
-
-.research-auth__research-note header i {
-    width: 6px;
-    height: 6px;
-
-    border-radius: 50%;
-
-    background:
-        var(--bd-coral);
-}
-
-.research-auth__research-note header small {
-    color: #89847e;
-
-    font-size: 4.3px;
-    font-weight: 830;
-}
-
-.research-auth__research-note > span {
-    display: block;
-
-    height: 4px;
-
-    margin-bottom: 4px;
-
-    border-radius: 999px;
-
-    background:
-        rgba(213, 207, 199, .81);
-}
-
-.research-auth__research-note > span:nth-of-type(2) {
-    width: 84%;
-}
-
-.research-auth__research-note > span:nth-of-type(3) {
-    width: 92%;
-}
-
-.research-auth__research-note > span:nth-of-type(4) {
-    width: 68%;
-}
-
-.research-auth__research-note b,
-.research-auth__research-note em {
-    display: block;
-
-    height: 4px;
-
-    border-radius: 999px;
-}
-
-.research-auth__research-note b {
-    width: 44%;
-
-    margin-top: 6px;
-
-    background:
-        rgba(32, 170, 166, .68);
-}
-
-.research-auth__research-note em {
-    width: 31%;
-
-    margin-top: 4px;
-
-    background:
-        rgba(245, 101, 73, .60);
-}
-
-
-/* ============================================================
-   RIGHT FORMS
+   FORMS
    ============================================================ */
 
 .research-auth__forms {
     position: relative;
 
-    min-width: 0;
     display: flex;
+    min-width: 0;
     flex-direction: column;
     justify-content: center;
 
-    overflow: hidden;
-
-    background:
-        rgba(255, 255, 255, .31);
-
-    backdrop-filter:
-        blur(17px)
-        saturate(128%);
-
-    -webkit-backdrop-filter:
-        blur(17px)
-        saturate(128%);
+    background: rgba(255, 252, 248, .92);
 }
-
-
-/* ============================================================
-   FORM PANES
-   SCROLL FIX ADA DI SINI
-   ============================================================ */
 
 .research-auth__form-pane {
     position: absolute;
     inset: 0 0 auto 0;
 
-    display: flex;
-
+    display: none;
     align-items: flex-start;
     justify-content: center;
 
     opacity: 0;
-
     visibility: hidden;
-
     pointer-events: none;
-
-    transform:
-        translateX(38px);
 }
 
-.research-auth__form-pane::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-}
-
-.research-auth[data-view="signin"]
-.research-auth__form-pane[data-auth-pane="signin"],
-.research-auth[data-view="signup"]
-.research-auth__form-pane[data-auth-pane="signup"] {
+.research-auth[data-view="signin"] .research-auth__form-pane[data-auth-pane="signin"],
+.research-auth[data-view="signup"] .research-auth__form-pane[data-auth-pane="signup"] {
     position: relative;
+    display: flex;
+
     opacity: 1;
-
     visibility: visible;
-
     pointer-events: auto;
-
-    transform:
-        translateX(0);
 }
-
-
-/* ============================================================
-   FORM INNER
-   ============================================================ */
 
 .research-auth__form-inner {
-    width:
-        min(
-            calc(100% - 72px),
-            335px
-        );
-
-    margin:
-        27px
-        auto
-        24px;
+    width: min(calc(100% - 64px), 400px);
+    margin: 28px auto;
 }
 
 .research-auth__form-inner.is-register {
-    margin-top: 18px;
-    margin-bottom: 28px;
+    width: min(calc(100% - 56px), 520px);
+    margin: 22px auto;
 }
 
 .research-auth__form-head {
-    margin-bottom: 13px;
+    margin-bottom: 16px;
 }
 
 .research-auth__form-head h2 {
-    margin:
-        6px
-        0
-        0;
-
+    margin: 6px 0 0;
     color: var(--bd-navy);
-
-    font-size:
-        clamp(
-            1.3rem,
-            1.7vw,
-            1.55rem
-        );
-
-    line-height: 1.06;
-
-    font-weight: 850;
-
-    letter-spacing: -.042em;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.02em;
 }
 
 .research-auth__form-head > p:last-child {
-    margin:
-        4px
-        0
-        0;
-
+    margin: 6px 0 0;
     color: var(--bd-muted);
-
-    font-size: 8.3px;
-
-    line-height: 1.46;
+    font-size: 14px;
+    line-height: 1.5;
 }
-
-
-/* ============================================================
-   ERROR
-   ============================================================ */
 
 .research-auth__error {
-    margin-bottom: 10px;
-
-    padding:
-        8px
-        10px;
-
+    margin-bottom: 14px;
+    padding: 10px 12px;
     color: #a9342a;
-
-    border:
-        1px solid
-        rgba(245, 101, 73, .22);
-
-    border-radius: 7px;
-
-    background:
-        rgba(245, 101, 73, .08);
-
-    font-size: 7.5px;
-
-    line-height: 1.45;
+    border: 1px solid rgba(239, 88, 67, .28);
+    border-radius: 10px;
+    background: #fff1ee;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
 }
-
-
-/* ============================================================
-   GOOGLE — LOGIN ONLY
-   ============================================================ */
 
 .research-auth__google {
     display: flex;
-
     width: 100%;
-    min-height: 37px;
-
+    min-height: 48px;
     align-items: center;
     justify-content: center;
-
-    gap: 8px;
-
+    gap: 10px;
     color: var(--bd-navy);
-
-    border:
-        1px solid
-        rgba(194, 186, 177, .57);
-
-    border-radius: 7px;
-
-    background:
-        rgba(255, 255, 255, .43);
-
+    border: 1px solid var(--bd-line);
+    border-radius: 12px;
+    background: #fff;
     text-decoration: none;
-
-    transition:
-        transform .17s ease,
-        box-shadow .17s ease,
-        background .17s ease;
+    transition: background .17s ease, border-color .17s ease;
 }
 
 .research-auth__google:hover {
-    transform:
-        translateY(-1px);
+    border-color: #d9cbbd;
+    background: var(--bd-cream);
+}
 
-    background:
-        rgba(255, 255, 255, .64);
-
-    box-shadow:
-        0
-        8px
-        18px
-        rgba(23, 23, 43, .055);
+.research-auth__google-icon,
+.research-auth__google-icon svg {
+    width: 20px;
+    height: 20px;
 }
 
 .research-auth__google-icon {
     display: grid;
-
-    width: 17px;
-    height: 17px;
-
     place-items: center;
 }
 
-.research-auth__google-icon svg {
-    width: 17px;
-    height: 17px;
-}
-
 .research-auth__google strong {
-    font-size: 8.8px;
-    font-weight: 760;
+    font-size: 15px;
+    font-weight: 600;
 }
-
-
-/* ============================================================
-   DIVIDER
-   ============================================================ */
 
 .research-auth__divider {
     position: relative;
-
-    margin:
-        15px
-        0
-        9px;
-
-    border-top:
-        1px solid
-        rgba(188, 181, 173, .46);
-
+    margin: 18px 0 14px;
+    border-top: 1px solid var(--bd-line);
     text-align: center;
 }
 
 .research-auth__divider span {
     position: relative;
-
-    top: -8px;
-
-    padding:
-        0
-        8px;
-
-    color: #97928c;
-
-    background:
-        rgba(250, 250, 248, .81);
-
-    font-size: 6.2px;
+    top: -10px;
+    padding: 0 10px;
+    color: var(--bd-muted);
+    background: #fff;
+    font-size: 13px;
 }
-
-
-/* ============================================================
-   FORM
-   ============================================================ */
 
 .research-auth__form {
     display: grid;
-
-    gap: 8px;
+    gap: 14px;
 }
 
 .research-auth__form--register {
-    grid-template-columns:
-        repeat(
-            2,
-            minmax(0, 1fr)
-        );
-
-    column-gap: 7px;
-    row-gap: 7px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 14px;
 }
 
 .research-auth__form label {
     display: grid;
-
     min-width: 0;
-
-    gap: 4px;
+    gap: 6px;
 }
 
 .research-auth__form label > span:first-child {
-    color: #47444d;
-
-    font-size: 7.6px;
-    font-weight: 760;
+    color: var(--bd-navy-soft);
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .research-auth .is-full {
-    grid-column:
-        1 / -1;
+    grid-column: 1 / -1;
 }
 
 
@@ -1824,685 +599,414 @@ body {
 
 .research-auth__input input {
     width: 100%;
-    min-height: 35px;
-
-    padding:
-        7px
-        39px
-        7px
-        31px;
-
-    color: #252431;
-
-    border:
-        1px solid
-        rgba(190, 183, 174, .61);
-
-    border-radius: 7px;
-
+    min-height: 44px;
+    padding: 8px 12px 8px 40px;
+    color: var(--bd-navy);
+    border: 1px solid #d9cfc5;
+    border-radius: 12px;
     outline: 0;
-
-    background:
-        rgba(255, 255, 255, .48);
-
-    font-size: 8.5px;
-
-    transition:
-        border-color .15s ease,
-        background .15s ease,
-        box-shadow .15s ease;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    transition: border-color .15s ease, box-shadow .15s ease;
 }
 
 .research-auth__input input::placeholder {
-    color: #aaa59f;
+    color: #9a93a6;
 }
 
 .research-auth__input input:focus {
-    border-color:
-        var(--bd-coral);
-
-    background:
-        rgba(255, 255, 255, .72);
-
-    box-shadow:
-        0
-        0
-        0
-        3px
-        rgba(245, 101, 73, .08);
+    border-color: var(--bd-coral);
+    box-shadow: 0 0 0 3px rgba(239, 88, 67, .16);
 }
 
 .research-auth__input > i {
     position: absolute;
-
     top: 50%;
-    left: 9px;
-
+    left: 14px;
     display: grid;
-
-    width: 14px;
-    height: 14px;
-
+    width: 18px;
+    height: 18px;
     place-items: center;
-
-    color: #918c86;
-
-    transform:
-        translateY(-50%);
-
+    color: #8f889c;
+    transform: translateY(-50%);
     pointer-events: none;
 }
 
 .research-auth__input > i svg {
-    width: 13px;
-    height: 13px;
+    width: 18px;
+    height: 18px;
+}
+
+/* Input password: ruang kanan untuk tombol Show/Hide agar tidak menimpa teks. */
+.research-auth__input:has(.research-auth__show) input {
+    padding-right: 58px;
 }
 
 .research-auth__show {
     position: absolute;
-
     top: 50%;
-    right: 7px;
-
-    padding:
-        3px
-        4px;
-
-    color: #817c83;
-
+    right: 6px;
+    min-width: 46px;
+    min-height: 36px;
+    padding: 0 6px;
+    color: var(--bd-navy-soft);
     border: 0;
-
+    border-radius: 8px;
     background: transparent;
-
-    font-size: 6px;
-    font-weight: 760;
-
-    transform:
-        translateY(-50%);
-
+    font-size: 13px;
+    font-weight: 600;
+    transform: translateY(-50%);
     cursor: pointer;
+}
+
+.research-auth__show:hover {
+    background: var(--bd-cream);
+}
+
+.research-auth__show:focus-visible {
+    outline: 2px solid var(--bd-coral);
+    outline-offset: 1px;
 }
 
 
 /* ============================================================
-                       REMEMBER 
+   REMEMBER
    ============================================================ */
 
-.research-auth__remember {
-    display: inline-flex !important;    
-    width: max-content !important;
-    min-width: 0 !important;
-    min-height: 18px !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 7px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    color: #69656d;
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    font-size: 7.5px;
-    line-height: 1.2;
+.research-auth__form .research-auth__remember {
+    display: flex;
+    width: fit-content;
+    min-height: 32px;
+    align-items: center;
+    gap: 10px;
     cursor: pointer;
 }
 
-.research-auth__remember > span {
-    display: inline !important;
-    width: auto !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    color: #69656d !important;
-    background: transparent !important;
-    border: 0 !important;
-    font-size: 7.5px !important;
-    font-weight: 650 !important;
-    line-height: 1.2 !important;
+.research-auth__form .research-auth__remember > span:first-child {
+    color: var(--bd-muted);
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .research-auth__remember input[type="checkbox"] {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-
-    position: relative !important;
-
-    display: grid !important;
-    flex: 0 0 14px !important;
-
-    width: 14px !important;
-    height: 14px !important;
-    min-width: 14px !important;
-    min-height: 14px !important;
-    max-width: 14px !important;
-    max-height: 14px !important;
-
-    place-items: center !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
-
-    border: 1.5px solid rgba(120, 116, 124, .55) !important;
-    border-radius: 4px !important;
-
-    outline: 0 !important;
-
-    background: rgba(255, 255, 255, .66) !important;
-
-    box-shadow:
-        inset 0 1px 1px rgba(23, 23, 43, .025) !important;
-
-    cursor: pointer !important;
-
-    transform: none !important;
-
-    transition:
-        border-color .18s ease,
-        background .18s ease,
-        box-shadow .18s ease,
-        transform .18s ease !important;
+    appearance: none;
+    -webkit-appearance: none;
+    display: grid;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    margin: 0;
+    padding: 0;
+    place-items: center;
+    border: 1.5px solid #b9afc4;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
 }
 
 .research-auth__remember input[type="checkbox"]::before {
     content: "";
-
-    width: 6px;
-    height: 3px;
-
-    border-left: 1.7px solid #fff;
-    border-bottom: 1.7px solid #fff;
-
+    width: 9px;
+    height: 5px;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #fff;
     opacity: 0;
-
-    transform:
-        translateY(-1px)
-        rotate(-45deg)
-        scale(.6);
-
-    transition:
-        opacity .14s ease,
-        transform .18s cubic-bezier(.22, 1, .36, 1);
-}
-
-.research-auth__remember input[type="checkbox"]:hover {
-    border-color: rgba(245, 101, 73, .62) !important;
-
-    background:
-        rgba(255, 247, 244, .92) !important;
+    transform: translateY(-1px) rotate(-45deg);
 }
 
 .research-auth__remember input[type="checkbox"]:checked {
-    border-color: var(--bd-coral) !important;
-
-    background:
-        var(--bd-coral) !important;
-
-    box-shadow:
-        0 3px 8px rgba(245, 101, 73, .18) !important;
+    border-color: var(--bd-coral);
+    background: var(--bd-coral);
 }
 
 .research-auth__remember input[type="checkbox"]:checked::before {
     opacity: 1;
-
-    transform:
-        translateY(-1px)
-        rotate(-45deg)
-        scale(1);
-}
-
-.research-auth__remember input[type="checkbox"]:active {
-    transform: scale(.90) !important;
-}
-
-.research-auth__remember input[type="checkbox"]:focus {
-    outline: 0 !important;
-
-    box-shadow:
-        0 0 0 3px rgba(245, 101, 73, .10) !important;
 }
 
 .research-auth__remember input[type="checkbox"]:focus-visible {
-    border-color: var(--bd-coral) !important;
-
-    box-shadow:
-        0 0 0 3px rgba(245, 101, 73, .13) !important;
+    outline: 2px solid var(--bd-coral);
+    outline-offset: 2px;
 }
 
 
 /* ============================================================
-   REALTIME REGISTER PROGRESS
+   REGISTER PROGRESS (state: auth-register-enhancements.css)
    ============================================================ */
 
 .research-auth__signup-progress {
     --signup-progress: 0;
 
     display: grid;
-
-    grid-template-columns:
-        42px
-        minmax(0, 1fr);
-
+    grid-template-columns: 52px minmax(0, 1fr);
     align-items: center;
-
-    gap: 9px;
-
-    padding:
-        7px
-        9px;
-
-    border:
-        1px solid
-        rgba(32, 170, 166, .22);
-
-    border-radius: 8px;
-
-    background:
-        rgba(219, 249, 247, .30);
-
-    transition:
-        background .2s ease,
-        border-color .2s ease;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid rgba(32, 170, 166, .26);
+    border-radius: 12px;
+    background: rgba(219, 249, 247, .3);
 }
 
 .research-auth__signup-progress-ring {
     position: relative;
-
     display: grid;
-
-    width: 39px;
-    height: 39px;
-
+    width: 48px;
+    height: 48px;
     place-items: center;
-
     border-radius: 50%;
-
     background:
         conic-gradient(
-            var(--bd-teal)
-            calc(
-                var(--signup-progress)
-                * 1%
-            ),
-            rgba(32, 170, 166, .15)
-            0
+            var(--bd-teal) calc(var(--signup-progress) * 1%),
+            rgba(32, 170, 166, .16) 0
         );
 }
 
 .research-auth__signup-progress-ring::before {
     content: "";
-
     position: absolute;
-
-    inset: 4px;
-
+    inset: 5px;
     border-radius: 50%;
-
-    background:
-        rgba(247, 253, 252, .96);
+    background: #fff;
 }
 
 .research-auth__signup-progress-ring strong {
     position: relative;
     z-index: 2;
-
-    color:
-        var(--bd-teal-dark);
-
-    font-size: 7.5px;
-    font-weight: 880;
+    color: var(--bd-teal-dark);
+    font-size: 12px;
+    font-weight: 700;
 }
 
 .research-auth__signup-progress-copy {
     display: grid;
-
     gap: 2px;
 }
 
 .research-auth__signup-progress-copy b {
     color: var(--bd-navy);
-
-    font-size: 6.7px;
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .research-auth__signup-progress-copy span {
-    color: #747079;
-
-    font-size: 5.7px;
-
+    color: var(--bd-muted);
+    font-size: 13px;
     line-height: 1.4;
-}
-
-.research-auth__signup-progress.is-complete {
-    border-color:
-        rgba(32, 170, 166, .39);
-
-    background:
-        rgba(210, 248, 244, .48);
 }
 
 
 /* ============================================================
-   SUBMIT
+   SUBMIT / SWITCH / FOOTER
    ============================================================ */
 
 .research-auth__submit {
     display: flex;
-
     width: 100%;
-    min-height: 37px;
-
+    min-height: 48px;
     align-items: center;
     justify-content: space-between;
-
-    padding:
-        7px
-        12px;
-
+    padding: 8px 18px;
     color: #fff;
-
     border: 0;
-
-    border-radius: 7px;
-
-    font-size: 8.8px;
-    font-weight: 780;
-
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
 }
 
 .research-auth__submit.is-navy {
-    background:
-        var(--bd-navy);
+    background: var(--bd-navy);
+}
 
-    box-shadow:
-        0
-        9px
-        20px
-        rgba(23, 23, 43, .14);
+.research-auth__submit.is-navy:hover {
+    background: var(--bd-navy-soft);
 }
 
 .research-auth__submit.is-coral {
-    background:
-        linear-gradient(
-            110deg,
-            #f56549,
-            #ef5b50
-        );
-
-    box-shadow:
-        0
-        9px
-        20px
-        rgba(245, 101, 73, .17);
+    background: var(--bd-coral);
 }
 
+.research-auth__submit.is-coral:hover:not(:disabled) {
+    background: var(--bd-coral-dark);
+}
 
-/* ============================================================
-   SWITCH
-   ============================================================ */
+.research-auth__submit:focus-visible {
+    outline: 3px solid rgba(239, 88, 67, .35);
+    outline-offset: 2px;
+}
 
 .research-auth__switch {
-    margin:
-        11px
-        0
-        0;
-
-    color: #77737b;
-
-    font-size: 7.5px;
-
+    margin: 16px 0 0;
+    color: var(--bd-muted);
+    font-size: 14px;
     text-align: center;
 }
 
 .research-auth__switch a {
-    color:
-        var(--bd-coral-dark);
-
-    font-weight: 790;
+    color: var(--bd-coral-dark);
+    font-weight: 600;
 }
-
-
-/* ============================================================
-   FOOTER
-   ============================================================ */
 
 .research-auth__footer {
     display: flex;
-
     align-items: center;
     justify-content: space-between;
-
-    padding:
-        7px
-        2px
-        0;
-
-    color: #8b878e;
-
-    font-size: 7px;
+    gap: 12px;
+    padding: 10px 2px 0;
+    color: var(--bd-muted);
+    font-size: 12px;
 }
 
 
 /* ============================================================
-   SHORT DESKTOP
+   TABLET + MOBILE (<= 900px): satu kolom, normal flow
+   Urutan visual: panel visual → tab Masuk/Daftar → form putih solid.
+   header & body memakai display: contents supaya tab bisa diurutkan
+   di antara panel visual dan form tanpa mengubah markup.
    ============================================================ */
 
-@media
-(min-width: 951px)
-and
-(max-height: 760px) {
+@media (max-width: 900px) {
 
     .research-auth__page {
-        width:
-            min(
-                calc(100% - 78px),
-                970px
-            );
+        width: min(calc(100% - 32px), 560px);
+        min-height: 0;
+        justify-content: flex-start;
 
-        min-height: auto;
-
-        padding:
-            8px
-            0
-            15px;
-
-        justify-content:
-            flex-start;
+        /* Ruang untuk dock mengambang agar tidak menutupi submit/link/error. */
+        padding: 14px 0 calc(92px + env(safe-area-inset-bottom, 0px));
     }
 
+    /* "Kembali" pindah ke dock di bawah. */
     .research-auth__top {
-        min-height: 22px;
-
-        margin-bottom: 3px;
-    }
-
-    .research-auth__body,
-    .research-auth__visual {
-        min-height: 442px;
-    }
-
-    .research-auth__workspace-stage {
-        top: 151px;
-
-        transform:
-            translateX(-50%)
-            scale(.94);
-
-        transform-origin:
-            center top;
-    }
-
-    .research-auth__flow {
-        top: 151px;
-
-        transform:
-            translateX(-50%)
-            scale(.94);
-
-        transform-origin:
-            center top;
-    }
-
-    .research-auth__form-inner {
-        margin-top: 19px;
-    }
-
-    .research-auth__form-inner.is-register {
-        margin-top: 13px;
-    }
-}
-
-
-/* ============================================================
-   TABLET
-   ============================================================ */
-
-@media
-(max-width: 950px) {
-
-    .research-auth__page {
-        width:
-            min(
-                calc(100% - 28px),
-                720px
-            );
-
-        min-height: auto;
-
-        justify-content:
-            flex-start;
-
-        padding:
-            12px
-            0
-            20px;
-    }
-
-    .research-auth__shell {
-        height: auto;
-        min-height: 0;
-    }
-
-    .research-auth__body {
-        grid-template-columns: 1fr;
-
-        height: auto;
-        min-height: 0;
-    }
-
-    /*
-     * Small screens: the form is the priority. The animated illustration
-     * stays, but as a faint layer behind the form instead of a tall block
-     * above it, so the form starts right under the tabs.
-     */
-    .research-auth__body {
-        min-height: 0;
-    }
-
-    .research-auth__visual {
-        position: absolute;
-        z-index: 0;
-        inset: 0;
-        min-height: 0;
-        border: 0;
-        opacity: .2;
-        pointer-events: none;
-    }
-
-    .research-auth__visual .research-auth__intro,
-    .research-auth__visual .research-auth__journey {
         display: none;
     }
 
-    .research-auth__forms {
-        z-index: 1;
+    .research-auth__shell {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        overflow: visible;
+
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
     }
 
-    .research-auth__workspace-stage {
-        top: 24px;
+    .research-auth__header,
+    .research-auth__body {
+        display: contents;
     }
 
-    .research-auth__flow {
-        top: 24px;
-    }
-}
-
-
-/* ============================================================
-   MOBILE
-   ============================================================ */
-
-@media
-(max-width: 620px) {
-
-    .research-auth__page {
-        width:
-            calc(100% - 16px);
-
-        padding:
-            8px
-            0
-            18px;
+    /* Logo utama = eyebrow "BACADULU RESEARCH" di panel visual. */
+    .research-auth__brand {
+        display: none;
     }
 
-    .research-auth__header {
-        padding:
-            6px
-            10px;
-    }
+    .research-auth__visual {
+        order: 1;
 
-    .research-auth__brand span {
-        font-size: 12px;
-    }
+        border: 1px solid rgba(239, 88, 67, .14);
+        border-radius: 20px;
 
-    .research-auth__brand strong {
-        font-size: 11px;
+        background: rgba(255, 244, 232, .78);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .85);
     }
 
     .research-auth__tabs {
-        grid-template-columns:
-            repeat(
-                2,
-                70px
-            );
+        order: 2;
+        grid-template-columns: 1fr 1fr;
     }
 
+    .research-auth__tab {
+        min-height: 44px;
+        font-size: 15px;
+    }
+
+    .research-auth__forms {
+        order: 3;
+
+        border: 1px solid rgba(239, 88, 67, .14);
+        border-radius: 20px;
+
+        background: var(--bd-paper-solid);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .85), 0 10px 30px rgba(23, 15, 56, .06);
+    }
+
+    /* Hero kompak: mascot dulu, lalu brand + tagline, agar form cepat terlihat. */
     .research-auth__hero {
-        padding:
-            16px
-            18px;
+        align-items: center;
+        gap: 2px;
+        padding: 12px;
+        text-align: center;
+    }
+
+    .research-auth__intro {
+        align-self: center;
+        max-width: none;
+    }
+
+    .research-auth__stage {
+        order: 0;
+        align-self: center;
+        padding: 0;
+    }
+
+    .research-auth__mascot {
+        width: 140px;
     }
 
     .research-auth__intro h1 {
-        font-size:
-            clamp(
-                1.9rem,
-                9vw,
-                2.45rem
-            );
+        margin-top: 4px;
+        font-size: clamp(24px, 7.2vw, 30px);
+        line-height: 1.15;
     }
 
-    .research-auth__workspace-stage {
-        width: 98%;
-
-        top: 16px;
+    .research-auth__intro > p:last-child {
+        display: none;
     }
 
-    .research-auth__flow {
-        width: 98%;
+    .research-auth__ribbon {
+        gap: 4px;
+        margin-top: 6px;
+        padding: 4px 8px;
+        font-size: 12px;
+    }
 
-        top: 16px;
+    .research-auth__ribbon-step {
+        gap: 4px;
+        padding: 3px 4px;
+    }
+
+    .research-auth__ribbon-step.is-core {
+        padding: 3px 8px 3px 6px;
+    }
+
+    .research-auth__ribbon-step svg {
+        width: 15px;
+        height: 15px;
+        flex-basis: 15px;
+    }
+
+    .research-auth__ribbon-link {
+        width: 14px;
+        flex-basis: 14px;
     }
 
     .research-auth__form-inner,
     .research-auth__form-inner.is-register {
-        width:
-            calc(100% - 34px);
+        width: calc(100% - 32px);
+        margin: 20px auto 22px;
+    }
 
-        margin:
-            23px
-            auto
-            30px;
+    .research-auth__form-head h2 {
+        font-size: 22px;
     }
 
     .research-auth__form--register {
@@ -2513,142 +1017,263 @@ and
         grid-column: auto;
     }
 
+    .research-auth__form label > span:first-child {
+        font-size: 14px;
+    }
+
+    /* >= 16px agar iOS tidak zoom saat fokus; area sentuh 48px. */
+    .research-auth__input input {
+        min-height: 48px;
+        padding-left: 42px;
+        font-size: 16px;
+    }
+
+    .research-auth__input:has(.research-auth__show) input {
+        padding-right: 64px;
+    }
+
+    .research-auth__submit {
+        font-size: 16px;
+    }
+
+    /* Tagline sudah ada di hero; footer cukup © agar tidak bertumpuk dengan dock. */
     .research-auth__footer {
-        flex-direction: column;
+        justify-content: center;
+        margin-top: 8px;
+        padding: 6px 0 0;
+    }
 
-        align-items: flex-start;
+    .research-auth__footer span:last-child {
+        display: none;
+    }
 
-        gap: 3px;
+    /* ------------------------------------------------------------
+       DOCK: kapsul kaca-kertas mengambang.
+       Kiri: kembali | tengah: Masuk + Daftar (pill aktif bergeser
+       dengan transform) | kanan: pindah mode. State = data-view.
+       ------------------------------------------------------------ */
+    .research-auth__dock {
+        position: fixed;
+        z-index: 30;
+        left: 50%;
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+
+        display: grid;
+        width: calc(100% - 32px);
+        max-width: 420px;
+        height: 72px;
+        grid-template-columns: 44px minmax(0, 1fr) 44px;
+        align-items: center;
+        gap: 6px;
+        padding: 10px;
+
+        border: 1px solid rgba(239, 88, 67, .15);
+        border-radius: 36px;
+
+        background: rgba(255, 250, 245, .92);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, .8),
+            0 10px 28px rgba(190, 90, 50, .16);
+
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+
+        transform: translateX(-50%);
+        transition: transform .2s ease, opacity .2s ease;
+    }
+
+    /* Keyboard terbuka: dock minggir agar tidak menutupi input. */
+    .research-auth.is-typing .research-auth__dock {
+        opacity: 0;
+        pointer-events: none;
+        transform: translate(-50%, 140%);
+    }
+
+    .research-auth__dock-btn {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        color: var(--bd-navy-soft);
+        border-radius: 50%;
+        transition: background .18s ease;
+    }
+
+    .research-auth__dock-btn:hover,
+    .research-auth__dock-btn:active {
+        background: rgba(239, 88, 67, .1);
+    }
+
+    .research-auth__dock-btn svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Permukaan navigasi dalam: dua segmen sama lebar, pill di bawah teks. */
+    .research-auth__dock-modes {
+        position: relative;
+        display: grid;
+        height: 52px;
+        grid-template-columns: 1fr 1fr;
+        padding: 4px;
+
+        border: 1px solid rgba(239, 88, 67, .1);
+        border-radius: 28px;
+
+        background: rgba(255, 255, 255, .55);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6);
+    }
+
+    .research-auth__dock-pill {
+        position: absolute;
+        top: 4px;
+        bottom: 4px;
+        left: 4px;
+        width: calc(50% - 4px);
+
+        border-radius: 24px;
+
+        background: linear-gradient(180deg, #f26a56, var(--bd-coral));
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, .35),
+            0 6px 14px rgba(239, 88, 67, .28);
+
+        transition: transform .32s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    .research-auth[data-view="signup"] .research-auth__dock-pill {
+        transform: translateX(100%);
+    }
+
+    .research-auth__dock-mode {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        color: var(--bd-navy-soft);
+        border-radius: 24px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        opacity: .72;
+        transition: color .25s ease, opacity .25s ease;
+    }
+
+    .research-auth__dock-mode svg {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
+    }
+
+    .research-auth__dock-mode[aria-current="page"] {
+        color: #fff;
+        opacity: 1;
+    }
+
+    .research-auth__dock-btn:focus-visible,
+    .research-auth__dock-mode:focus-visible {
+        outline: 2px solid var(--bd-navy-soft);
+        outline-offset: 1px;
     }
 }
 
-
-/* ============================================================
-   REGISTER PROGRESS — POLISH
-   ============================================================ */
-
-.research-auth__input {
-    transition:
-        transform .28s cubic-bezier(.22, 1, .36, 1);
-}
-
-.research-auth__input.is-filled-valid {
-    transform: translateY(-1px);
-}
-
-.research-auth__input.is-filled-valid input {
-    border-color: rgba(32, 170, 166, .32);
-    background: rgba(244, 253, 251, .72);
-    box-shadow: 0 0 0 3px rgba(32, 170, 166, .045);
-}
-
-.research-auth__signup-progress {
-    position: relative;
-    overflow: hidden;
-
-    transition:
-        border-color .35s ease,
-        background .35s ease,
-        box-shadow .35s ease,
-        transform .35s cubic-bezier(.22, 1, .36, 1);
-}
-
-.research-auth__signup-progress::after {
-    content: "";
-
-    position: absolute;
-    inset: 0;
-
-    pointer-events: none;
-
-    opacity: .45;
-
-    background:
-        linear-gradient(
-            110deg,
-            transparent 20%,
-            rgba(255, 255, 255, .6) 48%,
-            transparent 76%
-        );
-
-    transform: translateX(-130%);
-}
-
-.research-auth__signup-progress.is-minimum {
-    border-color: rgba(32, 170, 166, .34);
-
-    background:
-        rgba(222, 248, 246, .42);
-}
-
-.research-auth__signup-progress.is-complete {
-    border-color: rgba(32, 170, 166, .42);
-
-    background:
-        rgba(218, 249, 246, .54);
-
-    box-shadow:
-        0 9px 24px
-        rgba(32, 170, 166, .08);
-}
-
-.research-auth__signup-progress.is-complete::after {
-    animation:
-        researchProgressShine
-        .85s
-        ease
-        forwards;
-}
-
-.research-auth__signup-progress-ring {
-    box-shadow:
-        0 6px 18px
-        rgba(32, 170, 166, .10);
-}
-
-.research-auth__signup-progress-ring strong {
-    min-width: 28px;
-
-    text-align: center;
-
-    font-variant-numeric:
-        tabular-nums;
-}
-
-@keyframes researchProgressShine {
-    from {
-        transform:
-            translateX(-130%);
+/* Layar mobile sangat pendek (mis. landscape): dock disembunyikan. */
+@media (max-width: 900px) and (max-height: 480px) {
+    .research-auth__dock {
+        display: none;
     }
 
-    to {
-        transform:
-            translateX(130%);
+    .research-auth__page {
+        padding-bottom: 24px;
     }
 }
 
-
-/* ============================================================
-   REDUCED MOTION
-   Harus PALING BAWAH
-   ============================================================ */
+/* Dock hanya untuk mobile. */
+@media (min-width: 901px) {
+    .research-auth__dock {
+        display: none;
+    }
+}
 
 @media (prefers-reduced-motion: reduce) {
-    .research-auth *,
-    .research-auth *::before,
-    .research-auth *::after {
-        animation-duration:
-            .01ms !important;
+    .research-auth__dock-pill,
+    .research-auth__dock-mode {
+        transition: none;
+    }
+}
 
-        animation-iteration-count:
-            1 !important;
+/* Teks untuk screen reader saja. */
+.research-auth__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
 
-        transition-duration:
-            .01ms !important;
+
+/* ============================================================
+   PAPER TEAR (dibuat oleh auth-research.js hanya saat berpindah mode)
+   Dua lembar clone form lama (kiri/kanan); sheet di-clip-path zig-zag,
+   wrapper-nya membawa bayangan sehingga mengikuti tepi sobekan.
+   Vertikal di semua ukuran layar.
+   ============================================================ */
+
+.research-auth__tear {
+    position: absolute;
+    z-index: 20; /* di bawah dock (30) */
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.research-auth__tear-half {
+    position: absolute;
+    inset: 0;
+    will-change: transform, opacity;
+    filter: drop-shadow(0 2px 5px rgba(23, 15, 56, .14));
+}
+
+.research-auth__tear-sheet {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--bd-paper-solid);
+}
+
+.research-auth__tear-pane {
+    position: absolute;
+    inset: 0 0 auto 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    opacity: 1;
+    visibility: visible;
+}
+
+.research-auth__tear-seam {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    color: var(--bd-coral);
+    opacity: 0;
+}
+
+/* Sudut luar mengikuti radius kontainer form di mobile. */
+@media (max-width: 900px) {
+    .research-auth__tear-half:first-child .research-auth__tear-sheet {
+        border-radius: 19px 0 0 19px;
     }
 
-    .research-auth__signup-progress.is-complete::after {
-        animation:
-            none !important;
+    .research-auth__tear-half:nth-child(2) .research-auth__tear-sheet {
+        border-radius: 0 19px 19px 0;
     }
 }
