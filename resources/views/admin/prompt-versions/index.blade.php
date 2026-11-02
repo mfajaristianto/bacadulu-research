@@ -15,13 +15,13 @@
 
     <form method="GET" class="bd-admin-filter">
         <input class="bd-admin-input" type="search" name="search" value="{{ request('search') }}" placeholder="Cari prompt…">
-        <select class="bd-admin-select" name="tool" onchange="this.form.submit()">
+        <select class="bd-admin-select" name="tool" data-auto-submit>
             <option value="">Semua Research Tool</option>
             @foreach($tools as $tool)
                 <option value="{{ $tool->id }}" @selected((string) request('tool') === (string) $tool->id)>{{ $tool->name }}</option>
             @endforeach
         </select>
-        <select class="bd-admin-select" name="status" onchange="this.form.submit()">
+        <select class="bd-admin-select" name="status" data-auto-submit>
             <option value="">Semua status</option>
             @foreach(['draft','active','archived'] as $status)
                 <option value="{{ $status }}" @selected(request('status') === $status)>{{ ucfirst($status) }}</option>

@@ -322,13 +322,15 @@ body {
    SHELL
    ============================================================ */
 
+/*
+ * Layout: no fixed heights. The active form pane sits in normal flow, so
+ * the shell grows with its content (long sign-up form, validation errors)
+ * and the page scrolls naturally instead of clipping.
+ */
 .research-auth__shell {
     position: relative;
 
     width: 100%;
-
-    height: 510px;
-    min-height: 510px;
 
     overflow: hidden;
 
@@ -593,7 +595,6 @@ body {
         1fr
         1fr;
 
-    height: 460px;
     min-height: 460px;
 }
 
@@ -606,8 +607,6 @@ body {
     position: relative;
 
     min-width: 0;
-
-    height: 460px;
     min-height: 460px;
 
     overflow: hidden;
@@ -1514,9 +1513,9 @@ body {
     position: relative;
 
     min-width: 0;
-
-    height: 460px;
-    min-height: 460px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
     overflow: hidden;
 
@@ -1540,19 +1539,12 @@ body {
 
 .research-auth__form-pane {
     position: absolute;
-    inset: 0;
+    inset: 0 0 auto 0;
 
     display: flex;
 
     align-items: flex-start;
     justify-content: center;
-
-    overflow-x: hidden;
-    overflow-y: auto;
-
-    overscroll-behavior: contain;
-
-    scrollbar-width: none;
 
     opacity: 0;
 
@@ -1573,6 +1565,7 @@ body {
 .research-auth__form-pane[data-auth-pane="signin"],
 .research-auth[data-view="signup"]
 .research-auth__form-pane[data-auth-pane="signup"] {
+    position: relative;
     opacity: 1;
 
     visibility: visible;
@@ -2323,15 +2316,8 @@ and
         margin-bottom: 3px;
     }
 
-    .research-auth__shell {
-        height: 492px;
-        min-height: 492px;
-    }
-
     .research-auth__body,
-    .research-auth__visual,
-    .research-auth__forms {
-        height: 442px;
+    .research-auth__visual {
         min-height: 442px;
     }
 
@@ -2404,28 +2390,40 @@ and
         min-height: 0;
     }
 
+    /*
+     * Small screens: the form is the priority. The animated illustration
+     * stays, but as a faint layer behind the form instead of a tall block
+     * above it, so the form starts right under the tabs.
+     */
+    .research-auth__body {
+        min-height: 0;
+    }
+
     .research-auth__visual {
-        height: 535px;
-        min-height: 535px;
+        position: absolute;
+        z-index: 0;
+        inset: 0;
+        min-height: 0;
+        border: 0;
+        opacity: .2;
+        pointer-events: none;
+    }
 
-        border-right: 0;
-
-        border-bottom:
-            1px solid
-            rgba(196, 187, 177, .30);
+    .research-auth__visual .research-auth__intro,
+    .research-auth__visual .research-auth__journey {
+        display: none;
     }
 
     .research-auth__forms {
-        height: 520px;
-        min-height: 520px;
+        z-index: 1;
     }
 
     .research-auth__workspace-stage {
-        top: 180px;
+        top: 24px;
     }
 
     .research-auth__flow {
-        top: 180px;
+        top: 24px;
     }
 }
 
@@ -2469,11 +2467,6 @@ and
             );
     }
 
-    .research-auth__visual {
-        height: 555px;
-        min-height: 555px;
-    }
-
     .research-auth__hero {
         padding:
             16px
@@ -2492,18 +2485,13 @@ and
     .research-auth__workspace-stage {
         width: 98%;
 
-        top: 205px;
+        top: 16px;
     }
 
     .research-auth__flow {
         width: 98%;
 
-        top: 205px;
-    }
-
-    .research-auth__forms {
-        height: 600px;
-        min-height: 600px;
+        top: 16px;
     }
 
     .research-auth__form-inner,

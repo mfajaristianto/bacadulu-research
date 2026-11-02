@@ -16,7 +16,7 @@
 
     <form method="GET" class="bd-admin-filter">
         <input class="bd-admin-input" type="search" name="search" value="{{ request('search') }}" placeholder="Cari collection…">
-        <select class="bd-admin-select" name="status" onchange="this.form.submit()"><option value="">Semua status</option><option value="active" @selected(request('status') === 'active')>Active</option><option value="archived" @selected(request('status') === 'archived')>Archived</option></select>
+        <select class="bd-admin-select" name="status" data-auto-submit><option value="">Semua status</option><option value="active" @selected(request('status') === 'active')>Active</option><option value="archived" @selected(request('status') === 'archived')>Archived</option></select>
         <span></span>
     </form>
 

@@ -37,6 +37,7 @@ ready(() => {
             .matches;
 
     initMobileNavigation();
+    initDeclarativeForms();
     initPasswordToggles();
     initPromptPicker();
     initChatSidebar();
@@ -53,6 +54,66 @@ ready(() => {
         initMotionDetails();
     }
 });
+
+
+/*
+ * CSP-safe replacements for inline handlers:
+ * - [data-confirm="..."] on a form or submit button asks before submitting.
+ * - [data-auto-submit] on a select/input submits its form on change.
+ */
+function initDeclarativeForms() {
+    document.addEventListener(
+        'click',
+        (event) => {
+            const trigger =
+                event.target.closest(
+                    'button[data-confirm], input[type="submit"][data-confirm]',
+                );
+
+            if (
+                trigger
+                && !window.confirm(
+                    trigger.dataset.confirm,
+                )
+            ) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+        },
+        true,
+    );
+
+    document.addEventListener(
+        'submit',
+        (event) => {
+            const form =
+                event.target;
+
+            if (
+                form.matches?.('form[data-confirm]')
+                && !window.confirm(
+                    form.dataset.confirm,
+                )
+            ) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+        },
+        true,
+    );
+
+    document.addEventListener(
+        'change',
+        (event) => {
+            const field =
+                event.target.closest?.(
+                    '[data-auto-submit]',
+                );
+
+            field?.form?.requestSubmit();
+        },
+    );
+}
 
 
 function initMobileNavigation() {

@@ -16,6 +16,8 @@ export default defineConfig({
 
                 'resources/css/admin.css',
 
+                'resources/js/admin.js',
+
                 'resources/js/app.js',
 
                 /*

@@ -94,7 +94,7 @@
         <select
             class="bd-admin-select"
             name="status"
-            onchange="this.form.submit()"
+            data-auto-submit
             aria-label="Filter status prompt"
         >
             <option value="">

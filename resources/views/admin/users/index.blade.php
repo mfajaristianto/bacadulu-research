@@ -15,7 +15,7 @@
 
     <form method="GET" class="bd-admin-filter">
         <input class="bd-admin-input" type="search" name="search" value="{{ request('search') }}" placeholder="Nama, email, institusi…">
-        <select class="bd-admin-select" name="status" onchange="this.form.submit()"><option value="">Semua status</option><option value="active" @selected(request('status') === 'active')>Active</option><option value="suspended" @selected(request('status') === 'suspended')>Suspended</option></select>
+        <select class="bd-admin-select" name="status" data-auto-submit><option value="">Semua status</option><option value="active" @selected(request('status') === 'active')>Active</option><option value="suspended" @selected(request('status') === 'suspended')>Suspended</option></select>
         <span></span>
     </form>
 

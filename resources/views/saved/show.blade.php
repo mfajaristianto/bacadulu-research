@@ -622,11 +622,7 @@
                             $savedResult
                         )
                     }}"
-                    onsubmit="
-                        return confirm(
-                            'Hapus hasil ini dari Saved Results?'
-                        );
-                    "
+                    data-confirm="Hapus hasil ini dari Saved Results?"
                 >
                     @csrf
                     @method('DELETE')

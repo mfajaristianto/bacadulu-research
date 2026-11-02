@@ -11,7 +11,7 @@
 
     <form method="GET" class="bd-admin-filter">
         <input class="bd-admin-input" type="search" name="search" value="{{ request('search') }}" placeholder="Action, user, IP…">
-        <select class="bd-admin-select" name="action" onchange="this.form.submit()"><option value="">Semua action</option>@foreach($actions as $action)<option value="{{ $action }}" @selected(request('action') === $action)>{{ $action }}</option>@endforeach</select>
+        <select class="bd-admin-select" name="action" data-auto-submit><option value="">Semua action</option>@foreach($actions as $action)<option value="{{ $action }}" @selected(request('action') === $action)>{{ $action }}</option>@endforeach</select>
         <span></span>
     </form>
 

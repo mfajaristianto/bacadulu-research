@@ -215,6 +215,21 @@
     @break
 
 
+    @case('settings')
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 7h10M18 7h2M4 17h4M12 17h8"/>
+            <circle cx="16" cy="7" r="2"/>
+            <circle cx="10" cy="17" r="2"/>
+        </svg>
+        @break
+
+    @case('versions')
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3 3 8l9 5 9-5-9-5z"/>
+            <path d="m3 13 9 5 9-5"/>
+        </svg>
+        @break
+
     @default
         <svg
             viewBox="0 0 24 24"

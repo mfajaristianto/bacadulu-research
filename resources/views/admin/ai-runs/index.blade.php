@@ -15,13 +15,13 @@
 
     <form method="GET" action="{{ route('admin.ai-runs.index') }}" class="bd-admin-filter">
         <input class="bd-admin-input" type="search" name="search" value="{{ request('search') }}" placeholder="Run UUID, user, tool, prompt…">
-        <select class="bd-admin-select" name="status" onchange="this.form.submit()">
+        <select class="bd-admin-select" name="status" data-auto-submit>
             <option value="">Semua status</option>
             @foreach(['queued','retrieving','evidence_ready','generating','completed','insufficient_evidence','citation_failed','failed'] as $status)
                 <option value="{{ $status }}" @selected(request('status') === $status)>{{ str($status)->replace('_',' ')->title() }}</option>
             @endforeach
         </select>
-        <select class="bd-admin-select" name="provider" onchange="this.form.submit()">
+        <select class="bd-admin-select" name="provider" data-auto-submit>
             <option value="">Semua provider</option>
             @foreach($providers as $provider)
                 <option value="{{ $provider }}" @selected(request('provider') === $provider)>{{ strtoupper($provider) }}</option>

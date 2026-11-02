@@ -55,7 +55,7 @@
         <select
             class="bd-admin-select"
             name="document_type"
-            onchange="this.form.submit()"
+            data-auto-submit
         >
 
             <option value="">
@@ -84,7 +84,7 @@
         <select
             class="bd-admin-select"
             name="status"
-            onchange="this.form.submit()"
+            data-auto-submit
         >
 
             <option value="">

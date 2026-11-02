@@ -126,7 +126,7 @@
             class="bd-admin-select"
             name="status"
             aria-label="Filter status"
-            onchange="this.form.submit()"
+            data-auto-submit
         >
 
             <option value="">

@@ -18,6 +18,9 @@ class DashboardController extends Controller
             'draft' => $this->countWhere('documents', 'status', 'draft'),
             'processing' => $this->countWhere('documents', 'status', 'processing'),
             'failed' => $this->countWhere('documents', 'status', 'failed'),
+            'ready' => $this->countWhere('documents', 'status', 'ready'),
+            'sync_pending' => $this->countWhereIn('source_sync_items', 'status', ['new', 'changed']),
+            'runs_failed_today' => $this->countWhereIn('ai_runs', 'status', ['failed', 'citation_failed'], today: true),
             'chunks' => $this->countTable('document_chunks'),
             'tools' => $this->countTable('ai_tools'),
             'prompts' => $this->countTable('prompt_templates'),
@@ -60,6 +63,25 @@ class DashboardController extends Controller
 
         return DB::table($table)
             ->where($column, $value)
+            ->count();
+    }
+
+    private function countWhereIn(
+        string $table,
+        string $column,
+        array $values,
+        bool $today = false
+    ): int {
+        if (
+            ! Schema::hasTable($table)
+            || ! Schema::hasColumn($table, $column)
+        ) {
+            return 0;
+        }
+
+        return DB::table($table)
+            ->whereIn($column, $values)
+            ->when($today, fn ($query) => $query->whereDate('created_at', today()))
             ->count();
     }
 
