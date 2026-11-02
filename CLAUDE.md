@@ -61,6 +61,47 @@ Current frontend stack:
 
 Do not introduce React, Next.js, Vue, Framer Motion, Motion, or another frontend runtime merely to solve an existing Blade UI task unless explicitly approved.
 
+## Identitas, Dokumentasi, dan Aturan Modifikasi (tambahan, bahasa Indonesia)
+
+### Identitas project
+BacaDulu Research adalah workspace riset berbasis AI yang mengutamakan bukti (Laravel 12, PHP ≥ 8.2, Blade, Vite 6, Tailwind CSS 4, GSAP, MySQL, antrean database). Detail: `README.md` dan `docs/PRD.md`.
+
+### Dokumentasi adalah sumber aturan
+Dokumentasi teknis ada di `docs/` (indeks: `docs/README.md`). Baca hanya yang relevan dengan tugas; jangan menyalin isinya ke sini.
+
+| Jenis tugas | Dokumen |
+|---|---|
+| UI / CSS / animasi | `docs/DESIGN_SYSTEM.md`, `docs/RESPONSIVE.md`, `docs/CODE_STYLE.md` |
+| Backend, controller, service | `docs/ARCHITECTURE.md`, `docs/CODE_STYLE.md` |
+| Database, migrasi | `docs/DATABASE.md` |
+| Route, endpoint, integrasi | `docs/API.md` |
+| Auth, upload, input eksternal | `docs/SECURITY.md` |
+| Tes dan verifikasi | `docs/TESTING.md` |
+| Setup dan rilis | `docs/DEPLOYMENT.md` |
+| Referensi visual | `docs/FRONTEND_RESOURCES.md` |
+
+`docs/archive/` hanya untuk riwayat; bila bertentangan dengan `docs/*.md` aktif, dokumen aktif yang berlaku. Informasi yang tidak bisa dipastikan ditulis "Belum diverifikasi", tidak dikarang. Saat kode berubah, perbarui dokumen yang relevan alih-alih membuat dokumen baru.
+
+### Aturan minimal modification
+- Ubah hanya file dan kode yang diperlukan tugas; pilih file pemilik yang sudah ada sebelum membuat file baru.
+- Dilarang refactor, rename, pemformatan massal, atau "merapikan" kode yang tidak terkait.
+- Lindungi fitur existing: nama route, kontrak controller, nama field form, `@csrf`, validasi, auth/otorisasi, pemisahan user/admin, ID dan `data-*` yang dipakai JS, data nyata, unggahan, OAuth, perilaku database.
+- Jangan menjalankan `migrate:fresh`, `composer update`, `npm update`, atau deployment tanpa persetujuan eksplisit. Jangan mengubah `.env`, data pengguna, atau file privat.
+- Jangan melemahkan keamanan demi menyederhanakan UI.
+
+### Membaca file seperlunya
+Mulai dari route/halaman/komponen yang terlibat, cari dulu sebelum membaca file besar, baca rentang baris bukan seluruh file. Hindari `node_modules`, `vendor`, `public/build`, log, dan aset. Panduan lengkap: skill `token-saver`.
+
+### Skill dan agent
+- Skill project: `.claude/skills/token-saver/SKILL.md` — gunakan saat memperbaiki, menelusuri, atau mengubah kode agar pembacaan, perubahan, dan output efisien.
+- Tujuh agent project di `.claude/agents/` (project-lead, design-critic, frontend-architect, motion-director, implementation-engineer, visual-qa, maintenance-reviewer); `AGENTS.md` tetap berisi bootstrap Laravel Boost dan jangan dihapus.
+
+### Pengujian dan verifikasi
+Setelah perubahan signifikan: periksa `git diff`, jalankan `npm run build` dan tes yang relevan, lalu laporkan hasil apa adanya. Baseline tes saat ini memiliki banyak kegagalan lingkungan (lihat `docs/TESTING.md`); bedakan dari kegagalan baru. Jangan mengklaim verifikasi runtime atau visual yang tidak dijalankan.
+
+### Catatan konflik yang perlu keputusan
+Standar desain terbaru di `docs/DESIGN_SYSTEM.md` (Poppins, `#EF5843`, `#F7AA35`) berbeda dari implementasi CSS saat ini dan dari panduan "kompak" lama. Sampai ada keputusan, jangan mengubah token/font secara global tanpa instruksi eksplisit.
+
 ## Core working rule: ANALYZE BEFORE EDITING
 
 Never treat a supplied design as an automatic implementation order.
