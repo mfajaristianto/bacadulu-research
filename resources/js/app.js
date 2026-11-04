@@ -48,6 +48,7 @@ ready(() => {
     initNetworkState();
     initAvatarFallbacks();
     initToasts();
+    initErrorPage();
 
     if (!reduceMotion) {
         animateReveals();
@@ -2349,4 +2350,45 @@ function initMotionDetails() {
                     );
             },
         );
+}
+
+
+/* ============================================================
+   ERROR PAGE — Kembali / Coba lagi
+   Kembali memakai riwayat hanya bila halaman asal ada di situs ini
+   (mencegah loop ke halaman error yang sama); selain itu href aman dipakai.
+   Coba lagi pada request GET = muat ulang URL yang sama (navigasi biasa);
+   pada request non-GET kembali ke form agar tidak mengirim ulang data.
+   ============================================================ */
+
+function initErrorPage() {
+    const page = document.querySelector('[data-error-page]');
+
+    if (!page) {
+        return;
+    }
+
+    const canGoBack = () => {
+        try {
+            return history.length > 1
+                && document.referrer !== ''
+                && new URL(document.referrer).origin === window.location.origin
+                && document.referrer !== window.location.href;
+        } catch {
+            return false;
+        }
+    };
+
+    page.querySelectorAll('[data-error-back], [data-error-retry]').forEach((link) => {
+        link.addEventListener('click', (event) => {
+            if (link.hasAttribute('data-error-retry') && page.dataset.method === 'get') {
+                return;
+            }
+
+            if (canGoBack()) {
+                event.preventDefault();
+                history.back();
+            }
+        });
+    });
 }

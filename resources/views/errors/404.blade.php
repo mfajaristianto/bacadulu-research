@@ -1,1 +1,1 @@
-@extends('layouts.app') @section('title','404 — BacaDulu Research') @section('content')<section class="error-page"><span>404</span><h1>Halaman tidak ditemukan.</h1><p>Alamat yang kamu buka tidak tersedia.</p><x-ui.button href="{{ route('home') }}">Kembali</x-ui.button></section>@endsection
+<x-error-page code="404" mascot="no-results" heading="Halaman yang kamu cari tidak ditemukan." description="Mungkin tautannya sudah berubah, dihapus, atau alamatnya kurang tepat." primary="home" secondary="back" />

@@ -13,7 +13,7 @@ class AdminConsoleLayoutTest extends TestCase
     {
         $this->get(route('admin.login'))
             ->assertOk()
-            ->assertSee('Masuk ke panel admin')
+            ->assertSee('Masuk ke Admin BacaDulu')
             ->assertSee('data-admin-password-toggle', false)
             ->assertDontSee('name="remember"', false)
             ->assertDontSee('<script>', false);

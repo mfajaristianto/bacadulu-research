@@ -109,6 +109,12 @@
                         !== $activePrompt->id
                 )
             : $prompts->first();
+
+    // User tanpa riwayat research => First Research Experience (returning user tetap melihat halaman lama).
+    $isFirstRun =
+        ! $conversation
+        && $pinnedConversations->isEmpty()
+        && $recentConversations->isEmpty();
 @endphp
 
 
@@ -268,6 +274,12 @@
             NEW RESEARCH
         ============================================================ --}}
         @if(!$conversation)
+
+            @if($isFirstRun)
+
+                @include('research.workspace.partials.first-research')
+
+            @else
 
             <div class="research-new-page">
 
@@ -832,6 +844,8 @@
                 </section>
 
             </div>
+
+            @endif
 
 
         {{-- ============================================================

@@ -1277,3 +1277,222 @@ body {
         border-radius: 0 19px 19px 0;
     }
 }
+
+
+/* ============================================================
+   SUCCESS SETELAH REGISTER (register-success.blade.php)
+   Bubu + speech bubble di panel visual; pesan, status, dan satu CTA
+   di panel kanan (mobile: bubble → Bubu → heading → body → status → CTA).
+   ============================================================ */
+
+.research-auth--success .research-auth__body {
+    min-height: 520px;
+}
+
+.research-auth__success-art {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px 28px;
+}
+
+.research-auth__bubble {
+    position: relative;
+    max-width: 280px;
+    margin: 0;
+    padding: 10px 18px;
+
+    color: var(--bd-navy);
+    border: 1px solid rgba(239, 88, 67, .3);
+    border-radius: 16px;
+
+    background: #fffaf5;
+    box-shadow: 0 6px 16px rgba(190, 90, 50, .1);
+
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+}
+
+/* Ekor kecil mengarah ke Bubu. */
+.research-auth__bubble::after {
+    content: "";
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    border-right: 1px solid rgba(239, 88, 67, .3);
+    border-bottom: 1px solid rgba(239, 88, 67, .3);
+    background: #fffaf5;
+    transform: translateX(-50%) rotate(45deg);
+}
+
+.research-auth__success-art .research-auth__stage {
+    align-self: center;
+}
+
+.research-auth__success-copy .research-auth__form-inner {
+    margin-block: 32px;
+}
+
+.research-auth__success-copy h1 {
+    margin: 0;
+    color: var(--bd-navy);
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.02em;
+}
+
+.research-auth__success-lead {
+    margin: 10px 0 0;
+    color: var(--bd-muted);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Status: Akun ✓ — Profil ✓ — Mulai ● */
+.research-auth__status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 20px 0 22px;
+    padding: 0;
+    list-style: none;
+    row-gap: 8px;
+}
+
+.research-auth__status li {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+
+    color: var(--bd-navy);
+    border: 1px solid var(--bd-line);
+    border-radius: 999px;
+
+    background: #fff;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.research-auth__status li + li {
+    margin-left: 22px;
+}
+
+.research-auth__status li + li::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -17px;
+    width: 14px;
+    height: 2px;
+    background: #e3d3c6;
+}
+
+.research-auth__status svg {
+    width: 14px;
+    height: 14px;
+    color: var(--bd-coral);
+}
+
+.research-auth__status .is-current {
+    border-color: rgba(239, 88, 67, .4);
+    background: rgba(239, 88, 67, .08);
+}
+
+.research-auth__status .is-current i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--bd-coral);
+}
+
+.research-auth__success-copy .research-auth__submit {
+    text-decoration: none;
+}
+
+.research-auth__success-note {
+    margin: 12px 0 0;
+    color: var(--bd-muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+/* Urutan muncul (±0,9 dtk, sekali jalan, tanpa bounce): Bubu → bubble → teks → status → CTA. */
+@keyframes research-auth-rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes research-auth-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.research-auth--success .research-auth__success-art .research-auth__stage {
+    animation: research-auth-rise .4s ease-out both;
+}
+
+.research-auth--success .research-auth__bubble {
+    animation: research-auth-fade .25s ease-out .16s both;
+}
+
+.research-auth--success .research-auth__success-copy h1,
+.research-auth--success .research-auth__success-lead {
+    animation: research-auth-fade .3s ease-out .35s both;
+}
+
+.research-auth--success .research-auth__status {
+    animation: research-auth-fade .3s ease-out .5s both;
+}
+
+.research-auth--success .research-auth__submit,
+.research-auth--success .research-auth__success-note {
+    animation: research-auth-fade .3s ease-out .62s both;
+}
+
+@media (max-width: 900px) {
+    .research-auth--success .research-auth__page {
+        padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .research-auth__success-art {
+        gap: 10px;
+        padding: 18px 12px 12px;
+    }
+
+    .research-auth__bubble {
+        font-size: 14px;
+    }
+
+    .research-auth__success-copy .research-auth__form-inner {
+        margin-block: 20px 22px;
+    }
+
+    .research-auth__success-copy h1 {
+        font-size: 26px;
+    }
+
+    .research-auth__success-lead {
+        font-size: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .research-auth--success .research-auth__stage,
+    .research-auth--success .research-auth__bubble,
+    .research-auth--success .research-auth__success-copy h1,
+    .research-auth--success .research-auth__success-lead,
+    .research-auth--success .research-auth__status,
+    .research-auth--success .research-auth__submit,
+    .research-auth--success .research-auth__success-note {
+        animation: none;
+    }
+}

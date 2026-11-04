@@ -1,3 +1,8 @@
-@extends('layouts.app')
-@section('title','500 — BacaDulu Research')
-@section('content')<section class="error-page"><span>ERROR</span><h1>Something went wrong.</h1><p>The server encountered a problem while processing your request. Please try again shortly.</p><x-ui.button href="{{ route('home') }}">Back to Home</x-ui.button></section>@endsection
+@php
+    try {
+        $signedIn = auth()->check();
+    } catch (\Throwable $e) {
+        $signedIn = false;
+    }
+@endphp
+<x-error-page code="500" mascot="system-error" heading="Ada masalah di sistem BacaDulu." :description="$signedIn ? 'Coba muat ulang atau kembali ke Workspace.' : 'Coba muat ulang atau kembali ke beranda.'" primary="retry" secondary="home" />

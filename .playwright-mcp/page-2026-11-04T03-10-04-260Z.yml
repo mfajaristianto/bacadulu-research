@@ -1,0 +1,40 @@
+- generic [ref=e1]:
+  - link "Lewati ke formulir" [ref=e2] [cursor=pointer]:
+    - /url: "#admin-auth-form"
+  - main [ref=e3]:
+    - link "Kembali ke BacaDulu Research" [ref=e4] [cursor=pointer]:
+      - /url: http://127.0.0.1:8000
+      - text: ← Kembali ke BacaDulu Research
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - link "BacaDulu Research — beranda" [ref=e7] [cursor=pointer]:
+          - /url: http://127.0.0.1:8000
+          - generic [ref=e12]:
+            - text: BacaDulu
+            - emphasis [ref=e13]: Research
+        - generic [ref=e14]: Admin Access
+      - complementary [ref=e15]:
+        - 'img "Bubu, penjaga admin BacaDulu, menyapa: Hai, Admin BacaDulu!" [ref=e17]'
+        - generic [ref=e18]:
+          - paragraph [ref=e19]: Research Management Console
+          - list "Area pengelolaan" [ref=e20]:
+            - listitem [ref=e21]: Library
+            - listitem [ref=e22]: Prompt
+            - listitem [ref=e23]: Research tools
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - heading "Masuk ke Admin BacaDulu" [level=1] [ref=e26]
+          - paragraph [ref=e27]: Kelola library, research tools, prompt, dan operasional BacaDulu Research.
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - generic [ref=e30]: Email administrator
+            - textbox "Email administrator" [active] [ref=e35]:
+              - /placeholder: nama@email.com
+          - generic [ref=e36]:
+            - generic [ref=e37]: Kata sandi
+            - generic [ref=e38]:
+              - textbox "Kata sandi" [ref=e42]:
+                - /placeholder: Masukkan kata sandi
+              - button "Lihat" [ref=e43] [cursor=pointer]
+          - button "Masuk Admin" [ref=e44] [cursor=pointer]
+        - paragraph [ref=e45]: Akses terbatas untuk administrator.

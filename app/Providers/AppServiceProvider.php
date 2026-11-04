@@ -10,6 +10,7 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -89,6 +90,27 @@ class AppServiceProvider extends ServiceProvider
                 'framework/vite.hot'
             )
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Asset Origin
+        |--------------------------------------------------------------------------
+        |
+        | ASSET_URL membuat asset() dan @vite selalu mengarah ke satu host. Jika host
+        | itu berbeda dari host request yang sedang berjalan (mis. ASSET_URL masih
+        | domain ngrok lama padahal dibuka dari 127.0.0.1 atau domain produksi),
+        | CSS/JS/gambar/font diblokir CSP 'self'. Dalam kasus itu ASSET_URL diabaikan
+        | dan aset mengikuti host request aktif (tanpa hardcode host apa pun).
+        |
+        */
+
+        if (! $this->app->runningInConsole()) {
+            $assetHost = parse_url((string) config('app.asset_url'), PHP_URL_HOST);
+
+            if ($assetHost && strcasecmp($assetHost, request()->getHost()) !== 0) {
+                URL::useAssetOrigin(null);
+            }
+        }
 
         /*
         |--------------------------------------------------------------------------

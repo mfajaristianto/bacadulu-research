@@ -3,12 +3,44 @@
 @section('title', 'Login Admin')
 
 @section('content')
-<div class="bd-admin-login">
+<aside class="bd-admin-auth__aside">
+    {{-- Walk and wave are the only assets. The wave PNG is drawn twice: once with its built-in
+         bubble masked out, once as the bubble alone, so the greeting can be revealed after the wave. --}}
+    <div class="bd-admin-auth__stage">
+        <div
+            class="bd-admin-auth__guardian"
+            data-guardian
+            data-guardian-state="hidden"
+            role="img"
+            aria-label="Bubu, penjaga admin BacaDulu, menyapa: Hai, Admin BacaDulu!"
+        >
+            <div class="bd-admin-auth__run" data-guardian-run>
+                <span class="bd-admin-auth__shadow" data-guardian-shadow></span>
+                <div class="bd-admin-auth__bob" data-guardian-bob>
+                    <img class="bd-admin-auth__walk" src="{{ asset('assets/mascot/mascot-admin-guardian-walk.png') }}" alt="" width="611" height="778" decoding="async">
+                    <img class="bd-admin-auth__wave" src="{{ asset('assets/mascot/mascot-admin-guardian-wave.png') }}" alt="" width="899" height="823" decoding="async">
+                    <div class="bd-admin-auth__bubble" data-guardian-bubble>
+                        <img src="{{ asset('assets/mascot/mascot-admin-guardian-wave.png') }}" alt="" width="899" height="823" decoding="async">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <p class="bd-admin-auth__tagline">Research Management Console</p>
+        <ul class="bd-admin-auth__scope" aria-label="Area pengelolaan">
+            <li>Library</li>
+            <li>Prompt</li>
+            <li>Research tools</li>
+        </ul>
+    </div>
+</aside>
+
+<section class="bd-admin-login" id="admin-auth-form">
     <header class="bd-admin-login__head">
-        <p class="bd-admin-login__badge">Panel Admin</p>
-        <h1>Masuk ke panel admin</h1>
+        <h1>Masuk ke Admin BacaDulu</h1>
         <p class="bd-admin-login__copy">
-            Khusus pengelola BacaDulu Research. Akun mahasiswa/peneliti tidak bisa dipakai di sini.
+            Kelola library, research tools, prompt, dan operasional BacaDulu Research.
         </p>
     </header>
 
@@ -42,7 +74,7 @@
                     value="{{ old('email') }}"
                     autocomplete="username"
                     inputmode="email"
-                    placeholder="admin@bacadulu.net"
+                    placeholder="nama@email.com"
                     maxlength="190"
                     required
                     autofocus
@@ -78,15 +110,15 @@
             </div>
         </div>
 
-        <button type="submit" class="bd-admin-login__submit">
-            Masuk
-            <span aria-hidden="true">→</span>
-        </button>
+        <button type="submit" class="bd-admin-login__submit">Masuk Admin</button>
     </form>
 
     <p class="bd-admin-login__note">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3z" /></svg>
-        Setiap login admin dicatat di log aktivitas untuk keamanan.
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="5" y="10" width="14" height="10" rx="2" />
+            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+        </svg>
+        Akses terbatas untuk administrator.
     </p>
-</div>
+</section>
 @endsection

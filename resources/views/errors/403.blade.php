@@ -1,1 +1,1 @@
-@extends('layouts.app') @section('title','403 — BacaDulu Research') @section('content')<section class="error-page"><span>403</span><h1>Akses tidak tersedia.</h1><p>Halaman ini hanya dapat diakses oleh pengguna yang memiliki izin.</p><x-ui.button href="{{ route('home') }}">Kembali</x-ui.button></section>@endsection
+<x-error-page code="403" mascot="access-denied" heading="Halaman ini tidak bisa kamu akses." description="Akunmu tidak memiliki izin untuk membuka halaman ini." primary="home" secondary="back" />

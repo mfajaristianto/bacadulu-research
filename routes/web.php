@@ -20,11 +20,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
+/*
+|--------------------------------------------------------------------------
+| Public
+|--------------------------------------------------------------------------
+*/
 
-Route::view(
-    '/',
-    'pages.landing'
-)->name('home');
+Route::view('/', 'pages.landing')
+    ->name('home');
+
+
+/*
+|--------------------------------------------------------------------------
+| Guest Authentication
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware('guest')
     ->group(function () {
@@ -72,7 +82,7 @@ Route::middleware('guest')
                     'redirect',
                 ]
             )->name('google.redirect');
-    
+
             Route::get(
                 '/auth/google/callback',
                 [
@@ -83,20 +93,59 @@ Route::middleware('guest')
         }
     });
 
-/* Password recovery also remains reachable from an authenticated Profile page. */
-Route::get('/forgot-password', [PasswordResetController::class, 'requestForm'])
-    ->name('password.request');
 
-Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])
+/*
+|--------------------------------------------------------------------------
+| Password Recovery
+|--------------------------------------------------------------------------
+|
+| Password recovery also remains reachable from an authenticated
+| Profile page.
+|
+*/
+
+Route::get(
+    '/forgot-password',
+    [
+        PasswordResetController::class,
+        'requestForm',
+    ]
+)->name('password.request');
+
+Route::post(
+    '/forgot-password',
+    [
+        PasswordResetController::class,
+        'sendResetLink',
+    ]
+)
     ->middleware('throttle:3,10')
     ->name('password.email');
 
-Route::get('/reset-password/{token}', [PasswordResetController::class, 'resetForm'])
-    ->name('password.reset');
+Route::get(
+    '/reset-password/{token}',
+    [
+        PasswordResetController::class,
+        'resetForm',
+    ]
+)->name('password.reset');
 
-Route::post('/reset-password', [PasswordResetController::class, 'reset'])
+Route::post(
+    '/reset-password',
+    [
+        PasswordResetController::class,
+        'reset',
+    ]
+)
     ->middleware('throttle:5,10')
     ->name('password.update');
+
+
+/*
+|--------------------------------------------------------------------------
+| Logout
+|--------------------------------------------------------------------------
+*/
 
 Route::post(
     '/logout',
@@ -108,31 +157,63 @@ Route::post(
     ->middleware('auth')
     ->name('logout');
 
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated + Active User
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware([
     'auth',
     'active',
 ])->group(function () {
-    Route::view('/register/success', 'auth.register-success')
-        ->name('register.success');
+    /*
+    |--------------------------------------------------------------------------
+    | Registration Success
+    |--------------------------------------------------------------------------
+    */
 
-    Route::post('/onboarding/complete', function (Request $request) {
-        $request->user()->forceFill([
-            'onboarding_completed_at' => now(),
-        ])->save();
+    Route::view(
+        '/register/success',
+        'auth.register-success'
+    )->name('register.success');
 
-        return response()->json(['ok' => true]);
-    })->middleware('throttle:10,1')->name('onboarding.complete');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Onboarding
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/onboarding/complete',
+        function (Request $request) {
+            $request->user()->forceFill([
+                'onboarding_completed_at' => now(),
+            ])->save();
+
+            return response()->json([
+                'ok' => true,
+            ]);
+        }
+    )
+        ->middleware('throttle:10,1')
+        ->name('onboarding.complete');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Email Verification
+    |--------------------------------------------------------------------------
+    */
 
     Route::get(
         '/email/verify',
         function () {
-            return view(
-                'auth.verify-email'
-            );
+            return view('auth.verify-email');
         }
-    )->name(
-        'verification.notice'
-    );
+    )->name('verification.notice');
 
     Route::get(
         '/email/verify/{id}/{hash}',
@@ -153,9 +234,7 @@ Route::middleware([
             'signed',
             'throttle:6,1',
         ])
-        ->name(
-            'verification.verify'
-        );
+        ->name('verification.verify');
 
     Route::post(
         '/email/verification-notification',
@@ -176,11 +255,24 @@ Route::middleware([
         ->name('verification.send');
 });
 
+
+/*
+|--------------------------------------------------------------------------
+| Verified User Area
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware([
     'auth',
     'active',
     'verified.if.required',
 ])->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Profile
+    |--------------------------------------------------------------------------
+    */
+
     Route::get(
         '/profile/avatar',
         [
@@ -215,203 +307,289 @@ Route::middleware([
         ->middleware('throttle:profile')
         ->name('profile.update');
 
-    Route::patch('/profile/credentials', [ProfileController::class, 'updateCredentials'])
+    Route::patch(
+        '/profile/credentials',
+        [
+            ProfileController::class,
+            'updateCredentials',
+        ]
+    )
         ->middleware('throttle:20,15')
         ->name('profile.credentials.update');
 
-    Route::middleware(
-        'profile.complete'
-    )->group(function () {
-        Route::get(
-            '/dashboard',
-            [
-                ResearchController::class,
-                'dashboard',
-            ]
-        )->name('dashboard');
 
-        Route::get(
-            '/workspace',
-            [
-                ResearchController::class,
-                'workspace',
-            ]
-        )->name('workspace');
+    /*
+    |--------------------------------------------------------------------------
+    | User Area Requiring Complete Profile
+    |--------------------------------------------------------------------------
+    */
 
-        Route::get(
-            '/workspace/{conversation}',
-            [
-                ResearchController::class,
-                'workspace',
-            ]
-        )->name('workspace.conversation');
+    Route::middleware('profile.complete')
+        ->group(function () {
+            /*
+            |--------------------------------------------------------------------------
+            | Dashboard / Workspace
+            |--------------------------------------------------------------------------
+            */
 
-        Route::post(
-            '/research/run',
-            [
-                ResearchController::class,
-                'run',
-            ]
-        )
-            ->middleware('throttle:research')
-            ->name('research.run');
+            Route::get(
+                '/dashboard',
+                [
+                    ResearchController::class,
+                    'dashboard',
+                ]
+            )->name('dashboard');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Temporary User Library
-        |--------------------------------------------------------------------------
-        |
-        | Masih dipertahankan sementara supaya behaviour existing tidak
-        | langsung rusak. Navigation user sudah tidak mengarah ke sini.
-        | Nanti kita retire setelah source/evidence flow selesai.
-        |
-        */
+            Route::get(
+                '/workspace',
+                [
+                    ResearchController::class,
+                    'workspace',
+                ]
+            )->name('workspace');
 
-        Route::get(
-            '/library',
-            [
-                LibraryController::class,
-                'index',
-            ]
-        )
-            ->middleware('throttle:library')
-            ->name('library.index');
+            Route::get(
+                '/workspace/{conversation}',
+                [
+                    ResearchController::class,
+                    'workspace',
+                ]
+            )->name('workspace.conversation');
 
-        Route::get(
-            '/library/{document}',
-            [
-                LibraryController::class,
-                'show',
-            ]
-        )
-            ->middleware('throttle:library')
-            ->name('library.show');
-
-        /*
-        |--------------------------------------------------------------------------
-        | History
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get(
-            '/history',
-            [
-                HistoryController::class,
-                'index',
-            ]
-        )->name('history.index');
 
             /*
+            |--------------------------------------------------------------------------
+            | Research
+            |--------------------------------------------------------------------------
+            */
+
+            Route::post(
+                '/research/run',
+                [
+                    ResearchController::class,
+                    'run',
+                ]
+            )
+                ->middleware('throttle:research')
+                ->name('research.run');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Temporary User Library
+            |--------------------------------------------------------------------------
+            |
+            | Masih dipertahankan sementara supaya behaviour existing tidak
+            | langsung rusak. Navigation user sudah tidak mengarah ke sini.
+            | Nanti kita retire setelah source/evidence flow selesai.
+            |
+            */
+
+            Route::get(
+                '/library',
+                [
+                    LibraryController::class,
+                    'index',
+                ]
+            )
+                ->middleware('throttle:library')
+                ->name('library.index');
+
+            Route::get(
+                '/library/{document}',
+                [
+                    LibraryController::class,
+                    'show',
+                ]
+            )
+                ->middleware('throttle:library')
+                ->name('library.show');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | History
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get(
+                '/history',
+                [
+                    HistoryController::class,
+                    'index',
+                ]
+            )->name('history.index');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Saved Results
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get(
+                '/saved',
+                [
+                    SavedResultController::class,
+                    'index',
+                ]
+            )->name('saved.index');
+
+            Route::post(
+                '/saved',
+                [
+                    SavedResultController::class,
+                    'store',
+                ]
+            )->name('saved.store');
+
+            Route::get(
+                '/saved/{savedResult}',
+                [
+                    SavedResultController::class,
+                    'show',
+                ]
+            )
+                ->whereNumber('savedResult')
+                ->name('saved.show');
+
+            Route::patch(
+                '/saved/{savedResult}',
+                [
+                    SavedResultController::class,
+                    'update',
+                ]
+            )
+                ->whereNumber('savedResult')
+                ->name('saved.update');
+
+            Route::patch(
+                '/saved/{savedResult}/favorite',
+                [
+                    SavedResultController::class,
+                    'toggleFavorite',
+                ]
+            )
+                ->whereNumber('savedResult')
+                ->name('saved.favorite');
+
+            Route::delete(
+                '/saved/{savedResult}',
+                [
+                    SavedResultController::class,
+                    'destroy',
+                ]
+            )
+                ->whereNumber('savedResult')
+                ->name('saved.destroy');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Conversation Management
+            |--------------------------------------------------------------------------
+            */
+
+            Route::patch(
+                '/research/conversations/{conversation}/pin',
+                [
+                    ConversationController::class,
+                    'pin',
+                ]
+            )->name('conversations.pin');
+
+            Route::patch(
+                '/research/conversations/{conversation}/unpin',
+                [
+                    ConversationController::class,
+                    'unpin',
+                ]
+            )->name('conversations.unpin');
+
+            Route::patch(
+                '/research/conversations/{conversation}/rename',
+                [
+                    ConversationController::class,
+                    'rename',
+                ]
+            )->name('conversations.rename');
+
+            Route::get(
+                '/research/conversations/{conversation}/delete',
+                [
+                    ConversationController::class,
+                    'deleteConfirmation',
+                ]
+            )->name('conversations.delete.confirmation');
+
+            Route::delete(
+                '/research/conversations/{conversation}',
+                [
+                    ConversationController::class,
+                    'destroy',
+                ]
+            )->name('conversations.destroy');
+        });
+});
+
+
+/*
 |--------------------------------------------------------------------------
-| Saved Results
+| LOCAL ERROR PAGE TESTER
 |--------------------------------------------------------------------------
+|
+| KHUSUS DEVELOPMENT.
+|
+| Route ini sengaja berada DI LUAR:
+| - middleware auth
+| - middleware profile.complete
+| - admin prefix
+| - admin middleware
+|
+| Jadi URL test-nya benar-benar:
+|
+| /__test-error/404
+| /__test-error/500
+| dst.
+|
+| HAPUS SEBELUM PRODUCTION (guard environment di bawah juga membuat route
+| ini tidak mungkin aktif di production).
+|
 */
 
-Route::get(
-    '/saved',
-    [
-        SavedResultController::class,
-        'index',
-    ]
-)->name('saved.index');
+// Guard environment: tidak mungkin aktif di production.
+if (app()->environment(['local', 'testing'])) {
+    Route::get(
+        '/__test-error/{code}',
+        function (int $code) {
+            $allowed = [
+                403,
+                404,
+                419,
+                422,
+                429,
+                500,
+                502,
+                503,
+                504,
+            ];
 
-Route::post(
-    '/saved',
-    [
-        SavedResultController::class,
-        'store',
-    ]
-)->name('saved.store');
+            abort_unless(
+                in_array($code, $allowed, true),
+                404
+            );
 
-Route::get(
-    '/saved/{savedResult}',
-    [
-        SavedResultController::class,
-        'show',
-    ]
-)
-    ->whereNumber('savedResult')
-    ->name('saved.show');
+            abort($code);
+        }
+    )->whereNumber('code');
+}
 
-Route::patch(
-    '/saved/{savedResult}',
-    [
-        SavedResultController::class,
-        'update',
-    ]
-)
-    ->whereNumber('savedResult')
-    ->name('saved.update');
 
-Route::patch(
-    '/saved/{savedResult}/favorite',
-    [
-        SavedResultController::class,
-        'toggleFavorite',
-    ]
-)
-    ->whereNumber('savedResult')
-    ->name('saved.favorite');
-
-Route::delete(
-    '/saved/{savedResult}',
-    [
-        SavedResultController::class,
-        'destroy',
-    ]
-)
-    ->whereNumber('savedResult')
-    ->name('saved.destroy');
-
-        /*
-        |--------------------------------------------------------------------------
-        | Conversation Management
-        |--------------------------------------------------------------------------
-        */
-
-        Route::patch(
-            '/research/conversations/{conversation}/pin',
-            [
-                ConversationController::class,
-                'pin',
-            ]
-        )->name('conversations.pin');
-
-        Route::patch(
-            '/research/conversations/{conversation}/unpin',
-            [
-                ConversationController::class,
-                'unpin',
-            ]
-        )->name('conversations.unpin');
-
-        Route::patch(
-            '/research/conversations/{conversation}/rename',
-            [
-                ConversationController::class,
-                'rename',
-            ]
-        )->name('conversations.rename');
-
-        Route::get(
-            '/research/conversations/{conversation}/delete',
-            [
-                ConversationController::class,
-                'deleteConfirmation',
-            ]
-        )->name(
-            'conversations.delete.confirmation'
-        );
-
-        Route::delete(
-            '/research/conversations/{conversation}',
-            [
-                ConversationController::class,
-                'destroy',
-            ]
-        )->name('conversations.destroy');
-    });
-});
+/*
+|--------------------------------------------------------------------------
+| Admin
+|--------------------------------------------------------------------------
+*/
 
 $adminPath = config(
     'research.admin_path'
@@ -420,6 +598,12 @@ $adminPath = config(
 Route::prefix($adminPath)
     ->name('admin.')
     ->group(function () {
+        /*
+        |--------------------------------------------------------------------------
+        | Admin Authentication
+        |--------------------------------------------------------------------------
+        */
+
         Route::get(
             '/login',
             [
@@ -448,8 +632,21 @@ Route::prefix($adminPath)
             ->middleware('admin')
             ->name('logout');
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Protected Admin Area
+        |--------------------------------------------------------------------------
+        */
+
         Route::middleware('admin')
             ->group(function () {
+                /*
+                |--------------------------------------------------------------------------
+                | Dashboard
+                |--------------------------------------------------------------------------
+                */
+
                 Route::get(
                     '/',
                     [
@@ -457,6 +654,7 @@ Route::prefix($adminPath)
                         'index',
                     ]
                 )->name('dashboard');
+
 
                 /*
                 |--------------------------------------------------------------------------
@@ -504,6 +702,7 @@ Route::prefix($adminPath)
                     ]
                 )->name('library.update');
 
+
                 /*
                 |--------------------------------------------------------------------------
                 | Research Tools
@@ -549,6 +748,7 @@ Route::prefix($adminPath)
                         'update',
                     ]
                 )->name('tools.update');
+
 
                 /*
                 |--------------------------------------------------------------------------

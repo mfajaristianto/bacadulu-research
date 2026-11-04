@@ -1,1 +1,1 @@
-@extends('layouts.app') @section('title','419 — BacaDulu Research') @section('content')<section class="error-page"><span>419</span><h1>Sesi berakhir.</h1><p>Segarkan halaman lalu coba kembali.</p><x-ui.button href="{{ url()->previous() }}">Coba Lagi</x-ui.button></section>@endsection
+<x-error-page code="419" mascot="locked" heading="Sesi kamu sudah berakhir." description="Masuk kembali untuk melanjutkan dengan aman." primary="login" secondary="beranda" />

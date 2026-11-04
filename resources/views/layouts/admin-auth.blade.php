@@ -18,25 +18,27 @@
     <a href="#admin-auth-form" class="bd-admin-auth__skip">Lewati ke formulir</a>
 
     <main class="bd-admin-auth__page">
-        <div class="bd-admin-auth__card" id="admin-auth-form">
-            <a href="{{ route('home') }}" class="bd-admin-auth__brand" aria-label="BacaDulu Research — beranda">
-                <span class="bd-admin-auth__mark" aria-hidden="true">
-                    <svg viewBox="0 0 48 48" fill="none">
-                        <path d="M5 10c8-3 14-2 19 3v28c-6-5-12-6-19-3V10Z" />
-                        <path d="M43 10c-8-3-14-2-19 3v28c6-5 12-6 19-3V10Z" />
-                        <path d="M24 13v28" />
-                    </svg>
-                </span>
-                <span>BacaDulu <em>Research</em></span>
-            </a>
+        <a href="{{ route('home') }}" class="bd-admin-auth__back">
+            <span aria-hidden="true">←</span> Kembali ke BacaDulu Research
+        </a>
+
+        <div class="bd-admin-auth__shell">
+            <header class="bd-admin-auth__bar">
+                <a href="{{ route('home') }}" class="bd-admin-auth__brand" aria-label="BacaDulu Research — beranda">
+                    <span class="bd-admin-auth__mark" aria-hidden="true">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <path d="M5 10c8-3 14-2 19 3v28c-6-5-12-6-19-3V10Z" />
+                            <path d="M43 10c-8-3-14-2-19 3v28c6-5 12-6 19-3V10Z" />
+                            <path d="M24 13v28" />
+                        </svg>
+                    </span>
+                    <span>BacaDulu <em>Research</em></span>
+                </a>
+                <span class="bd-admin-auth__label">Admin Access</span>
+            </header>
 
             @yield('content')
         </div>
-
-        <footer class="bd-admin-auth__footer">
-            <span>© {{ now()->year }} BacaDulu Research</span>
-            <a href="{{ route('home') }}">Kembali ke situs <span aria-hidden="true">↗</span></a>
-        </footer>
     </main>
 </body>
 </html>

@@ -67,6 +67,7 @@ ready(() => {
     initResearchSubmitGuard();
     initInlineSavedResult();
     initResearchRunPolling();
+    initFirstResearch();
 
 });
 
@@ -1990,4 +1991,790 @@ function initResearchRunPolling() {
     });
 
     poll();
+}
+
+
+/* =========================================================================
+   FIRST RESEARCH EXPERIENCE
+   - Chip Research Tool = tampilan lain dari menu prompt existing: klik chip
+     meneruskan klik ke opsi [data-prompt-id], jadi nilai prompt_template_id
+     tetap ditentukan logic existing (app.js initPromptPicker).
+   - "Coba Contoh" = BUBU GUIDED CURSOR TOUR: satu state machine berbasis
+     langkah (intro → judul → kategori → tool → tombol → alur → selesai).
+     Langkah UI 1–4 menunggu user menekan "Lanjut"; hanya simulasi alur
+     (langkah 5) yang berjalan otomatis. Ghost cursor (desktop) / tap
+     indicator (touch) mengikuti posisi elemen asli lewat
+     getBoundingClientRect. Murni UI di client: TIDAK ada fetch/XHR/submit;
+     research sungguhan hanya berjalan lewat tombol "Mulai Research".
+   ========================================================================= */
+
+const FR_DEMO_TOOLS = ['Research Gap', 'Literature Synthesis'];
+const FR_CATEGORY_HINTS = ['keuangan', 'ekonomi', 'manajemen', 'bisnis', 'akuntansi'];
+
+const FR_BUBU_COPY = {
+    search: 'Mulai dari judul atau topikmu.',
+    reading: 'Membaca sumber yang relevan…',
+    processing: 'Menganalisis evidence…',
+    verified: 'Siap. Sekarang kamu bisa mulai research.',
+};
+
+const FR_FLOW = ['title', 'tool', 'source', 'reading', 'evidence', 'insight'];
+
+// Indeks langkah tour.
+const FR_INTRO = 0;
+const FR_TITLE = 1;
+const FR_CATEGORY = 2;
+const FR_TOOL = 3;
+const FR_SUBMIT = 4;
+const FR_FLOWSTEP = 5;
+const FR_COMPLETE = 6;
+
+function initFirstResearch() {
+
+    const root = first('[data-first-research]');
+
+    if (!root) {
+        return;
+    }
+
+    const input = first('[data-chat-input]', root);
+    const select = first('#fr-category', root);
+    const hidden = first('[data-prompt-input]', root);
+    const menu = first('[data-prompt-menu]', root);
+    const label = first('[data-prompt-label]', root);
+    const chips = all('[data-fr-tool]', root);
+    const toolDesc = first('[data-fr-tool-desc]', root);
+    const copy = first('[data-fr-copy]', root);
+    const sources = first('[data-fr-sources]', root);
+    const flowList = first('.fr-flow', root);
+    const demoButton = first('[data-fr-demo]', root);
+    const submit = first('button[type="submit"]', root);
+    const bubus = all('[data-bubu]', root);
+    const steps = Object.fromEntries(
+        all('[data-fr-step]', root).map((node) => [node.dataset.frStep, node]),
+    );
+
+    const tour = first('[data-fr-tour]', root);
+    const spot = first('[data-fr-spot]', root);
+    const pointer = first('[data-fr-pointer]', root);
+    const bubble = first('[data-fr-bubble]', root);
+    const bubbleCopy = first('[data-fr-bubble-copy]', root);
+    const bubbleNote = first('[data-fr-bubble-note]', root);
+    const bubbleCount = first('[data-fr-bubble-count]', root);
+    const bubbleBubus = all('[data-fr-bubble-bubu]', root);
+    const btn = {
+        start: first('[data-fr-start]', root),
+        next: first('[data-fr-next]', root),
+        back: first('[data-fr-back]', root),
+        skip: first('[data-fr-skip]', root),
+        keep: first('[data-fr-keep]', root),
+        own: first('[data-fr-own]', root),
+    };
+
+    const options = menu ? all('[data-prompt-id]', menu) : [];
+    const demoTitle = root.dataset.demoTitle || '';
+    const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const touchMode = () =>
+        window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 900;
+
+    // ---- Research Tool: chip <-> menu prompt existing ----------------------
+
+    const syncChips = () => {
+        const selected = options.find((option) => option.getAttribute('aria-selected') === 'true');
+        const id = selected?.dataset.promptId || '';
+
+        chips.forEach((chip) => {
+            chip.setAttribute('aria-pressed', String(chip.dataset.frTool === id && id !== ''));
+        });
+
+        if (toolDesc) {
+            toolDesc.textContent = selected?.dataset.promptDescription || 'Pilih satu jenis analisis.';
+        }
+    };
+
+    chips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+            options.find((option) => option.dataset.promptId === chip.dataset.frTool)?.click();
+        });
+    });
+
+    if (menu) {
+        new MutationObserver(syncChips).observe(menu, {
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['aria-selected'],
+        });
+    }
+
+    // stopPropagation: klik "luar" tidak boleh langsung menutup menu yang baru dibuka.
+    first('[data-fr-tools-info]', root)?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        first('[data-prompt-open]', root)?.click();
+    });
+
+    const clearTool = () => {
+        options.forEach((option) => option.setAttribute('aria-selected', 'false'));
+
+        if (hidden) {
+            hidden.value = '';
+        }
+
+        if (label) {
+            label.textContent = 'Pilih research prompt';
+        }
+
+        syncChips();
+    };
+
+    const selectedToolId = () => hidden?.value || '';
+
+    const chipById = (id) => chips.find((chip) => chip.dataset.frTool === String(id));
+
+    const demoChip = () =>
+        FR_DEMO_TOOLS
+            .map((name) => chips.find((chip) => chip.dataset.frToolName === name))
+            .find(Boolean)
+        || chips[0];
+
+    const demoCategory = () => {
+        const real = all('option', select).filter((option) => option.value !== '');
+
+        return real.find((option) =>
+            FR_CATEGORY_HINTS.some((hint) => option.textContent.toLowerCase().includes(hint)),
+        ) || real[0];
+    };
+
+    // ---- Bubu (kartu pemandu + avatar di bubble) + mini flow ------------------
+
+    const loadBubus = () => {
+        bubus.forEach((img) => {
+            if (!img.getAttribute('src') && img.dataset.src) {
+                img.src = img.dataset.src;
+            }
+        });
+
+        bubbleBubus.forEach((img) => {
+            const guide = bubus.find((item) => item.dataset.bubu === img.dataset.frBubbleBubu);
+            const url = guide?.getAttribute('src') || guide?.dataset.src;
+
+            if (url && !img.getAttribute('src')) {
+                img.src = url;
+            }
+        });
+    };
+
+    const setBubu = (name) => {
+        loadBubus();
+
+        bubus.forEach((img) => img.classList.toggle('is-on', img.dataset.bubu === name));
+        bubbleBubus.forEach((img) => img.classList.toggle('is-on', img.dataset.frBubbleBubu === name));
+
+        if (copy) {
+            copy.textContent = FR_BUBU_COPY[name];
+        }
+    };
+
+    // actives: daftar langkah flow yang menyala; doneUpTo: indeks terakhir yang ✓.
+    const setFlow = (actives = [], doneUpTo = -1) => {
+        FR_FLOW.forEach((name, index) => {
+            const node = steps[name];
+
+            if (!node) {
+                return;
+            }
+
+            node.classList.toggle('is-done', index <= doneUpTo);
+            node.classList.toggle('is-active', actives.includes(name));
+        });
+
+        sources?.classList.toggle('is-on', actives.includes('source'));
+    };
+
+    // ---- Tour: state machine -------------------------------------------------
+
+    let index = -1;
+    let active = false;
+    let token = 0;
+    let snapshot = null;
+    let current = null;
+    let waiter = null;
+    let raf = 0;
+    let moveFrame = 0;
+    let pointerEl = null;
+    let pointerId = 0;
+
+    const wait = (ms) => new Promise((resolve) => {
+        waiter = {
+            resolve,
+            id: window.setTimeout(() => {
+                waiter = null;
+                resolve(true);
+            }, ms),
+        };
+    });
+
+    // Satu-satunya jalur pembatalan: timer tunggu, rAF mengetik, dan token.
+    const bump = () => {
+        token += 1;
+
+        if (waiter) {
+            window.clearTimeout(waiter.id);
+            waiter.resolve(false);
+            waiter = null;
+        }
+
+        window.cancelAnimationFrame(raf);
+
+        return token;
+    };
+
+    const typeTitle = (run) => new Promise((resolve) => {
+        const total = demoTitle.length;
+        const duration = reduced() ? 0 : 1500;
+        const started = performance.now();
+
+        const frame = (now) => {
+            if (run !== token) {
+                resolve(false);
+
+                return;
+            }
+
+            const count = duration
+                ? Math.min(total, Math.ceil(((now - started) / duration) * total))
+                : total;
+
+            input.value = demoTitle.slice(0, count);
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+
+            if (count < total) {
+                raf = window.requestAnimationFrame(frame);
+
+                return;
+            }
+
+            resolve(true);
+        };
+
+        raf = window.requestAnimationFrame(frame);
+    });
+
+    const dispatchValue = (field) => {
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    // Keadaan nilai form setelah langkah k selesai (k = -1/0: kondisi awal user).
+    const applyUpTo = (k) => {
+        if (!snapshot) {
+            return;
+        }
+
+        // Judul contoh yang pernah dipertahankan = nilai demo: kategori/tool-nya ikut dibersihkan.
+        const fromDemo = snapshot.text === demoTitle;
+        const baseText = fromDemo ? '' : snapshot.text;
+        const baseCategory = fromDemo ? '' : snapshot.category;
+        const baseTool = fromDemo ? '' : snapshot.tool;
+
+        input.value = k >= FR_TITLE ? demoTitle : baseText;
+        dispatchValue(input);
+
+        if (select) {
+            const category = demoCategory();
+
+            select.value = k >= FR_CATEGORY && category ? category.value : baseCategory;
+            dispatchValue(select);
+        }
+
+        const chip = demoChip();
+
+        if (k >= FR_TOOL) {
+            if (chip && selectedToolId() !== chip.dataset.frTool) {
+                chip.click();
+            }
+        } else if (baseTool) {
+            if (selectedToolId() !== baseTool) {
+                chipById(baseTool)?.click();
+            }
+        } else if (selectedToolId() !== '') {
+            clearTool();
+        }
+
+        setFlow([], k >= FR_TOOL ? 1 : (k >= FR_TITLE ? 0 : -1));
+    };
+
+    const safe = () => ({
+        top: (first('.research-workspace-topbar')?.getBoundingClientRect().bottom || 72) + 8,
+        bottom: touchMode() ? 92 : 16,
+    });
+
+    // Gulir halus sampai target terlihat, lalu tunggu posisinya stabil.
+    const ensureVisible = (el) => new Promise((resolve) => {
+        const rect = el.getBoundingClientRect();
+        const bounds = safe();
+
+        if (rect.top >= bounds.top && rect.bottom <= window.innerHeight - bounds.bottom) {
+            resolve();
+
+            return;
+        }
+
+        el.scrollIntoView({ block: 'center', behavior: reduced() ? 'auto' : 'smooth' });
+
+        const started = performance.now();
+        let last = null;
+        let still = 0;
+
+        const poll = () => {
+            const top = el.getBoundingClientRect().top;
+
+            still = last !== null && Math.abs(top - last) < 0.5 ? still + 1 : 0;
+            last = top;
+
+            if (still >= 4 || performance.now() - started > 1400) {
+                resolve();
+
+                return;
+            }
+
+            raf = window.requestAnimationFrame(poll);
+        };
+
+        raf = window.requestAnimationFrame(poll);
+    });
+
+    const pointFor = (el, id) => {
+        const rect = el.getBoundingClientRect();
+
+        if (touchMode()) {
+            return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+        }
+
+        if (id === FR_TITLE) {
+            return { x: rect.left + Math.min(72, rect.width * 0.2), y: rect.top + rect.height / 2 + 8 };
+        }
+
+        if (id === FR_CATEGORY) {
+            return { x: rect.right - 56, y: rect.top + rect.height / 2 + 8 };
+        }
+
+        return { x: rect.left + rect.width / 2 + 14, y: rect.top + rect.height / 2 + 10 };
+    };
+
+    const move = (el, x, y, animate) => {
+        el.classList.toggle('is-instant', !animate);
+        el.style.transform = `translate(${x}px, ${y}px)`;
+    };
+
+    const placeBubble = (rect, animate) => {
+        const margin = 12;
+
+        // Bubble boleh sementara menutupi topbar/bottom-nav (target yang disorot tetap terlihat).
+        const bounds = { top: 8, bottom: 8 };
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const w = bubble.offsetWidth;
+        const h = bubble.offsetHeight;
+        const clampX = (x) => Math.max(margin, Math.min(x, vw - w - margin));
+        const clampY = (y) => Math.max(bounds.top, Math.min(y, vh - bounds.bottom - h));
+        const centerX = clampX(rect.left + rect.width / 2 - w / 2);
+
+        const below = { x: centerX, y: rect.bottom + 14 };
+        const above = { x: centerX, y: rect.top - h - 14 };
+        const right = { x: rect.right + 14, y: clampY(rect.top + rect.height / 2 - h / 2) };
+        const left = { x: rect.left - w - 14, y: clampY(rect.top + rect.height / 2 - h / 2) };
+
+        const fits = {
+            below: below.y + h <= vh - bounds.bottom,
+            above: above.y >= bounds.top,
+            right: right.x + w <= vw - margin,
+            left: left.x >= margin,
+        };
+
+        const lower = rect.top + rect.height / 2 > vh * 0.55;
+        const order = touchMode()
+            ? (lower ? ['above', 'below'] : ['below', 'above'])
+            : (lower ? ['above', 'below', 'right', 'left'] : ['below', 'above', 'right', 'left']);
+
+        const spots = { below, above, right, left };
+        let choice = order.find((key) => fits[key]);
+
+        // Desktop dua kolom: langkah form → bubble di kolom kanan agar field tidak tertutup.
+        const formRect = first('.fr-form', root)?.getBoundingClientRect();
+
+        if (!touchMode() && formRect && index >= FR_TITLE && index <= FR_SUBMIT
+            && formRect.right + 24 + w <= vw - margin) {
+            spots.beside = { x: formRect.right + 24, y: clampY(rect.top + rect.height / 2 - h / 2) };
+            choice = 'beside';
+        }
+
+        // Tidak ada ruang di sekitar target: tempel di atas/bawah layar.
+        const pos = choice
+            ? spots[choice]
+            : {
+                x: clampX(vw / 2 - w / 2),
+                y: rect.top + rect.height / 2 > vh / 2
+                    ? bounds.top
+                    : vh - bounds.bottom - h,
+            };
+
+        move(bubble, Math.round(pos.x), Math.round(pos.y), animate);
+    };
+
+    const targetFor = (i) => {
+        switch (i) {
+            case FR_TITLE: return input;
+            case FR_CATEGORY: return select;
+            case FR_TOOL: return demoChip();
+            case FR_SUBMIT: return submit;
+            case FR_FLOWSTEP:
+            case FR_COMPLETE: return flowList;
+            default: return demoButton;
+        }
+    };
+
+    // Langkah alur menyorot daftar flow + chip source (tanpa blok bantuan) agar muat di layar pendek.
+    const rectOf = (el) => {
+        const rect = el.getBoundingClientRect();
+
+        // Chip source hanya ikut disorot saat sedang tampil (fase membaca).
+        if (el !== flowList || !sources || !sources.classList.contains('is-on')) {
+            return rect;
+        }
+
+        const extra = sources.getBoundingClientRect();
+        const left = Math.min(rect.left, extra.left);
+        const top = Math.min(rect.top, extra.top);
+        const right = Math.max(rect.right, extra.right);
+        const bottom = Math.max(rect.bottom, extra.bottom);
+
+        return { left, top, right, bottom, width: right - left, height: bottom - top };
+    };
+
+    // Posisi spotlight + bubble dari DOM aktual (dipanggil ulang saat scroll/resize).
+    const place = (animate) => {
+        if (!active || !current) {
+            return;
+        }
+
+        const rect = rectOf(current);
+        const showSpot = index >= FR_TITLE && index <= FR_FLOWSTEP;
+
+        spot.hidden = !showSpot;
+
+        // Penempatan pertama langsung di posisi (tanpa meluncur dari pojok).
+        const glide = animate && bubble.dataset.placed === '1';
+
+        bubble.dataset.placed = '1';
+
+        if (showSpot) {
+            spot.classList.toggle('is-instant', !glide);
+            spot.style.width = `${Math.round(rect.width + 12)}px`;
+            spot.style.height = `${Math.round(rect.height + 12)}px`;
+            spot.style.transform = `translate(${Math.round(rect.left - 6)}px, ${Math.round(rect.top - 6)}px)`;
+        }
+
+        placeBubble(rect, glide);
+    };
+
+    const onViewportChange = () => {
+        if (moveFrame) {
+            return;
+        }
+
+        moveFrame = window.requestAnimationFrame(() => {
+            moveFrame = 0;
+            place(false);
+
+            // Pointer ikut elemen yang sedang disorot (bukan koordinat tetap).
+            if (!pointer.hidden && pointerEl) {
+                const point = pointFor(pointerEl, pointerId);
+
+                move(pointer, Math.round(point.x), Math.round(point.y), false);
+            }
+        });
+    };
+
+    const onKey = (event) => {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closeTour({ restore: true, focus: demoButton });
+        }
+    };
+
+    const movePointer = async (run, el, id, from) => {
+        pointer.dataset.mode = touchMode() ? 'tap' : 'cursor';
+
+        const target = pointFor(el, id);
+
+        if (pointer.hidden) {
+            const start = from || target;
+
+            pointer.hidden = false;
+            move(pointer, Math.round(start.x), Math.round(start.y), false);
+
+            // paksa reflow agar transisi ke target terbaca
+            void pointer.offsetWidth;
+        }
+
+        const animate = !reduced();
+
+        move(pointer, Math.round(target.x), Math.round(target.y), animate);
+
+        if (animate && !await wait(680)) {
+            return false;
+        }
+
+        pointerEl = el;
+        pointerId = id;
+
+        return run === token;
+    };
+
+    const pulse = async (run) => {
+        if (reduced()) {
+            return true;
+        }
+
+        pointer.classList.remove('is-click');
+        void pointer.offsetWidth;
+        pointer.classList.add('is-click');
+
+        return await wait(460) && run === token;
+    };
+
+    const hidePointer = () => {
+        pointer.hidden = true;
+        pointer.classList.remove('is-click');
+        pointerEl = null;
+    };
+
+    // Dibaca saat dipanggil (bukan saat init): konstanta FR_* ada di bawah modul.
+    const copyFor = (i) => {
+        switch (i) {
+            case FR_INTRO:
+                return 'Yuk, aku tunjukin cara mulai research.';
+            case FR_TITLE:
+                return 'Mulai dari judul atau topik yang ingin kamu teliti.';
+            case FR_CATEGORY:
+                return 'Pilih kategori supaya pencarian sumber lebih terarah.';
+            case FR_TOOL: {
+                const name = demoChip()?.dataset.frToolName || 'Research Tool';
+
+                return `Lalu pilih bantuan yang kamu butuhkan. Misalnya, ${name === 'Research Gap' ? 'mencari Research Gap' : name}.`;
+            }
+            case FR_SUBMIT:
+                return 'Kalau tombol ini kamu tekan, barulah BacaDulu mulai memproses research.';
+            case FR_COMPLETE:
+                return 'Sekarang giliran kamu.';
+            default:
+                return '';
+        }
+    };
+
+    const renderBubble = (i, text, bubu) => {
+        bubbleCopy.textContent = text;
+
+        bubbleNote.hidden = i !== FR_SUBMIT;
+        bubbleNote.textContent = i === FR_SUBMIT ? 'Demo ini belum mengirim apa pun.' : '';
+
+        bubbleCount.textContent = i >= FR_TITLE ? `${Math.min(i, FR_FLOWSTEP)} / 5` : '';
+
+        btn.start.hidden = i !== FR_INTRO;
+        btn.back.hidden = i < FR_TITLE;
+        btn.next.hidden = i < FR_TITLE || i > FR_FLOWSTEP;
+        btn.skip.hidden = i === FR_COMPLETE;
+        btn.keep.hidden = i !== FR_COMPLETE;
+        btn.own.hidden = i !== FR_COMPLETE;
+
+        setBubu(bubu);
+    };
+
+    const focusPrimary = (i) => {
+        const target = i === FR_INTRO ? btn.start : (i === FR_COMPLETE ? btn.keep : btn.next);
+
+        target?.focus({ preventScroll: true });
+    };
+
+    const runFlow = async (run) => {
+        const slow = reduced() ? 0.35 : 1;
+        const phases = [
+            ['reading', 'Pertama, BacaDulu membaca sumber yang relevan.', ['source', 'reading'], 1, 1500],
+            ['processing', 'Evidence dianalisis sesuai Research Tool yang kamu pilih.', ['evidence'], 3, 1800],
+            ['verified', 'Setelah selesai, kamu bisa memeriksa evidence dan hasilnya.', [], 5, 1300],
+        ];
+
+        for (const [bubu, text, actives, doneUpTo, duration] of phases) {
+            if (run !== token) {
+                return;
+            }
+
+            renderBubble(FR_FLOWSTEP, text, bubu);
+            setFlow(actives, doneUpTo);
+            place(false);
+
+            if (!await wait(duration * slow)) {
+                return;
+            }
+        }
+
+        if (run === token) {
+            enterStep(FR_COMPLETE);
+        }
+    };
+
+    async function enterStep(i, { animate = true } = {}) {
+        const run = bump();
+
+        index = i;
+        current = targetFor(i);
+
+        // Kembali/lanjut: nilai form selalu konsisten dengan langkah yang ditampilkan.
+        applyUpTo(animate ? i - 1 : i);
+        renderBubble(i, copyFor(i), i === FR_COMPLETE ? 'verified' : 'search');
+
+        if (i === FR_COMPLETE) {
+            setFlow([], FR_FLOW.length - 1);
+        }
+
+        if (i === FR_INTRO || i === FR_COMPLETE) {
+            hidePointer();
+        }
+
+        await ensureVisible(current);
+
+        if (run !== token) {
+            return;
+        }
+
+        place(animate && !reduced());
+        focusPrimary(i);
+
+        if (i === FR_INTRO || i === FR_COMPLETE) {
+            return;
+        }
+
+        if (i === FR_FLOWSTEP) {
+            hidePointer();
+            runFlow(run);
+
+            return;
+        }
+
+        const from = pointer.hidden
+            ? (() => {
+                const rect = demoButton.getBoundingClientRect();
+
+                return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+            })()
+            : null;
+
+        if (!await movePointer(run, current, i, from) || !await pulse(run)) {
+            return;
+        }
+
+        if (i === FR_TITLE && animate && input.value !== demoTitle) {
+            input.readOnly = true;
+
+            const done = await typeTitle(run);
+
+            input.readOnly = false;
+
+            if (!done) {
+                return;
+            }
+        }
+
+        applyUpTo(i);
+
+        // Memilih tool lewat menu existing memindahkan fokus; kembalikan ke bubble.
+        focusPrimary(i);
+    }
+
+    function startTour() {
+        if (!input || !chips.length || !tour) {
+            return;
+        }
+
+        if (!active) {
+            snapshot = {
+                text: input.value,
+                category: select ? select.value : '',
+                tool: selectedToolId(),
+            };
+
+            active = true;
+            tour.hidden = false;
+            delete bubble.dataset.placed;
+            root.dataset.tourActive = '';
+            submit.disabled = true;
+
+            window.addEventListener('resize', onViewportChange);
+            window.addEventListener('scroll', onViewportChange, true);
+            document.addEventListener('keydown', onKey);
+        }
+
+        loadBubus();
+        hidePointer();
+        enterStep(FR_INTRO);
+    }
+
+    function closeTour({ restore = false, focus = null } = {}) {
+        if (!active) {
+            return;
+        }
+
+        bump();
+
+        active = false;
+        current = null;
+        pointerEl = null;
+        tour.hidden = true;
+        delete root.dataset.tourActive;
+        hidePointer();
+        spot.hidden = true;
+        input.readOnly = false;
+        submit.disabled = false;
+
+        window.removeEventListener('resize', onViewportChange);
+        window.removeEventListener('scroll', onViewportChange, true);
+        document.removeEventListener('keydown', onKey);
+
+        if (restore) {
+            applyUpTo(FR_INTRO);
+        }
+
+        setFlow([], -1);
+        setBubu('search');
+
+        snapshot = null;
+        index = -1;
+
+        focus?.focus({ preventScroll: false });
+    }
+
+    demoButton?.addEventListener('click', startTour);
+    btn.start?.addEventListener('click', () => enterStep(FR_TITLE));
+    btn.next?.addEventListener('click', () => enterStep(Math.min(index + 1, FR_COMPLETE)));
+    btn.back?.addEventListener('click', () => enterStep(Math.max(index - 1, FR_INTRO), { animate: index - 1 === FR_FLOWSTEP }));
+    btn.skip?.addEventListener('click', () => closeTour({ restore: true, focus: demoButton }));
+
+    // Gunakan contoh ini: nilai tetap di form; user tetap menekan "Mulai Research".
+    btn.keep?.addEventListener('click', () => {
+        closeTour();
+
+        submit?.scrollIntoView({ block: 'center', behavior: reduced() ? 'auto' : 'smooth' });
+        submit?.focus({ preventScroll: true });
+    });
+
+    // Mulai dengan topik saya: kembalikan kondisi sebelum tour.
+    btn.own?.addEventListener('click', () => {
+        closeTour({ restore: true });
+        input.focus();
+    });
+
+    // Tour tidak boleh tertinggal saat halaman disembunyikan/ditinggalkan.
+    window.addEventListener('pagehide', () => closeTour());
+
+    syncChips();
 }

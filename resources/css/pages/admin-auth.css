@@ -2,18 +2,60 @@
 |--------------------------------------------------------------------------
 | Admin login (layouts/admin-auth.blade.php, admin/auth/login.blade.php)
 |--------------------------------------------------------------------------
-| One centred card on a bright background. No decorative motion: the page
-| only has to make signing in clear and safe.
+| One solid split surface: brand bar on top, Bubu + scope on the left, the
+| form on the right. Single column below 760px. Motion is a short fade plus
+| Bubu's one-time entrance (see the guardian block); skipped for prefers-reduced-motion.
 */
 
+@font-face {
+    font-family: "Poppins Auth";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/poppins-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Poppins Auth";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("/fonts/poppins-latin-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Poppins Auth";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("/fonts/poppins-latin-600-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Poppins Auth";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/fonts/poppins-latin-700-normal.woff2") format("woff2");
+}
+
 .bd-admin-auth {
+    --aa-navy: #170f38;
+    --aa-navy-soft: #241b52;
+    --aa-coral: #ef5843;
+    --aa-coral-text: #a63d25;
+    --aa-gold: #f7aa35;
+    --aa-paper: #fffcf8;
+    --aa-cream: #fff6ee;
+    --aa-line: #eadfd5;
+    --aa-line-input: #a39a8d;
+    --aa-muted: #6b6578;
+
     min-height: 100dvh;
     margin: 0;
-    background:
-        radial-gradient(48rem 24rem at 50% -10%, rgba(242, 107, 79, .10), transparent 70%),
-        var(--ivory);
-    color: var(--navy-900);
-    font-family: var(--font-body);
+    background: #fbf8f4;
+    color: var(--aa-navy);
+    font-family: "Poppins Auth", var(--font-body);
 }
 
 .bd-admin-auth__skip {
@@ -23,7 +65,7 @@
     left: var(--space-3);
     padding: 10px 14px;
     border-radius: var(--radius-control);
-    background: var(--navy-900);
+    background: var(--aa-navy);
     color: #fff;
     text-decoration: none;
     transform: translateY(-160%);
@@ -38,103 +80,260 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--space-4);
-    padding: var(--space-8) var(--space-4);
+    gap: var(--space-3);
+    padding: var(--space-6) var(--space-4);
 }
 
-.bd-admin-auth__card {
-    width: min(100%, 420px);
-    padding: var(--space-8);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-panel);
-    background: #fff;
-    box-shadow: var(--shadow-lg);
+.bd-admin-auth__back {
+    align-self: center;
+    width: min(100%, 960px);
+    color: var(--aa-muted);
+    font-size: var(--text-label);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.bd-admin-auth__back:hover { color: var(--aa-coral-text); }
+
+.bd-admin-auth__shell {
+    display: grid;
+    width: min(100%, 960px);
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-areas:
+        "bar bar"
+        "aside form";
+    overflow: hidden;
+    border: 1px solid var(--aa-line);
+    border-radius: var(--radius-card);
+    background: var(--aa-paper);
+    box-shadow: 0 1px 2px rgba(23, 15, 56, .06), 0 16px 40px rgba(23, 15, 56, .06);
+}
+
+/* Brand bar ----------------------------------------------------------- */
+
+.bd-admin-auth__bar {
+    display: flex;
+    grid-area: bar;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-8);
+    border-bottom: 1px solid var(--aa-line);
 }
 
 .bd-admin-auth__brand {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: var(--space-6);
-    color: var(--navy-900);
-    font-size: 1.0625rem;
-    font-weight: 800;
+    color: var(--aa-navy);
+    font-size: 1rem;
+    font-weight: 700;
     text-decoration: none;
 }
 
 .bd-admin-auth__brand em {
-    color: var(--orange-600);
+    color: var(--aa-coral-text);
     font-style: normal;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .bd-admin-auth__mark {
     display: grid;
     place-items: center;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: var(--radius-control);
-    background: var(--orange-50);
-    color: var(--orange-600);
+    background: var(--aa-cream);
+    color: var(--aa-coral);
 }
 
 .bd-admin-auth__mark svg {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     stroke: currentColor;
     stroke-width: 2.4;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
 
-.bd-admin-auth__footer {
-    display: flex;
-    width: min(100%, 420px);
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: var(--space-2);
-    color: var(--navy-500);
-    font-size: var(--text-label);
-}
-
-.bd-admin-auth__footer a {
-    color: var(--navy-700);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.bd-admin-auth__footer a:hover { color: var(--orange-700); }
-
-/* Login form ---------------------------------------------------------- */
-
-.bd-admin-login__head { margin-bottom: var(--space-6); }
-
-.bd-admin-login__badge {
+.bd-admin-auth__label {
     display: inline-flex;
-    margin: 0 0 var(--space-3);
-    padding: 4px 10px;
-    border-radius: var(--radius-pill);
-    background: var(--cream);
-    color: var(--navy-700);
+    align-items: center;
+    gap: 8px;
+    color: var(--aa-navy-soft);
     font-size: var(--text-caption);
-    font-weight: 700;
-    letter-spacing: .06em;
+    font-weight: 600;
+    letter-spacing: .12em;
     text-transform: uppercase;
 }
 
+.bd-admin-auth__label::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    background: var(--aa-gold);
+}
+
+/* Left: Bubu + scope -------------------------------------------------- */
+
+.bd-admin-auth__aside {
+    display: flex;
+    grid-area: aside;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--space-6);
+    padding: var(--space-8);
+    border-right: 1px solid var(--aa-line);
+    background: var(--aa-cream);
+}
+
+/* Full-width stage centres Bubu on the aside; the text below keeps the aside's left alignment. */
+.bd-admin-auth__stage {
+    display: flex;
+    align-self: stretch;
+    justify-content: center;
+}
+
+/*
+ * Guardian: a fixed box with the wave PNG's proportions, so swapping walk -> wave never moves
+ * anything. The walk image is placed so its body lands on the wave image's body. Motion lives in
+ * resources/js/admin.js (initAdminGuardian); this file only styles each data-guardian-state.
+ * No state / "idle" is the final pose: wave + bubble.
+ * --bubble-clip outlines the wave PNG's built-in speech bubble (pixel-measured, 0 Bubu pixels inside).
+ */
+.bd-admin-auth__guardian {
+    --bubble-clip: 70.0% 2.4%,70.0% 3.4%,65.2% 3.4%,65.2% 4.4%,61.6% 4.4%,61.6% 5.3%,59.1% 5.3%,59.1% 6.3%,56.8% 6.3%,56.8% 7.3%,55.2% 7.3%,55.2% 8.3%,53.7% 8.3%,53.7% 9.2%,52.5% 9.2%,52.5% 10.2%,51.5% 10.2%,51.5% 11.2%,50.7% 11.2%,50.7% 12.2%,49.9% 12.2%,49.9% 13.1%,49.4% 13.1%,49.4% 14.1%,48.8% 14.1%,48.8% 15.1%,48.5% 15.1%,48.5% 16.0%,48.2% 16.0%,48.2% 17.0%,47.8% 17.0%,47.8% 18.0%,47.7% 18.0%,47.7% 19.0%,47.6% 19.0%,47.6% 19.9%,47.5% 19.9%,47.5% 20.9%,47.5% 21.9%,47.5% 22.8%,47.5% 23.8%,47.6% 23.8%,47.6% 24.8%,47.6% 25.8%,47.9% 25.8%,47.9% 26.7%,48.2% 26.7%,48.2% 27.7%,48.6% 27.7%,48.6% 28.7%,49.1% 28.7%,49.1% 29.6%,49.7% 29.6%,49.7% 30.6%,50.6% 30.6%,50.6% 31.6%,51.5% 31.6%,51.5% 32.6%,52.9% 32.6%,52.9% 33.5%,53.1% 33.5%,53.1% 34.5%,52.6% 34.5%,52.6% 35.5%,52.4% 35.5%,52.4% 36.5%,52.4% 37.4%,52.4% 38.4%,52.4% 39.4%,56.2% 39.4%,56.2% 38.4%,58.2% 38.4%,58.2% 37.4%,59.7% 37.4%,59.7% 36.5%,79.5% 36.5%,79.5% 35.5%,84.6% 35.5%,84.6% 34.5%,88.2% 34.5%,88.2% 33.5%,90.4% 33.5%,90.4% 32.6%,92.2% 32.6%,92.2% 31.6%,93.4% 31.6%,93.4% 30.6%,94.4% 30.6%,94.4% 29.6%,95.2% 29.6%,95.2% 28.7%,95.8% 28.7%,95.8% 27.7%,96.3% 27.7%,96.3% 26.7%,96.7% 26.7%,96.7% 25.8%,97.0% 25.8%,97.0% 24.8%,97.2% 24.8%,97.2% 23.8%,97.3% 23.8%,97.3% 22.8%,97.4% 22.8%,97.4% 21.9%,97.4% 20.9%,97.4% 19.9%,97.4% 19.0%,97.4% 18.0%,97.3% 18.0%,97.3% 17.0%,97.3% 16.0%,97.1% 16.0%,97.1% 15.1%,97.0% 15.1%,97.0% 14.1%,96.8% 14.1%,96.8% 13.1%,96.4% 13.1%,96.4% 12.2%,96.1% 12.2%,96.1% 11.2%,95.7% 11.2%,95.7% 10.2%,95.2% 10.2%,95.2% 9.2%,94.7% 9.2%,94.7% 8.3%,93.9% 8.3%,93.9% 7.3%,93.1% 7.3%,93.1% 6.3%,92.1% 6.3%,92.1% 5.3%,90.8% 5.3%,90.8% 4.4%,89.0% 4.4%,89.0% 3.4%,86.4% 3.4%,86.4% 2.4%;
+
+    position: relative;
+    width: clamp(200px, 20vw, 240px);
+    aspect-ratio: 899 / 823;
+}
+
+/* Run / bob pivot on the feet (35% 97% of the box), so scale and tilt keep Bubu on the ground. */
+.bd-admin-auth__run,
+.bd-admin-auth__bob,
+.bd-admin-auth__bubble {
+    position: absolute;
+    inset: 0;
+}
+
+.bd-admin-auth__run,
+.bd-admin-auth__bob { transform-origin: 35% 97%; }
+
+.bd-admin-auth__guardian img {
+    position: absolute;
+    display: block;
+}
+
+.bd-admin-auth__wave,
+.bd-admin-auth__bubble img {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Bubu only: the whole box minus the bubble (even-odd hole). */
+.bd-admin-auth__wave {
+    clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, var(--bubble-clip), 70.0% 2.4%);
+    transition: opacity 110ms linear;
+}
+
+/* Bubble only; the wrapper (not the image) is what gets revealed. */
+.bd-admin-auth__bubble { transform-origin: 53% 38%; }
+.bd-admin-auth__bubble img { clip-path: polygon(var(--bubble-clip)); }
+
+.bd-admin-auth__walk {
+    top: 7.6%;
+    left: 1.6%;
+    width: 66.9%;
+    height: auto;
+    opacity: 0;
+    transition: opacity 0s linear 110ms;
+}
+
+/* Contact shadow on the ground under the feet; it rides the run layer but not the bob. */
+.bd-admin-auth__shadow {
+    position: absolute;
+    top: 98%;
+    left: 35%;
+    width: 42%;
+    height: 5.5%;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(23, 15, 56, .26), rgba(23, 15, 56, 0));
+    translate: -50% -50%;
+}
+
+.bd-admin-auth__guardian[data-guardian-state="hidden"] {
+    opacity: 0;
+    animation: bd-admin-auth-failsafe 1ms 4s forwards; /* if the script never starts, show the final pose */
+}
+
+.bd-admin-auth__guardian:is([data-guardian-state="running"], [data-guardian-state="arrived"]) .bd-admin-auth__walk {
+    opacity: 1;
+    transition: none;
+}
+
+.bd-admin-auth__guardian:is([data-guardian-state="running"], [data-guardian-state="arrived"]) .bd-admin-auth__wave {
+    opacity: 0;
+    transition: none;
+}
+
+.bd-admin-auth__guardian:is([data-guardian-state="running"], [data-guardian-state="arrived"], [data-guardian-state="waving"]) .bd-admin-auth__bubble {
+    opacity: 0;
+}
+
+.bd-admin-auth__tagline {
+    margin: 0 0 var(--space-3);
+    color: var(--aa-navy);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.bd-admin-auth__scope {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.bd-admin-auth__scope li {
+    padding: 3px 10px;
+    border: 1px solid var(--aa-line);
+    border-radius: var(--radius-pill);
+    background: var(--aa-paper);
+    color: var(--aa-muted);
+    font-size: var(--text-caption);
+    font-weight: 500;
+}
+
+/* Right: form --------------------------------------------------------- */
+
+.bd-admin-login {
+    grid-area: form;
+    align-self: center;
+    padding: var(--space-8) clamp(var(--space-6), 4vw, 44px);
+}
+
+.bd-admin-login__head { margin-bottom: var(--space-6); }
+
 .bd-admin-login__head h1 {
     margin: 0 0 var(--space-2);
-    color: var(--navy-900);
-    font-family: var(--font-body);
+    color: var(--aa-navy);
+    font-family: inherit;
     font-size: 1.5rem;
-    font-weight: 750;
-    letter-spacing: -.02em;
+    font-weight: 700;
+    letter-spacing: -.01em;
     line-height: 1.25;
 }
 
 .bd-admin-login__copy {
     margin: 0;
-    color: var(--navy-500);
+    color: var(--aa-muted);
     font-size: var(--text-body-sm);
     line-height: 1.6;
 }
@@ -150,9 +349,9 @@
 }
 
 .bd-admin-auth .bd-admin-field label {
-    color: var(--navy-900);
+    color: var(--aa-navy);
     font-size: var(--text-label);
-    font-weight: 650;
+    font-weight: 600;
 }
 
 .bd-admin-field__control {
@@ -161,15 +360,15 @@
     gap: var(--space-2);
     min-height: 48px;
     padding: 0 6px 0 12px;
-    border: 1px solid var(--line-strong);
+    border: 1px solid var(--aa-line-input);
     border-radius: var(--radius-control);
     background: #fff;
     transition: border-color var(--duration-micro) ease, box-shadow var(--duration-ui) ease;
 }
 
 .bd-admin-field__control:focus-within {
-    border-color: var(--orange-600);
-    box-shadow: 0 0 0 3px rgba(194, 74, 44, .16);
+    border-color: var(--aa-navy);
+    box-shadow: 0 0 0 3px rgba(239, 88, 67, .28);
 }
 
 .bd-admin-field__control:has(input[aria-invalid="true"]) { border-color: var(--danger); }
@@ -178,7 +377,7 @@
     flex: 0 0 auto;
     width: 18px;
     height: 18px;
-    color: var(--navy-500);
+    color: var(--aa-muted);
 }
 
 .bd-admin-auth .bd-admin-field__control input {
@@ -189,10 +388,17 @@
     border: 0;
     background: transparent;
     box-shadow: none;
+    font-family: inherit;
     font-size: var(--text-body);
 }
 
-.bd-admin-auth .bd-admin-field__control input:focus { box-shadow: none; }
+/* The wrapper draws the focus ring (:focus-within); no second ring on the input. */
+.bd-admin-auth .bd-admin-field__control input:focus,
+.bd-admin-auth .bd-admin-field__control input:focus-visible {
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+}
 
 .bd-admin-field__toggle {
     flex: 0 0 auto;
@@ -200,57 +406,59 @@
     padding: 0 12px;
     border: 0;
     border-radius: 8px;
-    background: var(--cream);
-    color: var(--navy-700);
+    background: var(--aa-cream);
+    color: var(--aa-navy-soft);
     font: inherit;
     font-size: var(--text-label);
-    font-weight: 650;
+    font-weight: 600;
     cursor: pointer;
 }
 
-.bd-admin-field__toggle:hover { background: var(--line); }
+.bd-admin-field__toggle:hover { background: var(--aa-line); }
+
+.bd-admin-field__toggle:focus-visible,
+.bd-admin-login__submit:focus-visible,
+.bd-admin-auth__back:focus-visible,
+.bd-admin-auth__brand:focus-visible {
+    outline: 2px solid var(--aa-coral);
+    outline-offset: 2px;
+}
 
 .bd-admin-login__submit {
     display: flex;
     min-height: 48px;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
     margin-top: var(--space-2);
     border: 0;
     border-radius: var(--radius-control);
-    background: var(--orange-600);
+    background: var(--aa-navy);
     color: #fff;
     font: inherit;
     font-size: var(--text-body);
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color var(--duration-micro) ease, box-shadow var(--duration-ui) ease;
+    transition: background-color var(--duration-micro) ease;
 }
 
-.bd-admin-login__submit:hover {
-    background: var(--orange-700);
-    box-shadow: 0 10px 24px rgba(194, 74, 44, .2);
-}
+.bd-admin-login__submit:hover { background: var(--aa-navy-soft); }
 
 .bd-admin-login__note {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--space-2);
     margin: var(--space-6) 0 0;
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--line);
-    color: var(--navy-500);
+    color: var(--aa-muted);
     font-size: var(--text-caption);
     line-height: 1.5;
 }
 
 .bd-admin-login__note svg {
     flex: 0 0 auto;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     fill: none;
-    stroke: var(--success);
+    stroke: currentColor;
     stroke-width: 2;
     stroke-linejoin: round;
 }
@@ -278,11 +486,79 @@
     color: var(--success);
 }
 
-@media (max-width: 480px) {
-    .bd-admin-auth__page {
-        justify-content: flex-start;
-        padding-top: var(--space-6);
+/* Motion: one short fade, no transform ------------------------------- */
+
+@keyframes bd-admin-auth-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes bd-admin-auth-failsafe {
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .bd-admin-login { animation: bd-admin-auth-fade 350ms ease-out 80ms both; }
+}
+
+/* Reduced motion: final pose (wave + bubble) straight away, no entrance. */
+@media (prefers-reduced-motion: reduce) {
+    .bd-admin-auth__guardian[data-guardian-state="hidden"] {
+        opacity: 1;
+        animation: none;
     }
 
-    .bd-admin-auth__card { padding: var(--space-6) var(--space-4); }
+    .bd-admin-auth__wave,
+    .bd-admin-auth__walk { transition: none; }
+}
+
+/* Mobile: single column ---------------------------------------------- */
+
+@media (max-width: 760px) {
+    .bd-admin-auth__page {
+        justify-content: flex-start;
+        padding: var(--space-4) var(--space-4) var(--space-6);
+    }
+
+    .bd-admin-auth__back { order: -1; }
+
+    .bd-admin-auth__shell {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "bar"
+            "aside"
+            "form";
+    }
+
+    .bd-admin-auth__bar { padding: var(--space-3) var(--space-4); }
+
+    .bd-admin-auth__brand,
+    .bd-admin-auth__label { white-space: nowrap; }
+
+    .bd-admin-auth__brand { font-size: .9375rem; }
+
+    .bd-admin-auth__label { letter-spacing: .08em; }
+
+    .bd-admin-auth__aside {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--space-4);
+        padding: var(--space-4);
+        border-right: 0;
+        border-bottom: 1px solid var(--aa-line);
+    }
+
+    .bd-admin-auth__stage {
+        flex: 0 0 auto;
+        align-self: center;
+    }
+
+    .bd-admin-auth__guardian { width: 115px; }
+
+    .bd-admin-auth__tagline {
+        margin-bottom: var(--space-2);
+        font-size: var(--text-body-sm);
+    }
+
+    .bd-admin-login { padding: var(--space-6) var(--space-4); }
 }
