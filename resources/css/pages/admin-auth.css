@@ -301,7 +301,11 @@
     list-style: none;
 }
 
+/* Module status (not links): label + a small check once the console has "initialised". */
 .bd-admin-auth__scope li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 3px 10px;
     border: 1px solid var(--aa-line);
     border-radius: var(--radius-pill);
@@ -309,6 +313,90 @@
     color: var(--aa-muted);
     font-size: var(--text-caption);
     font-weight: 500;
+}
+
+.bd-admin-auth__check {
+    width: 12px;
+    height: 12px;
+    color: var(--success);
+}
+
+.bd-admin-auth__console-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    min-height: 32px;
+    margin-top: var(--space-3);
+}
+
+.bd-admin-auth__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: var(--aa-navy-soft);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.bd-admin-auth__status svg {
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    color: var(--aa-coral);
+}
+
+/* Small replay control: only appears after the first run, inert (aria-disabled) while one is playing. */
+.bd-admin-auth__replay {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--aa-line);
+    border-radius: var(--radius-control);
+    background: var(--aa-paper);
+    color: var(--aa-navy-soft);
+    cursor: pointer;
+    transition: background-color var(--duration-micro) ease, opacity var(--duration-micro) ease;
+}
+
+.bd-admin-auth__replay svg {
+    width: 16px;
+    height: 16px;
+}
+
+.bd-admin-auth__replay:not([data-ready]) { visibility: hidden; }
+
+.bd-admin-auth__replay[aria-disabled="true"] {
+    opacity: .4;
+    cursor: default;
+}
+
+.bd-admin-auth__replay:not([aria-disabled="true"]):hover { background: var(--aa-line); }
+
+.bd-admin-auth__replay:focus-visible {
+    outline: 2px solid var(--aa-coral);
+    outline-offset: 2px;
+}
+
+/* Console reveal: hidden until the greeting is done (final/no-state = visible). The script animates them in. */
+.bd-admin-auth__aside:has(:is(
+    [data-guardian-state="hidden"],
+    [data-guardian-state="running"],
+    [data-guardian-state="arrived"],
+    [data-guardian-state="waving"],
+    [data-guardian-state="greeting"]
+)) :is([data-console-title], [data-console-module], [data-console-status]) {
+    opacity: 0;
+}
+
+.bd-admin-auth__aside:has([data-guardian-state="hidden"]) :is([data-console-title], [data-console-module], [data-console-status]) {
+    animation: bd-admin-auth-failsafe 1ms 4s forwards;
 }
 
 /* Right: form --------------------------------------------------------- */
@@ -508,6 +596,13 @@
         animation: none;
     }
 
+    .bd-admin-auth__aside:has([data-guardian-state="hidden"]) :is([data-console-title], [data-console-module], [data-console-status]) {
+        opacity: 1;
+        animation: none;
+    }
+
+    .bd-admin-auth__replay { display: none; }
+
     .bd-admin-auth__wave,
     .bd-admin-auth__walk { transition: none; }
 }
@@ -554,6 +649,40 @@
     }
 
     .bd-admin-auth__guardian { width: 115px; }
+
+    .bd-admin-auth__console {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .bd-admin-auth__scope { gap: 4px 6px; }
+
+    .bd-admin-auth__scope li {
+        gap: 4px;
+        padding: 2px 8px;
+    }
+
+    .bd-admin-auth__check {
+        width: 10px;
+        height: 10px;
+    }
+
+    .bd-admin-auth__console-foot {
+        min-height: 24px;
+        margin-top: 4px;
+    }
+
+    .bd-admin-auth__status { letter-spacing: .02em; text-transform: none; }
+
+    .bd-admin-auth__replay {
+        width: 24px;
+        height: 24px;
+    }
+
+    .bd-admin-auth__replay svg {
+        width: 14px;
+        height: 14px;
+    }
 
     .bd-admin-auth__tagline {
         margin-bottom: var(--space-2);

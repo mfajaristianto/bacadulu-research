@@ -17,8 +17,15 @@ const ready = (callback) => {
 
 // Tables for initAdminGuardian(); declared here because ready() below may run it immediately.
 const GUARDIAN_PLAN = {
-    desktop: { x0: -120, y0: 18, s0: 0.25, amp: 1, run: 1400, settle: 220, hold: 280, wave: 600, bubble: 360 },
-    mobile: { x0: -38, y0: 8, s0: 0.55, amp: 0.7, run: 800, settle: 150, hold: 150, wave: 400, bubble: 280 },
+    desktop: {
+        x0: -120, y0: 18, s0: 0.25, amp: 1, run: 1400, settle: 220, hold: 280, wave: 600, bubble: 360,
+        // console-check: title, then each module `gap` apart from `first`, then the status line.
+        console: { title: 240, first: 140, gap: 120, item: 220 },
+    },
+    mobile: {
+        x0: -38, y0: 8, s0: 0.55, amp: 0.7, run: 800, settle: 150, hold: 150, wave: 400, bubble: 280,
+        console: { title: 160, first: 90, gap: 80, item: 160 },
+    },
 };
 
 // Travel + growth, keyed to the foot contacts: [time share, x progress, scale progress].
@@ -144,9 +151,10 @@ function initAdminPasswordToggles() {
 }
 
 /*
- * Bubu Admin Guardian on the admin login (admin/auth/login.blade.php), played once per load:
- * hidden -> running -> arrived -> waving -> greeting -> idle (data-guardian-state; admin-auth.css
- * styles each state). Only transform / opacity are animated, plus a short blur at the very start.
+ * Bubu Admin Guardian on the admin login (admin/auth/login.blade.php), played on load and on demand
+ * by the replay button: hidden -> running -> arrived -> waving -> greeting -> console-check -> idle
+ * (data-guardian-state; admin-auth.css styles each state). Only transform / opacity are animated,
+ * plus a short blur at the very start.
  */
 function initAdminGuardian() {
     const root = document.querySelector('[data-guardian]');
@@ -161,10 +169,29 @@ function initAdminGuardian() {
         return;
     }
 
-    playGuardian(root);
+    const replay = document.querySelector('[data-guardian-replay]');
+    const play = async (first) => {
+        // aria-disabled (not disabled) so the button keeps keyboard focus while a run is playing.
+        replay?.setAttribute('aria-disabled', 'true');
+        await playGuardian(root, first);
+        replay?.setAttribute('aria-disabled', 'false');
+        replay?.setAttribute('data-ready', '');
+    };
+
+    replay?.addEventListener('click', () => {
+        if (replay.getAttribute('aria-disabled') === 'true') {
+            return;
+        }
+
+        // Drop whatever the last run left behind (Bubu, bubble, console) before starting clean.
+        root.closest('.bd-admin-auth__aside').getAnimations({ subtree: true }).forEach((animation) => animation.cancel());
+        play(false);
+    });
+
+    play(true);
 }
 
-async function playGuardian(root) {
+async function playGuardian(root, first) {
     const p = GUARDIAN_PLAN[matchMedia('(max-width: 760px)').matches ? 'mobile' : 'desktop'];
     const part = (name) => root.querySelector(`[data-guardian-${name}]`);
     const [run, bob, shadow, bubble] = ['run', 'bob', 'shadow', 'bubble'].map(part);
@@ -172,6 +199,8 @@ async function playGuardian(root) {
     const done = (animation) => animation.finished.catch(() => {});
     const setState = (state) => { root.dataset.guardianState = state; };
     const scaleAt = (progress) => p.s0 + (1 - p.s0) * progress;
+
+    setState('hidden');
 
     // Start only once both images are decoded (no pop-in) and the panel has been empty for a beat.
     await Promise.all([sleep(250), ...[...root.querySelectorAll('img')].map((img) => img.decode().catch(() => {}))]);
@@ -235,10 +264,32 @@ async function playGuardian(root) {
     ], { duration: p.bubble, easing: 'ease-out', fill: 'backwards' });
     setState('greeting');
     await done(greeting);
+
+    // The console "initialises" under Bubu: title, then Library -> Prompt -> Research Tools, then the status line.
+    const aside = root.closest('.bd-admin-auth__aside');
+    const c = p.console;
+    const rise = [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0)' }];
+    const step = (element, keyframes, delay, duration) => element.animate(keyframes, { duration, delay, easing: 'ease-out', fill: 'backwards' });
+    const modules = [...aside.querySelectorAll('[data-console-module]')];
+    const lastModuleEnd = c.first + (modules.length - 1) * c.gap + c.item;
+    const consoleSteps = [
+        step(aside.querySelector('[data-console-title]'), rise, 0, c.title),
+        ...modules.flatMap((module, i) => [
+            step(module, rise, c.first + i * c.gap, c.item),
+            step(module.querySelector('svg'), [
+                { opacity: 0, transform: 'scale(0)' },
+                { opacity: 1, transform: 'scale(1.25)', offset: 0.6 },
+                { opacity: 1, transform: 'scale(1)' },
+            ], c.first + i * c.gap + c.item * 0.4, c.item),
+        ]),
+        step(aside.querySelector('[data-console-status]'), rise, lastModuleEnd + 60, c.item),
+    ];
+    setState('console-check');
+    await Promise.all(consoleSteps.map(done));
     setState('idle');
 
     // A failed login reloads this page, so the error gets one small shake once Bubu has greeted.
-    if (document.getElementById('admin-login-error')) {
+    if (first && document.getElementById('admin-login-error')) {
         root.animate([
             { transform: 'none' }, { transform: 'translateX(-4px)', offset: 0.2 }, { transform: 'translateX(4px)', offset: 0.4 },
             { transform: 'translateX(-4px)', offset: 0.6 }, { transform: 'translateX(4px)', offset: 0.8 }, { transform: 'none' },

@@ -26,13 +26,41 @@
             </div>
         </div>
     </div>
-    <div>
-        <p class="bd-admin-auth__tagline">Research Management Console</p>
-        <ul class="bd-admin-auth__scope" aria-label="Area pengelolaan">
-            <li>Library</li>
-            <li>Prompt</li>
-            <li>Research tools</li>
+    {{-- Module status only (not navigation): revealed one by one after the greeting by initAdminGuardian(). --}}
+    <div class="bd-admin-auth__console">
+        <p class="bd-admin-auth__tagline" data-console-title>Research Management Console</p>
+        <ul class="bd-admin-auth__scope" aria-label="Status modul admin">
+            @foreach (['Library', 'Prompt', 'Research Tools'] as $module)
+                <li data-console-module>
+                    {{ $module }}
+                    <svg class="bd-admin-auth__check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3.5 8.5l3 3 6-7" />
+                    </svg>
+                </li>
+            @endforeach
         </ul>
+        <div class="bd-admin-auth__console-foot">
+            <p class="bd-admin-auth__status" data-console-status>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" />
+                    <path d="M9 12l2 2 4-4" />
+                </svg>
+                Admin Console Ready
+            </p>
+            <button
+                type="button"
+                class="bd-admin-auth__replay"
+                data-guardian-replay
+                aria-label="Putar ulang animasi Bubu Admin"
+                title="Ulangi animasi Bubu"
+                aria-disabled="true"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 12a8 8 0 1 1-2.6-5.9" />
+                    <path d="M20 4v5h-5" />
+                </svg>
+            </button>
+        </div>
     </div>
 </aside>
 
