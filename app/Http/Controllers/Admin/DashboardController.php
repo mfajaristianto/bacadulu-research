@@ -23,19 +23,23 @@ class DashboardController extends Controller
             'runs_failed_today' => $this->countWhereIn('ai_runs', 'status', ['failed', 'citation_failed'], today: true),
             'chunks' => $this->countTable('document_chunks'),
             'tools' => $this->countTable('ai_tools'),
+            'tools_active' => $this->countWhere('ai_tools', 'status', 'active'),
+            'tools_with_prompt' => $this->countActiveToolsWithPrompt(),
             'prompts' => $this->countTable('prompt_templates'),
+            'prompts_active' => $this->countWhere('prompt_templates', 'status', 'active'),
+            'prompts_draft' => $this->countWhere('prompt_templates', 'status', 'draft'),
+            'prompts_archived' => $this->countWhere('prompt_templates', 'status', 'archived'),
             'runs_today' => $this->countToday('ai_runs'),
             'users' => $this->countTable('users'),
+            'users_active' => $this->countWhere('users', 'status', 'active'),
         ];
 
         $recentDocuments = $this->recentDocuments();
-        $recentRuns = $this->recentRuns();
         $recentActivity = $this->recentActivity();
 
         return view('admin.dashboard', compact(
             'stats',
             'recentDocuments',
-            'recentRuns',
             'recentActivity'
         ));
     }
@@ -85,6 +89,21 @@ class DashboardController extends Controller
             ->count();
     }
 
+    private function countActiveToolsWithPrompt(): int
+    {
+        if (
+            ! Schema::hasTable('ai_tools')
+            || ! Schema::hasColumn('ai_tools', 'active_prompt_template_id')
+        ) {
+            return 0;
+        }
+
+        return DB::table('ai_tools')
+            ->where('status', 'active')
+            ->whereNotNull('active_prompt_template_id')
+            ->count();
+    }
+
     private function countToday(string $table): int
     {
         if (
@@ -110,14 +129,8 @@ class DashboardController extends Controller
                 'd.id',
                 'd.title',
                 'd.status',
-                'd.updated_at',
-            ])
-            ->selectSub(
-                DB::table('document_chunks as dc')
-                    ->selectRaw('COUNT(*)')
-                    ->whereColumn('dc.document_id', 'd.id'),
-                'chunks_count'
-            );
+                'd.created_at',
+            ]);
 
         if (
             Schema::hasColumn('documents', 'category_id')
@@ -136,44 +149,9 @@ class DashboardController extends Controller
         }
 
         return $query
-            ->orderByDesc('d.updated_at')
-            ->limit(6)
-            ->get();
-    }
-
-    private function recentRuns(): Collection
-    {
-        if (! Schema::hasTable('ai_runs')) {
-            return collect();
-        }
-
-        $query = DB::table('ai_runs as r')
-            ->select([
-                'r.id',
-                'r.status',
-                'r.model_name',
-                'r.created_at',
-            ]);
-
-        if (
-            Schema::hasColumn('ai_runs', 'ai_tool_id')
-            && Schema::hasTable('ai_tools')
-        ) {
-            $query
-                ->leftJoin(
-                    'ai_tools as t',
-                    't.id',
-                    '=',
-                    'r.ai_tool_id'
-                )
-                ->addSelect(
-                    't.name as tool_name'
-                );
-        }
-
-        return $query
-            ->orderByDesc('r.id')
-            ->limit(6)
+            ->orderByDesc('d.created_at')
+            ->orderByDesc('d.id')
+            ->limit(5)
             ->get();
     }
 
@@ -183,9 +161,18 @@ class DashboardController extends Controller
             return collect();
         }
 
-        return DB::table('audit_logs')
-            ->orderByDesc('id')
-            ->limit(7)
+        $query = DB::table('audit_logs as a')
+            ->select(['a.id', 'a.action', 'a.created_at']);
+
+        if (Schema::hasTable('users')) {
+            $query
+                ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
+                ->addSelect('u.name as actor_name');
+        }
+
+        return $query
+            ->orderByDesc('a.id')
+            ->limit(4)
             ->get();
     }
 }

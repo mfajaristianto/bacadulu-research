@@ -1,18 +1,20 @@
 <laravel-boost-guidelines>
 # Laravel Application
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+This repository contains a Laravel application.
+
+> BacaDulu note: this bootstrap is NOT a mandatory first step for every task. Laravel Boost is currently not installed (`composer.json`). Continue the user's request with existing capabilities. Installing PHP/Composer or Laravel Boost, or changing dependencies, requires the user's explicit request or approval. Project rules: `CLAUDE.md` and `.claude/rules/workflow-autonomy.md`.
 
 ## Prerequisites
 
-Verify that PHP and Composer are available:
+Verify that PHP and Composer are available when needed:
 
 ```sh
 php -v
 composer -V
 ```
 
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
+If either command is unavailable, report it to the user. Only with the user's approval, install the prerequisites with the appropriate command:
 
 macOS:
 
@@ -36,7 +38,7 @@ After installation, ask the user to restart their terminal. If the agent needs t
 
 ## Agent Setup
 
-Install Laravel Boost from the application root before making application changes:
+Only when the user explicitly requests or approves it, install Laravel Boost from the application root:
 
 ```sh
 composer require laravel/boost --dev

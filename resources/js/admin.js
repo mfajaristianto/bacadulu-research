@@ -53,6 +53,7 @@ ready(() => {
     initAdminPasswordToggles();
     initAdminGuardian();
     initSourcePdfPreview();
+    initAdminDashboard();
 });
 
 /* Off-canvas sidebar below 900px (layouts/admin.blade.php). */
@@ -128,7 +129,7 @@ function initFileInputLabels() {
     });
 }
 
-/* "Lihat / Sembunyikan" on the admin login (layouts/admin-auth.blade.php). */
+/* Eye / eye-off password toggle on the admin login (admin/auth/login.blade.php); admin-auth.css swaps the icon on aria-pressed. */
 function initAdminPasswordToggles() {
     document.querySelectorAll('[data-admin-password-toggle]').forEach((button) => {
         button.addEventListener('click', (event) => {
@@ -144,7 +145,7 @@ function initAdminPasswordToggles() {
             const show = input.type === 'password';
 
             input.type = show ? 'text' : 'password';
-            button.textContent = show ? 'Sembunyikan' : 'Lihat';
+            button.setAttribute('aria-label', show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
             button.setAttribute('aria-pressed', show ? 'true' : 'false');
         });
     });
@@ -442,4 +443,112 @@ function initSourcePdfPreview() {
     }
 
     syncTitle();
+}
+
+/*
+ * One-pass entrance for the admin Beranda (admin/dashboard.blade.php), ~1.4s, nothing loops.
+ * Markup holds the final numbers; the animations start from "backwards" fill, so nothing shifts layout.
+ * [data-dash-ready] lifts the CSS hold on [data-dash-in] (also set under reduced motion: show final state).
+ */
+function initAdminDashboard() {
+    const root = document.querySelector('[data-dash]');
+
+    if (!root) {
+        return;
+    }
+
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !root.animate) {
+        root.dataset.dashReady = '';
+
+        return;
+    }
+
+    const EASE = 'cubic-bezier(.2,.65,.4,1)';
+    const all = (selector) => [...root.querySelectorAll(selector)];
+
+    const rise = (element, delay, { y = 8, scale = 1, duration = 380 } = {}) => element.animate(
+        [{ opacity: 0, transform: `translateY(${y}px) scale(${scale})` }, { opacity: 1, transform: 'none' }],
+        { duration, delay, easing: EASE, fill: 'backwards' },
+    );
+
+    const countUp = (element, delay, duration) => {
+        const to = Number(element.dataset.dashCount);
+
+        if (!to) {
+            return;
+        }
+
+        const start = performance.now() + delay;
+
+        element.textContent = '0';
+
+        const tick = (now) => {
+            const t = Math.min(Math.max((now - start) / duration, 0), 1);
+
+            element.textContent = Math.round(to * (1 - (1 - t) ** 3)).toLocaleString('en-US');
+
+            if (t < 1) {
+                requestAnimationFrame(tick);
+            }
+        };
+
+        requestAnimationFrame(tick);
+    };
+
+    // Header + greeting + attention strip.
+    rise(root.querySelector('.bd-admin-page-head'), 0);
+    rise(root.querySelector('.bd-dash__greeting'), 60);
+    rise(root.querySelector('.bd-dash__alert'), 300);
+
+    // Bubu: settle in, then one small wave, then idle.
+    const bubu = root.querySelector('[data-dash-bubu]');
+    rise(bubu, 200, { y: 8, scale: 0.94, duration: 400 });
+    bubu.animate(
+        [0, -7, 5, -3, 0].map((deg) => ({ transform: `rotate(${deg}deg)`, easing: 'ease-in-out' })),
+        { duration: 520, delay: 640 },
+    );
+
+    // Summary cards: stagger in (70ms), numbers count up, bars and the ring draw; all done in <800ms.
+    rise(root.querySelector('#dash-summary-title'), 380, { y: 5, duration: 300 });
+    all('.bd-dash__stats > li').forEach((card, i) => {
+        const delay = 420 + i * 70;
+
+        rise(card, delay, { duration: 320 });
+        card.querySelectorAll('[data-dash-count]:not(.bd-dash__ring *)').forEach((n) => countUp(n, delay + 40, 520));
+    });
+
+    const fillBar = (bar, delay) => bar.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 700, delay, easing: EASE, fill: 'backwards' });
+
+    all('.bd-dash__stats [data-dash-bar]').forEach((bar) => fillBar(bar, 560));
+
+    const drawRing = (circle, delay, duration) => {
+        const pct = Number(circle.dataset.dashRing);
+
+        circle.animate([{ strokeDashoffset: 100 }, { strokeDashoffset: 100 - pct }], { duration, delay, easing: EASE, fill: 'backwards' });
+        countUp(circle.closest('.bd-dash__ring').querySelector('[data-dash-count]'), delay, duration);
+    };
+
+    all('.bd-dash__stat-ring [data-dash-ring]').forEach((circle) => drawRing(circle, 560, 620));
+
+    // Kesiapan Sistem.
+    rise(root.querySelector('[aria-labelledby="dash-ready-title"]'), 800);
+    all('.bd-dash__ready > li').forEach((block, i) => rise(block, 900 + i * 70, { y: 6, duration: 300 }));
+    all('.bd-dash__ready [data-dash-bar]').forEach((bar) => fillBar(bar, 1000));
+
+    // Kategori Prompt: journal first, book ~110ms later.
+    rise(root.querySelector('.bd-dash__section-head'), 950);
+    all('.bd-dash__category').forEach((card, i) => {
+        const delay = 950 + i * 110;
+
+        rise(card, delay, { scale: 0.98 });
+        card.querySelectorAll('[data-dash-count]').forEach((n) => countUp(n, delay + 80, 500));
+    });
+
+    // Sumber Terbaru rows, then Aktivitas Terbaru timeline, top to bottom.
+    rise(root.querySelector('[aria-labelledby="dash-sources-title"]'), 1050, { y: 5 });
+    all('[data-dash-row]').forEach((row, i) => rise(row, 1100 + i * 70, { y: 5, duration: 300 }));
+    rise(root.querySelector('[aria-labelledby="dash-activity-title"]'), 1100, { y: 5 });
+    all('[data-dash-activity]').forEach((item, i) => rise(item, 1150 + i * 70, { y: 5, duration: 300 }));
+
+    root.dataset.dashReady = '';
 }

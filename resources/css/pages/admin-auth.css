@@ -454,7 +454,8 @@
     transition: border-color var(--duration-micro) ease, box-shadow var(--duration-ui) ease;
 }
 
-.bd-admin-field__control:focus-within {
+/* Ring follows the input only: the eye button draws its own focus ring, so the two never stack. */
+.bd-admin-field__control:has(input:focus) {
     border-color: var(--aa-navy);
     box-shadow: 0 0 0 3px rgba(239, 88, 67, .28);
 }
@@ -480,7 +481,7 @@
     font-size: var(--text-body);
 }
 
-/* The wrapper draws the focus ring (:focus-within); no second ring on the input. */
+/* The wrapper draws the focus ring; no second ring on the input. */
 .bd-admin-auth .bd-admin-field__control input:focus,
 .bd-admin-auth .bd-admin-field__control input:focus-visible {
     border: 0;
@@ -488,21 +489,58 @@
     box-shadow: none;
 }
 
-.bd-admin-field__toggle {
-    flex: 0 0 auto;
-    min-height: 36px;
-    padding: 0 12px;
-    border: 0;
-    border-radius: 8px;
-    background: var(--aa-cream);
-    color: var(--aa-navy-soft);
-    font: inherit;
-    font-size: var(--text-label);
-    font-weight: 600;
-    cursor: pointer;
+/*
+ * Chrome paints autofilled inputs light blue with a UA background that author backgrounds cannot
+ * beat. The usual fix: cover it with an inset white shadow, set text/caret colours explicitly, and
+ * stretch the UA background transition so it never lands. :autofill and :-webkit-autofill sit in
+ * separate rules because a browser that drops one selector would drop the whole list.
+ */
+.bd-admin-auth .bd-admin-field__control input:autofill,
+.bd-admin-auth .bd-admin-field__control input:autofill:hover,
+.bd-admin-auth .bd-admin-field__control input:autofill:focus {
+    caret-color: var(--aa-navy);
+    -webkit-text-fill-color: var(--aa-navy);
+    box-shadow: 0 0 0 1000px #fff inset;
+    transition: background-color 600000s 0s, color 600000s 0s;
 }
 
-.bd-admin-field__toggle:hover { background: var(--aa-line); }
+.bd-admin-auth .bd-admin-field__control input:-webkit-autofill,
+.bd-admin-auth .bd-admin-field__control input:-webkit-autofill:hover,
+.bd-admin-auth .bd-admin-field__control input:-webkit-autofill:focus {
+    caret-color: var(--aa-navy);
+    -webkit-text-fill-color: var(--aa-navy);
+    box-shadow: 0 0 0 1000px #fff inset;
+    transition: background-color 600000s 0s, color 600000s 0s;
+}
+
+/* Password visibility: icon-only, transparent until hovered; swaps eye / eye-off on aria-pressed. */
+.bd-admin-field__toggle {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--aa-navy-soft);
+    cursor: pointer;
+    transition: background-color var(--duration-micro) ease;
+}
+
+.bd-admin-field__toggle:hover { background: var(--aa-cream); }
+
+.bd-admin-field__control .bd-admin-field__toggle svg {
+    width: 20px;
+    height: 20px;
+    color: inherit;
+}
+
+.bd-admin-field__eye-off,
+.bd-admin-field__toggle[aria-pressed="true"] .bd-admin-field__eye { display: none; }
+
+.bd-admin-field__toggle[aria-pressed="true"] .bd-admin-field__eye-off { display: block; }
 
 .bd-admin-field__toggle:focus-visible,
 .bd-admin-login__submit:focus-visible,
@@ -511,6 +549,9 @@
     outline: 2px solid var(--aa-coral);
     outline-offset: 2px;
 }
+
+/* Inside the field's 3px inner margin, so the ring never touches the field border. */
+.bd-admin-field__toggle:focus-visible { outline-offset: 0; }
 
 .bd-admin-login__submit {
     display: flex;

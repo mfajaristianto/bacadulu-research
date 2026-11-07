@@ -3,49 +3,9 @@ OVERRIDE GLOBAL: Semua output yang ditampilkan kepada pengguna WAJIB dalam Bahas
 <laravel-boost-guidelines>
 # Laravel Application
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+This repository contains a Laravel application.
 
-## Prerequisites
-
-Verify that PHP and Composer are available:
-
-```sh
-php -v
-composer -V
-```
-
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
-
-macOS:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
-
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
+Optional reference only — NOT a bootstrap step. Laravel Boost is not installed (`composer.json`); work with existing capabilities. Do not run `composer require laravel/boost`, `php artisan boost:install`, Composer install/update, or PHP install scripts to satisfy this note. Installing Boost (or any significant dependency) needs the user's explicit request/approval. The original Boost bootstrap text is kept in `AGENTS.md`.
 </laravel-boost-guidelines>
 
 # BacaDulu Research — Permanent Project Instructions
@@ -106,21 +66,27 @@ Standar desain terbaru di `docs/DESIGN_SYSTEM.md` (Poppins, `#EF5843`, `#F7AA35`
 
 ## Core working rule: ANALYZE BEFORE EDITING
 
+Day-to-day workflow, question policy, critical-change list, safe commands, verification, and final report format are defined in `.claude/rules/workflow-autonomy.md`, including rule priority. That file wins over this one where they overlap.
+
 Never treat a supplied design as an automatic implementation order.
 
-For any UI/UX task, first determine which mode the user is asking for:
+For any task, first determine which gate applies:
 
-### REVIEW / PLAN MODE
-If the user asks to review, inspect, analyze, compare, audit, design, propose, or "lihat dulu":
-- do not modify files;
-- do not create files;
+### Discussion Gate (review / plan)
+If the user asks to explain, review, inspect, analyze, compare, audit, propose a concept, "jelasin/bedah/lihat dulu", "menurut lu gimana", or says "jangan implementasi/ubah kode dulu":
+- do not modify or create application files;
 - do not run destructive commands;
 - inspect the design source and current application first;
 - return a design and technical assessment;
-- wait for explicit implementation approval.
+- stop; discussion is not permission to implement.
 
-### IMPLEMENTATION MODE
-Only edit after the user explicitly asks to implement, execute, fix, or continue implementation.
+### Implementation Gate
+If the user explicitly asks to implement, fix, build, redesign, create, change, or continue ("kerjain", "implementasikan", "perbaiki", "redesign", "buat", "ubah", "lanjutkan"):
+- that request IS the approval; never ask for a second approval;
+- run the Design Gate below internally, then implement, test, run Playwright QA for UI, fix in-scope bugs, build, and report.
+
+### Critical Gate
+In any mode, stop and ask (one question: risk, recommendation, alternatives) only for critical changes: destructive, production, large schema, credentials/secrets, data deletion, API contract, significant new dependency, feature removal, or far out of scope. Full list: `.claude/rules/workflow-autonomy.md`.
 
 ## Design sources
 
@@ -140,9 +106,9 @@ Use the best available source:
 
 Do not require Figma if the source is an image.
 
-## DESIGN GATE — mandatory before implementation
+## DESIGN GATE — analysis before coding
 
-Before coding from a design, perform these reviews:
+Before coding from a design, perform these reviews. In the Discussion Gate they form the answer; in the Implementation Gate run them internally and summarize them in the final report — they are not a reason to pause.
 
 ### 1. Design Intake
 Identify:
@@ -224,11 +190,11 @@ Use existing GSAP for BacaDulu motion.
 Do not animate every element.
 Motion must communicate hierarchy, progression, cause/effect, or state change.
 
-### 6. Approval Gate
+### 6. Outcome
 After the design, feasibility, maintainability, responsive, and motion assessments:
-- present the recommendation;
-- clearly identify what should be kept, changed, or rejected;
-- wait for user approval before implementation when the task began as review/plan work.
+- Discussion Gate: present the recommendation (keep / change / reject) and stop;
+- Implementation Gate: proceed without waiting; summarize keep/change/reject in the final report;
+- Critical Gate: any critical change still needs dedicated approval, in either mode.
 
 ## Visual direction — BacaDulu
 
@@ -474,7 +440,7 @@ Do not claim runtime verification if it was not actually performed.
 
 ## Communication
 
-When a design is provided, the first useful response should normally state:
+In review/plan mode, when a design is provided, the first useful response should normally state (in implementation mode, fold these into the final report instead of stopping):
 A. what works in the design;
 B. what should change;
 C. implementation complexity;
@@ -517,160 +483,9 @@ Jika tool atau skill menghasilkan hasil dalam Bahasa Inggris, terjemahkan dan je
 
 ---
 
-# ATURAN BERTANYA
+# ATURAN BERTANYA, SCOPE, SKILL, DAN LAPORAN
 
-Jangan terlalu sering meminta konfirmasi.
-
-Jangan bertanya hanya untuk:
-- memilih skill;
-- memilih plugin;
-- memastikan apakah skill boleh digunakan;
-- memastikan apakah perlu menjalankan code review;
-- memastikan apakah perlu memakai Playwright;
-- memastikan apakah perlu menggunakan Graphify;
-- memastikan apakah perlu menggunakan Context7;
-- memastikan hal yang sudah jelas dari prompt pengguna;
-- meminta pengguna mengulang informasi yang sudah tersedia;
-- meminta persetujuan untuk langkah analisis yang tidak mengubah project.
-
-Jika skill atau tool relevan dan aman digunakan untuk memenuhi task, gunakan secara otomatis.
-
-Jangan mengatakan:
-- "Apakah saya boleh menggunakan skill X?"
-- "Apakah Anda ingin saya menjalankan Y?"
-- "Apakah saya lanjut?"
-jika langkah tersebut sudah jelas diperlukan oleh task.
-
----
-
-# KAPAN BOLEH BERTANYA
-
-Ajukan pertanyaan hanya jika keputusan pengguna benar-benar diperlukan.
-
-Contohnya:
-
-1. Requirements memiliki dua interpretasi yang akan menghasilkan implementasi berbeda secara signifikan.
-
-2. Akan melakukan tindakan destruktif seperti:
-   - menghapus banyak file;
-   - menghapus data;
-   - reset database;
-   - drop table;
-   - force push;
-   - overwrite file penting yang tidak berkaitan langsung dengan task;
-   - menghapus fitur existing.
-
-3. Akan melakukan perubahan production seperti:
-   - deploy;
-   - migration production;
-   - perubahan DNS;
-   - perubahan credential;
-   - rotasi secret;
-   - perubahan OAuth production.
-
-4. Akan menambah dependency/package baru yang sebenarnya belum diperlukan.
-
-5. Akan mengubah schema database atau kontrak API existing.
-
-6. Akan melakukan perubahan besar di luar scope prompt pengguna.
-
-Untuk perubahan rutin yang memang diminta pengguna, jangan meminta konfirmasi berulang.
-
-Contoh:
-
-Jika pengguna berkata:
-"Perbaiki animasi Research Flow."
-
-Maka:
-- audit file terkait;
-- buat rencana internal;
-- edit file yang diperlukan;
-- test;
-- laporkan.
-
-Jangan berhenti hanya untuk bertanya:
-"Apakah saya boleh mengedit landing-motion.js?"
-
-File yang secara jelas termasuk scope task boleh diedit tanpa bertanya ulang.
-
----
-
-# SCOPE PERUBAHAN FILE
-
-Sebelum mengubah file:
-1. identifikasi file yang benar-benar berhubungan dengan task;
-2. baca implementasi existing;
-3. cari dependency dan override terkait;
-4. ubah sekecil mungkin.
-
-Jika perubahan akan menyentuh file DI LUAR scope yang diminta pengguna dan dampaknya cukup besar, jelaskan dahulu dan minta persetujuan.
-
-Jangan melakukan broad rewrite tanpa kebutuhan.
-
----
-
-# PENGGUNAAN SKILL DAN PLUGIN
-
-Skill/plugin adalah alat bantu, bukan topik utama percakapan.
-
-Gunakan skill secara otomatis jika relevan.
-
-Jangan:
-- terus-menerus menyebut skill yang sedang digunakan;
-- meminta pengguna memilih skill;
-- menginstal skill baru tanpa kebutuhan;
-- menyarankan skill baru jika kemampuan existing sudah cukup;
-- menjalankan banyak skill yang fungsinya tumpang tindih hanya karena tersedia.
-
-Prioritaskan skill yang paling relevan dengan task.
-
-Contoh:
-
-Frontend:
-- frontend-design
-- responsive-qa
-- visual-audit
-
-Debugging browser:
-- Playwright
-- browser-debug
-
-Laravel:
-- laravel-safe-edit
-- Context7 bila membutuhkan dokumentasi framework terbaru
-
-Security:
-- security-audit
-
-Codebase exploration:
-- Graphify
-- codebase-memory
-
-Code review:
-- code-review
-
-Jangan menggunakan semuanya sekaligus jika tidak diperlukan.
-
----
-
-# CARA MEMBERIKAN HASIL
-
-Gunakan format:
-
-1. Apa yang ditemukan.
-2. Apa yang diubah.
-3. File yang diubah.
-4. Hasil test.
-5. Masalah yang masih tersisa.
-
-Gunakan Bahasa Indonesia yang langsung dan mudah dipahami.
-
-Hindari laporan panjang dengan gaya konsultansi jika pengguna hanya meminta perubahan kecil.
-
-Jika menemukan masalah lain di luar scope:
-- catat secara singkat;
-- jangan langsung memperbaikinya;
-- lanjutkan task utama.
+Dipindahkan dan digabung ke `.claude/rules/workflow-autonomy.md` (dimuat otomatis oleh Claude Code): mode review vs implementasi, kebijakan bertanya LOW/MEDIUM/HIGH RISK, anti pertanyaan berulang, scope perubahan file, penggunaan skill/tool, verifikasi, dan format laporan akhir.
 
 ---
 
@@ -684,3 +499,5 @@ Prioritas utama:
 4. Gunakan tool/skill seperlunya.
 5. Kurangi pertanyaan yang tidak perlu.
 6. Selalu jawab pengguna dalam Bahasa Indonesia.
+
+Urutan aturan bila bertabrakan: lihat bagian awal `.claude/rules/workflow-autonomy.md`.
