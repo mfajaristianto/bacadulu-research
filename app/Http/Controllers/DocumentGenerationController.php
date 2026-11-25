@@ -28,6 +28,20 @@ class DocumentGenerationController extends Controller
             $format = 'all';
         }
 
+        // "Temukan dokumen": ?focus={id} (hanya dokumen milik pengguna ini). Tampilkan semua format dan buka halaman yang memuatnya.
+        $focus = $request->filled('focus')
+            ? DocumentGeneration::query()->where('user_id', $request->user()->id)->find($request->integer('focus'))
+            : null;
+        $page = null;
+
+        if ($focus) {
+            $format = 'all';
+            $ahead = DocumentGeneration::query()->where('user_id', $request->user()->id)
+                ->where(fn ($q) => $q->where('updated_at', '>', $focus->updated_at)->orWhere(fn ($w) => $w->where('updated_at', $focus->updated_at)->where('id', '!=', $focus->id)))
+                ->count();
+            $page = intdiv($ahead, 18) + 1;
+        }
+
         $totalDocuments = DocumentGeneration::query()
             ->where('user_id', $request->user()->id)
             ->count();
@@ -60,10 +74,11 @@ class DocumentGenerationController extends Controller
                 'conversation',
             ])
             ->latest('updated_at')
-            ->paginate(18)
+            ->paginate(18, ['*'], 'page', $page ?? max(1, $request->integer('page', 1)))
             ->withQueryString();
 
         return view('documents.index', [
+            'focusId' => $focus?->id,
             'documents' => $documents,
             'activeFormat' => $format,
             'totalDocuments' => $totalDocuments,

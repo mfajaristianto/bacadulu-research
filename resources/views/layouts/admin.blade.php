@@ -42,20 +42,26 @@
         [
             'label' => 'Sumber & Pustaka',
             'items' => [
-                ['name' => 'admin.library.index', 'label' => 'Pustaka', 'icon' => 'library', 'match' => ['admin.library.*']],
-                ['name' => 'admin.source-sync.index', 'label' => 'Impor Sumber', 'icon' => 'sync', 'match' => ['admin.source-sync.*']],
-                ['name' => 'admin.categories.index', 'label' => 'Kategori', 'icon' => 'category', 'match' => ['admin.categories.*']],
-                ['name' => 'admin.collections.index', 'label' => 'Koleksi', 'icon' => 'collection', 'match' => ['admin.collections.*']],
-                ['name' => 'admin.glossary.index', 'label' => 'Glosarium', 'icon' => 'glossary', 'match' => ['admin.glossary.*']],
+                ['name' => 'admin.library.index', 'label' => 'Library Internal', 'icon' => 'library', 'match' => ['admin.library.*', 'admin.collections.*']],
+                ['name' => 'admin.external-sources.index', 'label' => 'Sumber Eksternal', 'icon' => 'globe', 'match' => ['admin.external-sources.*', 'admin.source-sync.*']],
+                ['name' => 'admin.categories.index', 'label' => 'Kategori Riset', 'icon' => 'category', 'match' => ['admin.categories.*']],
+            ],
+        ],
+        [
+            'label' => 'Pengaturan Pencarian',
+            'items' => [
+                ['name' => 'admin.glossary.index', 'label' => 'Kamus Istilah Pencarian', 'icon' => 'glossary', 'match' => ['admin.glossary.*']],
             ],
         ],
         [
             'label' => 'Alat Riset',
             'items' => [
-                ['name' => 'admin.tools.index', 'label' => 'Alat Riset', 'icon' => 'tools', 'match' => ['admin.tools.*']],
-                ['name' => 'admin.prompts.index', 'label' => 'Instruksi AI', 'icon' => 'prompt', 'match' => ['admin.prompts.*']],
-                ['name' => 'admin.prompt-versions.index', 'label' => 'Versi Instruksi', 'icon' => 'versions', 'match' => ['admin.prompt-versions.*']],
-                ['name' => 'admin.document-templates.index', 'label' => 'Template Dokumen', 'icon' => 'template', 'match' => ['admin.document-templates.*']],
+                ['name' => 'admin.tools.index', 'label' => 'Katalog Alat AI', 'icon' => 'tools', 'match' => ['admin.tools.*']],
+                ['name' => 'admin.prompts.index', 'label' => 'Instruksi & Versi', 'icon' => 'prompt', 'match' => ['admin.prompts.*', 'admin.prompt-versions.*']],
+                ['name' => 'admin.providers.index', 'label' => 'Provider & Analitik AI', 'icon' => 'provider', 'match' => ['admin.providers.*']],
+                ['name' => 'admin.prompt-documents.index', 'label' => 'Prompt Dokumen', 'icon' => 'document-prompt', 'match' => ['admin.prompt-documents.*']],
+                ['name' => 'admin.answer-behavior.index', 'label' => 'Perilaku Jawaban AI', 'icon' => 'behavior', 'match' => ['admin.answer-behavior.*']],
+                ['name' => 'admin.document-templates.index', 'label' => 'Template & Format Cetak', 'icon' => 'template', 'match' => ['admin.document-templates.*']],
             ],
         ],
         [
@@ -69,7 +75,7 @@
             'label' => 'Pengguna & Sistem',
             'items' => [
                 ['name' => 'admin.users.index', 'label' => 'Pengguna', 'icon' => 'users', 'match' => ['admin.users.*']],
-                ['name' => 'admin.security.index', 'label' => 'Keamanan', 'icon' => 'security', 'match' => ['admin.security.*']],
+                ['name' => 'admin.administrators.index', 'label' => 'Admin & Keamanan', 'icon' => 'security', 'match' => ['admin.administrators.*', 'admin.security.*']],
                 ['name' => 'admin.settings.index', 'label' => 'Pengaturan', 'icon' => 'settings', 'match' => ['admin.settings.*']],
             ],
         ],

@@ -125,10 +125,15 @@ class ResearchSubmissionController extends Controller
             ->all();
 
         if ($sourceIds === []) {
+            // Pesan "tidak ada dokumen" boleh ditulis admin (Perilaku Jawaban AI); tanpa itu teks lama dipakai.
+            $custom = app(\App\Services\Research\AnswerBehaviorResolver::class)
+                ->safe('research', $prompt->aiTool?->code)['unavailable']['no_documents']['message'] ?? null;
+
             return back()
                 ->withErrors([
                     'message' =>
-                        'Belum ada Curated Source yang sudah Published dan memiliki chunks untuk kategori ini.',
+                        $custom
+                        ?? 'Belum ada Curated Source yang sudah Published dan memiliki chunks untuk kategori ini.',
                 ])
                 ->withInput();
         }
@@ -479,18 +484,24 @@ class ResearchSubmissionController extends Controller
             || app()->environment('local');
 
         if ($runInline) {
-            ProcessResearchRun::dispatchSync($run->id);
+            try {
+                ProcessResearchRun::dispatchSync($run->id);
+            } catch (\Throwable) {
+                // Job sudah mencatat kegagalan (status failed, pesan untuk pengguna, audit) dan melaporkan exception-nya.
+                // Pengguna melihat status itu di workspace; tanpa ini kegagalan provider (mis. API key salah) menjadi halaman 500.
+            }
         } else {
             ProcessResearchRun::dispatch($run->id);
         }
 
+        $message = match (true) {
+            ! $runInline => 'Research masuk antrean. Progress akan diperbarui tanpa reload halaman.',
+            $run->fresh()?->status === 'failed' => null,
+            default => 'Research selesai diproses.',
+        };
+
         return redirect()
             ->route('workspace.conversation', $conversation)
-            ->with(
-                'success',
-                $runInline
-                    ? 'Research selesai diproses.'
-                    : 'Research masuk antrean. Progress akan diperbarui tanpa reload halaman.'
-            );
+            ->with($message ? ['success' => $message] : []);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DocumentGenerationController;
+use App\Http\Controllers\ResearchDocumentController;
 use App\Http\Controllers\ResearchOutputPresentationController;
 use Illuminate\Support\Facades\Route;
 
@@ -100,6 +101,12 @@ Route::middleware([
             'documents.store'
         );
 
+
+    // Hasil Generate Document: status pembuatan, unduhan otomatis sekali, tombol Unduh lagi / Temukan dokumen.
+    Route::get('/documents/{documentGeneration}/ready', [ResearchDocumentController::class, 'ready'])
+        ->whereNumber('documentGeneration')
+        ->middleware('throttle:120,1')
+        ->name('documents.ready');
 
     Route::get(
         '/documents/{documentGeneration}',

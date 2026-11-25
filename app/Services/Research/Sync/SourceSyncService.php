@@ -2,11 +2,13 @@
 
 namespace App\Services\Research\Sync;
 
+use App\Exceptions\SourceDuplicateException;
 use App\Models\Category;
 use App\Models\Document;
 use App\Models\SourceSyncItem;
 use App\Models\SourceSyncRun;
 use App\Services\Research\SourceIngestionService;
+use App\Services\Research\SourceVersions;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -142,6 +144,16 @@ class SourceSyncService
         if (! $category) {
             throw new RuntimeException(
                 'Kategori import tidak tersedia atau tidak aktif.'
+            );
+        }
+
+        // Pemeriksaan duplikat memakai aturan Pustaka (SourceVersions::findByDoi) dan terjadi sebelum perubahan apa pun.
+        $duplicate = $this->duplicateOf($item);
+
+        if ($duplicate['exact'] || $duplicate['doi']) {
+            throw new SourceDuplicateException(
+                $duplicate['exact'] ?? $duplicate['doi'],
+                $duplicate['exact'] ? 'exact' : 'doi'
             );
         }
 
@@ -532,6 +544,28 @@ class SourceSyncService
 
             throw $exception;
         }
+    }
+
+    /**
+     * Sumber lain di Pustaka yang berbenturan dengan item ini. `exact`: checksum isi sama persis; `doi`: DOI sama.
+     * Dokumen yang memang berasal dari item yang sama (matched_document_id) bukan duplikat, itu pembaruan.
+     *
+     * @return array{exact: ?Document, doi: ?Document}
+     */
+    public function duplicateOf(SourceSyncItem $item): array
+    {
+        $own = $item->matched_document_id;
+        $exact = filled($item->external_checksum)
+            ? Document::query()
+                ->where('external_checksum', $item->external_checksum)
+                ->when($own, fn ($query) => $query->where('id', '!=', $own))
+                ->first(['id', 'title', 'status'])
+            : null;
+
+        return [
+            'exact' => $exact,
+            'doi' => $exact ? null : app(SourceVersions::class)->findByDoi(data_get($item->payload_json, 'metadata.doi'), $own),
+        ];
     }
 
     public function ignore(

@@ -27,8 +27,16 @@ class PromptTemplate extends Model
         'retrieval_instructions',
         'output_instructions',
         'status',
+        'input_mode',
         'created_by',
     ];
+
+    /** Instruksi alat riset saja; versi bagian Prompt Dokumen (nama berawalan document-section:) dikelola di modulnya. */
+    public function scopeToolInstructions($query)
+    {
+        return $query->where('name', 'not like', DocumentPromptSection::PROMPT_PREFIX.'%')
+            ->where('name', 'not like', \App\Services\Research\AnswerBehavior::PREFIX.'%');
+    }
 
     public function aiTool(): BelongsTo
     {
@@ -50,6 +58,18 @@ class PromptTemplate extends Model
         return $this->hasMany(
             AiRun::class
         );
+    }
+
+    /** 'book' = topik + N rumusan masalah. Kolom belum ada sebelum migration disetujui => selalu 'standard'. */
+    public function getInputModeNameAttribute(): string
+    {
+        return ($this->attributes['input_mode'] ?? 'standard') === 'book' ? 'book' : 'standard';
+    }
+
+    /** Teks aturan (ruleset) Alat Riset: dibaca Research sebagai aturan dimensi, BUKAN prompt ke LLM. */
+    public function rulesetText(): string
+    {
+        return trim(implode("\n", array_filter([$this->question_template, $this->task_prompt, $this->retrieval_instructions, $this->output_instructions, $this->short_description])));
     }
 
     public function getDisplayNameAttribute(): string

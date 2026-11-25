@@ -5,6 +5,10 @@
     'Research Workspace — BacaDulu Research'
 )
 
+@push('styles')
+    @vite(['resources/js/research-flow.js'])
+@endpush
+
 @section('content')
 
 @php
@@ -25,6 +29,7 @@
     $activePromptId =
         old('prompt_template_id')
         ?: request()->integer('prompt')
+        ?: request()->integer('prompt_template_id')
         ?: data_get(
             $lastUserMessage?->metadata,
             'prompt_template_id'
@@ -100,15 +105,16 @@
             )
             : collect();
 
-    $nextPrompt =
-        $activePrompt
-            ? $prompts
-                ->first(
-                    fn ($prompt) =>
-                        $prompt->id
-                        !== $activePrompt->id
-                )
-            : $prompts->first();
+    // Saran alat berikutnya mengikuti rantai kanonis yang sama dengan endpoint presentation,
+    // dihitung dari alat yang menghasilkan jawaban terbaru (bukan alat yang sedang dipilih di komposer).
+    $producedPromptId = data_get($lastUserMessage?->metadata, 'prompt_template_id');
+    $producedCode = $producedPromptId
+        ? $prompts->firstWhere('id', (int) $producedPromptId)?->aiTool?->code
+        : $activePrompt?->aiTool?->code;
+    $nextCode = \App\Http\Controllers\ResearchOutputPresentationController::NEXT_TOOL[$producedCode] ?? null;
+    $nextPrompt = $nextCode
+        ? $prompts->first(fn ($prompt) => $prompt->aiTool?->code === $nextCode)
+        : null;
 
     // User tanpa riwayat research => First Research Experience (returning user tetap melihat halaman lama).
     $isFirstRun =
@@ -304,7 +310,7 @@
                         </p>
 
                         <p class="research-new-hero__lead">
-                            Pilih Research Tool, pahami kegunaannya,
+                            Pilih Alat Riset, pahami kegunaannya,
                             lalu tulis pertanyaan penelitian Anda.
                             BacaDulu akan menggunakan source yang
                             eligible untuk membantu proses research.
@@ -488,7 +494,7 @@
                         <div>
 
                             <strong>
-                                Pilih Research Tool
+                                Pilih Alat Riset
                             </strong>
 
                             <small>
@@ -570,12 +576,12 @@
                         <div>
 
                             <strong>
-                                Periksa evidence
+                                Periksa sumber
                             </strong>
 
                             <small>
-                                Nilai jawaban bersama source context,
-                                bukan output AI saja.
+                                Tinjau hasil bersama sumber
+                                yang digunakan.
                             </small>
 
                         </div>
@@ -620,13 +626,13 @@
 
 
                     <form
-                        method="POST"
-                        action="{{ route('research.run') }}"
+                        method="GET"
+                        action="{{ route('research.result') }}"
                         class="research-composer research-composer--new"
                         data-chat-form
+                        data-rf-form
                     >
 
-                        @csrf
 
 
                         @if($selectedSource)
@@ -691,11 +697,7 @@
                                             <option
                                                 value="{{ $category->id }}"
                                                 @selected(
-                                                    old(
-                                                        'category_id',
-                                                        $selectedSource
-                                                            ?->category_id
-                                                    )
+                                                    old('category_id', request('category_id', $selectedSource?->category_id))
                                                     == $category->id
                                                 )
                                             >
@@ -715,7 +717,7 @@
                             <div class="research-prompt-picker-wrap">
 
                                 <span class="research-composer__label">
-                                    RESEARCH TOOL / PROMPT
+                                    ALAT RISET
                                 </span>
 
                                 <button
@@ -734,7 +736,7 @@
                                         {{
                                             $activePrompt
                                                 ?->display_name
-                                            ?: 'Pilih research prompt'
+                                            ?: 'Pilih alat riset'
                                         }}
                                     </span>
 
@@ -772,12 +774,38 @@
                         </div>
 
 
+
+                        {{-- RISET BUKU: tampil hanya untuk alat bertipe buku (jumlah + rumusan masalah). Visual = kartu pertanyaan lama. --}}
+                        @php
+                            $rfBook = $activePrompt?->input_mode_name === 'book';
+                            $rfQs = array_values((array) old('questions', request('questions', [])));
+                            $rfCount = max(1, min(8, count(array_filter($rfQs, fn ($q) => filled($q))) ?: 3));
+                        @endphp
+                        <div class="research-question-panel rf-book" data-rf-book @unless($rfBook) hidden @endunless>
+                            <div class="research-question-panel__head">
+                                <strong>RUMUSAN MASALAH</strong>
+                                <label class="rf-count">Jumlah Rumusan Masalah
+                                    <select data-rf-count aria-controls="rf-questions">
+                                        @for($i = 1; $i <= 8; $i++)<option value="{{ $i }}" @selected($rfCount === $i)>{{ $i }}</option>@endfor
+                                    </select>
+                                </label>
+                            </div>
+                            <div id="rf-questions" class="rf-questions">
+                                @for($i = 0; $i < 8; $i++)
+                                    <label class="rf-q" data-rf-q @if($i >= $rfCount || ! $rfBook) hidden @endif>
+                                        <span>Rumusan Masalah {{ $i + 1 }}</span>
+                                        <input type="text" name="questions[]" maxlength="500" value="{{ $rfQs[$i] ?? '' }}" @if($i >= $rfCount || ! $rfBook) disabled @endif>
+                                    </label>
+                                @endfor
+                            </div>
+                        </div>
+
                         <div class="research-question-panel">
 
                             <div class="research-question-panel__head">
 
                                 <strong>
-                                    TULIS PERTANYAAN ANDA
+                                    TOPIK ATAU PERTANYAAN RISET
                                 </strong>
 
                                 <span>
@@ -790,19 +818,20 @@
                             <div class="research-question-panel__input">
 
                                 <textarea
-                                    name="message"
+                                    name="q"
                                     rows="3"
-                                    placeholder="Tulis pertanyaan research Anda…"
+                                    placeholder="mis. green accounting terhadap kinerja keuangan perusahaan"
                                     required
-                                    maxlength="5000"
+                                    minlength="3"
+                                    maxlength="500"
                                     data-chat-input
-                                >{{ old('message') }}</textarea>
+                                >{{ old('q', request('q')) }}</textarea>
 
 
                                 <button
                                     class="research-send"
                                     type="submit"
-                                    aria-label="Jalankan research"
+                                    aria-label="Mulai Riset"
                                     data-motion-button
                                 >
 
@@ -825,14 +854,10 @@
 
                             <div class="research-question-panel__footer">
 
-                                <span>
-                                    Output AI bukan evidence akademik.
-                                    Evidence tetap berasal dari source
-                                    yang diretrieve.
-                                </span>
+                                <span></span>
 
                                 <strong>
-                                    5000 karakter maks.
+                                    500 karakter maks.
                                 </strong>
 
                             </div>
@@ -1912,11 +1937,7 @@
                         </div>
 
 
-                        <div class="research-composer__note">
-                            Output AI bukan evidence akademik.
-                            Evidence tetap berasal dari source
-                            yang diretrieve.
-                        </div>
+                        <div class="research-composer__note">Jawaban percakapan lama. Riset baru dimulai dari menu Mulai Riset.</div>
 
                     </form>
 
@@ -1941,16 +1962,14 @@
             popover="auto"
             role="dialog"
             aria-modal="true"
-            aria-label="Penjelasan Research Tool: {{ $prompt->name }}"
+            aria-label="Penjelasan alat riset: {{ $prompt->name }}"
         >
 
             <header class="prompt-explainer__head">
 
                 <div>
 
-                    <span class="prompt-explainer__eyebrow">
-                        RESEARCH TOOL
-                    </span>
+                    <span class="prompt-explainer__eyebrow">ALAT RISET</span>
 
                     <h2>
                         {{ $prompt->name }}
@@ -2118,7 +2137,7 @@
                             prompt-explainer__use
                         "
                     >
-                        Gunakan Prompt
+                        Gunakan Alat
                         <b>→</b>
                     </a>
                 </div>

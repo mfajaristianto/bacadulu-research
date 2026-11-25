@@ -115,7 +115,12 @@ class OpenAiResponsesProvider implements AiProvider
                                 'strict' => true,
 
                                 'schema' => $this
-                                    ->outputSchema(),
+                                    ->outputSchema(
+                                        (bool) data_get(
+                                            $payload,
+                                            'answer_behavior.follow_up.enabled'
+                                        )
+                                    ),
                             ],
                         ],
 
@@ -147,9 +152,10 @@ class OpenAiResponsesProvider implements AiProvider
                 ?: $exception
                     ->getMessage();
 
+            // Pesan galat provider kadang memantulkan kunci; jangan simpan ke ai_runs.error_message maupun audit.
             throw new RuntimeException(
                 'AI provider request gagal: '
-                .$message
+                .str_replace($apiKey, '[kunci disamarkan]', (string) $message)
             );
         }
 
@@ -226,6 +232,11 @@ class OpenAiResponsesProvider implements AiProvider
                     )
                     : null,
 
+            // Hanya ada bila aturan tindak lanjut aktif meminta skema ini; dibersihkan lagi oleh AnswerBehaviorResolver.
+            'follow_ups' => is_array($decoded['follow_ups'] ?? null)
+                ? array_values(array_filter($decoded['follow_ups'], 'is_string'))
+                : [],
+
             'provider_meta' => [
                 'provider' => 'openai',
 
@@ -249,7 +260,24 @@ class OpenAiResponsesProvider implements AiProvider
         ];
     }
 
-    private function outputSchema(): array
+    private function outputSchema(
+        bool $followUps = false
+    ): array {
+        $schema = $this->baseSchema();
+
+        if ($followUps) {
+            // Mode strict mewajibkan setiap properti ada di required; array kosong berarti tidak ada saran yang relevan.
+            $schema['properties']['follow_ups'] = [
+                'type' => 'array',
+                'items' => ['type' => 'string'],
+            ];
+            $schema['required'][] = 'follow_ups';
+        }
+
+        return $schema;
+    }
+
+    private function baseSchema(): array
     {
         return [
             'type' => 'object',

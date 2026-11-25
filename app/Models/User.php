@@ -66,6 +66,11 @@ class User extends Authenticatable implements MustVerifyEmailContract
         );
     }
 
+    public function documentGenerations()
+    {
+        return $this->hasMany(DocumentGeneration::class);
+    }
+
     public function savedResults()
     {
         return $this->hasMany(

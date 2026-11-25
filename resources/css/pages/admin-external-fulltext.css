@@ -1,0 +1,23 @@
+/* Full-Text Sumber Eksternal (admin/external-sources/fulltext). Memakai token dan komponen .bd-ext. */
+.bd-ft__check { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.6rem; max-width: 46rem; }
+.bd-ft__check input[type="text"] { width: 100%; min-height: 2.6rem; padding: 0 0.8rem; border: 1px solid var(--ex-line); border-radius: 10px; background: var(--ex-field); color: var(--ex-ink); font: inherit; }
+.bd-ft__remote { display: flex; align-items: center; gap: 0.5rem; color: var(--ex-ink-2); font-size: 0.88rem; }
+.bd-ft__remote input { width: 1.1rem; height: 1.1rem; accent-color: var(--ex-red); }
+.bd-ft__actions { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: flex-start; }
+.bd-ft__actions form { margin: 0; }
+.bd-ft__review { position: relative; }
+.bd-ft__review summary { list-style: none; cursor: pointer; }
+.bd-ft__review summary::-webkit-details-marker { display: none; }
+.bd-ft__review form { display: grid; gap: 0.5rem; width: min(20rem, 78vw); margin-top: 0.4rem; padding: 0.8rem; border: 1px solid var(--ex-line); border-radius: 12px; background: var(--ex-field); }
+.bd-ft__review label { font-size: 0.8rem; color: var(--ex-ink-2); }
+.bd-ft__review textarea { width: 100%; padding: 0.5rem 0.6rem; border: 1px solid var(--ex-line); border-radius: 8px; background: #fff; color: var(--ex-ink); font: inherit; font-size: 0.88rem; resize: vertical; }
+.bd-ft__review-actions { display: flex; gap: 0.5rem; }
+.bd-ft__facts { display: grid; gap: 0.15rem; margin: 0; }
+.bd-ft__facts > div { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); gap: 0.75rem; padding: 0.55rem 0; border-top: 1px solid var(--ex-line); }
+.bd-ft__facts dt { color: var(--ex-ink-3); font-size: 0.82rem; }
+.bd-ft__facts dd { margin: 0; overflow-wrap: anywhere; }
+.bd-ft__url { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.8rem; }
+.bd-ft__json { margin: 0; padding: 0.9rem; max-height: 18rem; overflow: auto; border: 1px solid var(--ex-line); border-radius: 10px; background: var(--ex-field); font-size: 0.78rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bd-ft__chunk { margin: 0.5rem 0; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bd-ft .bd-ext__chip + .bd-ext__chip { margin-left: 0.25rem; }
+@media (max-width: 640px) { .bd-ft__facts > div { grid-template-columns: minmax(0, 1fr); gap: 0.15rem; } }

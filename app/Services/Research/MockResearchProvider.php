@@ -284,6 +284,15 @@ class MockResearchProvider implements AiProvider
                     $language
                 ),
 
+            // Hanya diisi bila aturan Perilaku Jawaban AI meminta saran lanjutan; berasal dari topik pertanyaan, bukan daftar tetap.
+            'follow_ups' =>
+                $this->followUps(
+                    $payload,
+                    $question,
+                    $intent,
+                    $language
+                ),
+
             'provider_meta' =>
                 $this->providerMeta(
                     $payload,
@@ -1458,6 +1467,49 @@ class MockResearchProvider implements AiProvider
     | Suggested Next Action
     |--------------------------------------------------------------------------
     */
+
+    /**
+     * Saran lanjutan deterministik untuk pengujian: disusun dari kata kunci pertanyaan dan jenis yang diminta aturan aktif.
+     * Mock tidak meniru kualitas model nyata; ia hanya memastikan kontrak (field, jumlah, penyaringan) bekerja.
+     *
+     * @return list<string>
+     */
+    private function followUps(
+        array $payload,
+        string $question,
+        string $intent,
+        string $language
+    ): array {
+        $config = $payload['answer_behavior']['follow_up'] ?? null;
+
+        if (! is_array($config) || ! ($config['enabled'] ?? false)) {
+            return [];
+        }
+
+        $topic = implode(' ', array_slice($this->focusTerms($question), 0, 3)) ?: ($language === 'en' ? 'this topic' : 'topik ini');
+        $en = $language === 'en';
+
+        $templates = [
+            'topic' => $intent === 'research-gap'
+                ? ($en ? "Which gap in {$topic} is most worth turning into a problem statement?" : "Gap mana pada {$topic} yang paling layak dijadikan rumusan masalah?")
+                : ($en ? "Which aspects of {$topic} are not yet covered by the available sources?" : "Aspek apa dari {$topic} yang belum dibahas oleh sumber yang tersedia?"),
+            'method' => $en ? "Which research design suits testing {$topic}?" : "Metode dan desain penelitian apa yang cocok untuk menguji {$topic}?",
+            'theory' => $en ? "Which theory best explains {$topic}?" : "Teori apa yang paling relevan untuk menjelaskan {$topic}?",
+            'variable' => $en ? "Which moderating or mediating variables could be added to {$topic}?" : "Variabel moderasi atau mediasi apa yang dapat ditambahkan pada {$topic}?",
+            'literature' => $en ? "What additional literature angle should be checked for {$topic}?" : "Sudut kajian literatur tambahan apa yang perlu diperiksa untuk {$topic}?",
+            'document' => $en ? "Which document section should be drafted first based on {$topic}?" : "Bagian dokumen apa yang sebaiknya disusun lebih dulu berdasarkan {$topic}?",
+        ];
+
+        $out = [];
+
+        foreach ((array) ($config['types'] ?? []) as $type) {
+            if (isset($templates[$type])) {
+                $out[] = $templates[$type];
+            }
+        }
+
+        return array_slice($out, 0, max(1, (int) ($config['max'] ?? 3)));
+    }
 
     private function nextAction(
         string $intent,

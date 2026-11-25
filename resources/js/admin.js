@@ -7,6 +7,8 @@
 | Policy (script-src without 'unsafe-inline') blocked from running.
 */
 
+import { initAdminDashboard } from './admin-dashboard.js';
+
 const ready = (callback) => {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', callback, { once: true });
@@ -52,8 +54,82 @@ ready(() => {
     initFileInputLabels();
     initAdminPasswordToggles();
     initAdminGuardian();
-    initSourcePdfPreview();
     initAdminDashboard();
+
+    // Pustaka (admin/library): loaded on demand so other admin pages do not download it.
+    if (document.querySelector('[data-lib]')) {
+        import('./admin-library.js').then((module) => module.initAdminLibrary());
+    }
+
+    // Instruksi & Versi (admin/prompts): same on-demand loading.
+    if (document.querySelector('[data-ix]')) {
+        import('./admin-instructions.js').then((module) => module.initAdminInstructions());
+    }
+
+    // Prompt Dokumen (admin/prompt-documents).
+    if (document.querySelector('[data-dp]')) {
+        import('./admin-document-prompts.js').then((module) => module.initAdminDocumentPrompts());
+    }
+
+    // Log Aktivitas (admin/audit).
+    if (document.querySelector('[data-au]')) {
+        import('./admin-audit.js').then((module) => module.initAdminAudit());
+    }
+
+    // Pengaturan (admin/settings).
+    if (document.querySelector('[data-st]')) {
+        import('./admin-settings.js').then((module) => module.initAdminSettings());
+    }
+
+    // Keamanan (admin/security).
+    if (document.querySelector('[data-sc]')) {
+        import('./admin-security.js').then((module) => module.initAdminSecurity());
+    }
+
+    // Pengguna (admin/users).
+    if (document.querySelector('[data-us]')) {
+        import('./admin-users.js').then((module) => module.initAdminUsers());
+    }
+
+    // Provider & Analitik AI (admin/providers).
+    if (document.querySelector('[data-pv]')) {
+        import('./admin-providers.js').then((module) => module.initAdminProviders());
+    }
+
+    // Katalog Alat AI (admin/tools).
+    if (document.querySelector('[data-tl]')) {
+        import('./admin-tools.js').then((module) => module.initAdminTools());
+    }
+
+    // Glosarium (admin/glossary): same on-demand loading.
+    if (document.querySelector('[data-gl]')) {
+        import('./admin-glossary.js').then((module) => module.initAdminGlossary());
+    }
+
+    // Koleksi (admin/collections): same on-demand loading. Its PDF viewer is Pustaka's (a [data-lib] wrapper loads it).
+    if (document.querySelector('[data-col]')) {
+        import('./admin-collections.js').then((module) => module.initAdminCollections());
+    }
+
+    // Kategori (admin/categories): same on-demand loading.
+    if (document.querySelector('[data-cat]')) {
+        import('./admin-categories.js').then((module) => module.initAdminCategories());
+    }
+
+    // Sumber Akademik Eksternal (admin/external-sources): same on-demand loading.
+    if (document.querySelector('[data-ext]')) {
+        import('./admin-external-sources.js').then((module) => module.initAdminExternalSources());
+    }
+
+    // Full-Text Sumber Eksternal (admin/external-sources/fulltext): same on-demand loading.
+    if (document.querySelector('[data-ft]')) {
+        import('./admin-external-fulltext.js').then((module) => module.initAdminExternalFulltext());
+    }
+
+    // Impor Sumber (admin/source-sync): same on-demand loading.
+    if (document.querySelector('[data-sync]')) {
+        import('./admin-sync.js').then((module) => module.initAdminSync());
+    }
 });
 
 /* Off-canvas sidebar below 900px (layouts/admin.blade.php). */
@@ -296,259 +372,4 @@ async function playGuardian(root, first) {
             { transform: 'translateX(-4px)', offset: 0.6 }, { transform: 'translateX(4px)', offset: 0.8 }, { transform: 'none' },
         ], { duration: 360, easing: 'ease-out' });
     }
-}
-
-/* PDF dropzone + live paper preview (admin/library/form.blade.php). */
-function initSourcePdfPreview() {
-    const wrapper = document.querySelector('[data-source-upload]');
-    const input = document.querySelector('[data-source-pdf-input]');
-    const titleInput = document.querySelector('[data-source-title-input]');
-    const dropzone = document.querySelector('[data-source-dropzone]');
-    const previewTitle = document.querySelector('[data-pdf-preview-title]');
-    const previewFile = document.querySelector('[data-pdf-preview-file]');
-    const previewMeta = document.querySelector('[data-pdf-preview-meta]');
-    const fileText = document.querySelector('#source-file-name');
-
-    if (!wrapper || !input || !titleInput || !previewTitle) {
-        return;
-    }
-
-    let currentFileName = previewFile?.textContent?.trim() || '';
-
-    const isPdf = (file) => file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
-
-    const cleanFileName = (name) => String(name || '')
-        .replace(/\.pdf$/i, '')
-        .replace(/[_-]+/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-
-    const titleForPreview = () => {
-        const typedTitle = titleInput.value.trim();
-
-        if (typedTitle) {
-            return typedTitle;
-        }
-
-        const fromFile = cleanFileName(currentFileName);
-
-        if (fromFile && fromFile !== 'Belum ada PDF') {
-            return fromFile;
-        }
-
-        return 'Judul Source';
-    };
-
-    const syncTitle = () => {
-        previewTitle.textContent = titleForPreview();
-    };
-
-    const animateReceived = () => {
-        wrapper.classList.remove('is-receiving');
-        void wrapper.offsetWidth;
-        wrapper.classList.add('is-receiving');
-
-        window.setTimeout(() => wrapper.classList.remove('is-receiving'), 1000);
-    };
-
-    const applyFile = (file, updateInput = false) => {
-        if (!file) {
-            return;
-        }
-
-        if (!isPdf(file)) {
-            window.alert('File harus berupa PDF.');
-
-            return;
-        }
-
-        if (updateInput) {
-            try {
-                const transfer = new DataTransfer();
-
-                transfer.items.add(file);
-                input.files = transfer.files;
-            } catch (error) {
-                /* Some browsers restrict assigning a FileList. */
-            }
-        }
-
-        currentFileName = file.name;
-
-        const cleanTitle = cleanFileName(file.name);
-
-        if (!titleInput.value.trim() && cleanTitle) {
-            titleInput.value = cleanTitle;
-        }
-
-        const sizeMb = (file.size / 1024 / 1024).toFixed(2);
-
-        if (previewFile) {
-            previewFile.textContent = file.name;
-        }
-
-        if (previewMeta) {
-            previewMeta.textContent = `${sizeMb} MB · PDF dipilih`;
-        }
-
-        if (fileText) {
-            fileText.textContent = `${file.name} · ${sizeMb} MB`;
-        }
-
-        wrapper.classList.add('has-file');
-
-        syncTitle();
-        animateReceived();
-    };
-
-    titleInput.addEventListener('input', syncTitle);
-
-    input.addEventListener('change', () => {
-        const file = input.files?.[0];
-
-        if (!file) {
-            syncTitle();
-
-            return;
-        }
-
-        applyFile(file);
-    });
-
-    if (dropzone) {
-        ['dragenter', 'dragover'].forEach((eventName) => {
-            dropzone.addEventListener(eventName, (event) => {
-                event.preventDefault();
-                dropzone.classList.add('is-dragging');
-            });
-        });
-
-        ['dragleave', 'drop'].forEach((eventName) => {
-            dropzone.addEventListener(eventName, () => dropzone.classList.remove('is-dragging'));
-        });
-
-        dropzone.addEventListener('drop', (event) => {
-            event.preventDefault();
-
-            const pdf = Array.from(event.dataTransfer?.files || []).find(isPdf);
-
-            if (!pdf) {
-                window.alert('Drag file PDF ke area upload.');
-
-                return;
-            }
-
-            applyFile(pdf, true);
-        });
-    }
-
-    syncTitle();
-}
-
-/*
- * One-pass entrance for the admin Beranda (admin/dashboard.blade.php), ~1.4s, nothing loops.
- * Markup holds the final numbers; the animations start from "backwards" fill, so nothing shifts layout.
- * [data-dash-ready] lifts the CSS hold on [data-dash-in] (also set under reduced motion: show final state).
- */
-function initAdminDashboard() {
-    const root = document.querySelector('[data-dash]');
-
-    if (!root) {
-        return;
-    }
-
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !root.animate) {
-        root.dataset.dashReady = '';
-
-        return;
-    }
-
-    const EASE = 'cubic-bezier(.2,.65,.4,1)';
-    const all = (selector) => [...root.querySelectorAll(selector)];
-
-    const rise = (element, delay, { y = 8, scale = 1, duration = 380 } = {}) => element.animate(
-        [{ opacity: 0, transform: `translateY(${y}px) scale(${scale})` }, { opacity: 1, transform: 'none' }],
-        { duration, delay, easing: EASE, fill: 'backwards' },
-    );
-
-    const countUp = (element, delay, duration) => {
-        const to = Number(element.dataset.dashCount);
-
-        if (!to) {
-            return;
-        }
-
-        const start = performance.now() + delay;
-
-        element.textContent = '0';
-
-        const tick = (now) => {
-            const t = Math.min(Math.max((now - start) / duration, 0), 1);
-
-            element.textContent = Math.round(to * (1 - (1 - t) ** 3)).toLocaleString('en-US');
-
-            if (t < 1) {
-                requestAnimationFrame(tick);
-            }
-        };
-
-        requestAnimationFrame(tick);
-    };
-
-    // Header + greeting + attention strip.
-    rise(root.querySelector('.bd-admin-page-head'), 0);
-    rise(root.querySelector('.bd-dash__greeting'), 60);
-    rise(root.querySelector('.bd-dash__alert'), 300);
-
-    // Bubu: settle in, then one small wave, then idle.
-    const bubu = root.querySelector('[data-dash-bubu]');
-    rise(bubu, 200, { y: 8, scale: 0.94, duration: 400 });
-    bubu.animate(
-        [0, -7, 5, -3, 0].map((deg) => ({ transform: `rotate(${deg}deg)`, easing: 'ease-in-out' })),
-        { duration: 520, delay: 640 },
-    );
-
-    // Summary cards: stagger in (70ms), numbers count up, bars and the ring draw; all done in <800ms.
-    rise(root.querySelector('#dash-summary-title'), 380, { y: 5, duration: 300 });
-    all('.bd-dash__stats > li').forEach((card, i) => {
-        const delay = 420 + i * 70;
-
-        rise(card, delay, { duration: 320 });
-        card.querySelectorAll('[data-dash-count]:not(.bd-dash__ring *)').forEach((n) => countUp(n, delay + 40, 520));
-    });
-
-    const fillBar = (bar, delay) => bar.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 700, delay, easing: EASE, fill: 'backwards' });
-
-    all('.bd-dash__stats [data-dash-bar]').forEach((bar) => fillBar(bar, 560));
-
-    const drawRing = (circle, delay, duration) => {
-        const pct = Number(circle.dataset.dashRing);
-
-        circle.animate([{ strokeDashoffset: 100 }, { strokeDashoffset: 100 - pct }], { duration, delay, easing: EASE, fill: 'backwards' });
-        countUp(circle.closest('.bd-dash__ring').querySelector('[data-dash-count]'), delay, duration);
-    };
-
-    all('.bd-dash__stat-ring [data-dash-ring]').forEach((circle) => drawRing(circle, 560, 620));
-
-    // Kesiapan Sistem.
-    rise(root.querySelector('[aria-labelledby="dash-ready-title"]'), 800);
-    all('.bd-dash__ready > li').forEach((block, i) => rise(block, 900 + i * 70, { y: 6, duration: 300 }));
-    all('.bd-dash__ready [data-dash-bar]').forEach((bar) => fillBar(bar, 1000));
-
-    // Kategori Prompt: journal first, book ~110ms later.
-    rise(root.querySelector('.bd-dash__section-head'), 950);
-    all('.bd-dash__category').forEach((card, i) => {
-        const delay = 950 + i * 110;
-
-        rise(card, delay, { scale: 0.98 });
-        card.querySelectorAll('[data-dash-count]').forEach((n) => countUp(n, delay + 80, 500));
-    });
-
-    // Sumber Terbaru rows, then Aktivitas Terbaru timeline, top to bottom.
-    rise(root.querySelector('[aria-labelledby="dash-sources-title"]'), 1050, { y: 5 });
-    all('[data-dash-row]').forEach((row, i) => rise(row, 1100 + i * 70, { y: 5, duration: 300 }));
-    rise(root.querySelector('[aria-labelledby="dash-activity-title"]'), 1100, { y: 5 });
-    all('[data-dash-activity]').forEach((item, i) => rise(item, 1150 + i * 70, { y: 5, duration: 300 }));
-
-    root.dataset.dashReady = '';
 }

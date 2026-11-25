@@ -27,8 +27,12 @@
             ?->conversation
             ?->title;
 
+    // Judul percakapan sudah dipotong ("…") untuk sidebar; judul dokumen memakai pertanyaan utuh, dipotong di batas kata.
+    $questionTitle = trim((string) data_get($run->user_parameters_json, 'user_message', ''));
+
     $defaultTitle =
-        $conversationTitle
+        ($questionTitle !== '' ? \Illuminate\Support\Str::limit($questionTitle, 200, '', true) : null)
+        ?: $conversationTitle
         ?: $run
             ->promptTemplate
             ?->name
@@ -603,7 +607,7 @@
                             <p>
                                 {{
                                     \Illuminate\Support\Str::limit(
-                                        $answer,
+                                        preg_replace('/^#{1,6}\s*/m', '', (string) $answer),
                                         560,
                                         '…'
                                     )

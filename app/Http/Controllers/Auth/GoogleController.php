@@ -353,6 +353,8 @@ class GoogleController extends Controller
             'last_login_at' => now(),
         ])->save();
 
+        app(\App\Services\Users\LoginRecorder::class)->record($request, $user);
+
         $profileGate = (int) config(
             'research.profile_gate',
             80

@@ -18,6 +18,14 @@
         'settings' => 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19 12l2-1-2-3-2.2.6-1.2-1L15 5h-4l-.6 2.6-1.2 1L7 8 5 11l2 1v1l-2 1 2 3 2.2-.6 1.2 1L11 19h4l.4-2.6 1.2-1 2.2.6 2-3-2-1v-1Z',
         'arrow' => 'M5 12h14 M13 6l6 6-6 6',
         'plus' => 'M12 5v14M5 12h14',
+        'arrow-down-to-line' => 'M12 4v11 M7.5 11l4.5 4.5 4.5-4.5 M5 20h14',
+        'arrow-up-from-line' => 'M12 20V9 M7.5 13l4.5-4.5 4.5 4.5 M5 4h14',
+        'activity' => 'M3 12h4l3-8 4 16 3-8h4',
+        'chevron' => 'M9 6l6 6-6 6',
+        'up' => 'M12 19V5 M6 11l6-6 6 6',
+        'down' => 'M12 5v14 M6 13l6 6 6-6',
+        'flat' => 'M5 12h14',
+        'calculator' => 'M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z M8 7h8 M8 12h.01 M12 12h.01 M16 12h.01 M8 16h.01 M12 16h.01 M16 16h.01',
     ];
 @endphp
 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="{{ $icons[$name] ?? $icons['info'] }}" /></svg>

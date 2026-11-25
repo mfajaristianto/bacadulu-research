@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "resources/css/pages/admin-settings.css"
+        ],
+        "createdAt": "2026-11-16T15:18:48.954Z",
+        "reason": "assistant: false positive; L136 is a 7px chevron (two borders rotated) on the details summary, not a card side accent; not confirmed by user"
+      }
+    ]
+  }
+}

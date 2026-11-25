@@ -18,7 +18,11 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        // Satu instance per aplikasi: nilai bawaan (sebelum override database) direkam sekali oleh applyOverrides().
+        $this->app->singleton(ResearchSettingsService::class);
+
+        // Pemeriksa klaim-bukti: baseline deterministik. Dapat diganti (mis. LLM judge) tanpa mengubah kontrak.
+        $this->app->bind(\App\Services\Synthesis\ClaimEvidenceVerifier::class, \App\Services\Synthesis\LexicalClaimEvidenceVerifier::class);
     }
 
     public function boot(
@@ -53,6 +57,16 @@ class AppServiceProvider extends ServiceProvider
         | Job berikutnya tetap aman karena Queue::before akan reset lagi.
         |
         */
+
+        /*
+         * Worker antrean berjalan lama dan hanya membaca override database saat boot. Tanpa ini, pengaturan yang disimpan admin
+         * (batas retrieval, ukuran chunk, dll.) baru berlaku pada riset di antrean setelah worker dimulai ulang. Satu query ringan per job.
+         */
+        Queue::before(
+            function (JobProcessing $event) use ($researchSettings): void {
+                $researchSettings->applyOverrides();
+            }
+        );
 
         Queue::before(
             function (
@@ -180,68 +194,64 @@ class AppServiceProvider extends ServiceProvider
             'admin-login',
             fn (
                 Request $request
-            ) =>
-                Limit::perMinute(
-                    5
+            ) => Limit::perMinute(
+                5
+            )
+                ->by(
+                    $request
+                        ->ip()
                 )
-                    ->by(
-                        $request
-                            ->ip()
-                    )
         );
 
         RateLimiter::for(
             'research',
             fn (
                 Request $request
-            ) =>
-                Limit::perMinute(
-                    12
+            ) => Limit::perMinute(
+                12
+            )
+                ->by(
+                    $request
+                        ->user()
+                        ?->id
+                    ?:
+                    $request
+                        ->ip()
                 )
-                    ->by(
-                        $request
-                            ->user()
-                            ?->id
-                        ?:
-                        $request
-                            ->ip()
-                    )
         );
 
         RateLimiter::for(
             'profile',
             fn (
                 Request $request
-            ) =>
-                Limit::perMinute(
-                    10
+            ) => Limit::perMinute(
+                10
+            )
+                ->by(
+                    $request
+                        ->user()
+                        ?->id
+                    ?:
+                    $request
+                        ->ip()
                 )
-                    ->by(
-                        $request
-                            ->user()
-                            ?->id
-                        ?:
-                        $request
-                            ->ip()
-                    )
         );
 
         RateLimiter::for(
             'library',
             fn (
                 Request $request
-            ) =>
-                Limit::perMinute(
-                    60
+            ) => Limit::perMinute(
+                60
+            )
+                ->by(
+                    $request
+                        ->user()
+                        ?->id
+                    ?:
+                    $request
+                        ->ip()
                 )
-                    ->by(
-                        $request
-                            ->user()
-                            ?->id
-                        ?:
-                        $request
-                            ->ip()
-                    )
         );
     }
 }

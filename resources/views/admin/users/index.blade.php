@@ -1,44 +1,78 @@
 @extends('layouts.admin')
 
-@section('title', 'Users')
-@section('page_title', 'Users')
+@section('title', 'Pengguna')
+@section('page_title', 'Pengguna')
+
+@php
+    // URL halaman ini dengan filter aktif dikurangi/ditambah $over. Halaman dan panel detail tidak ikut dibawa saat filter berubah.
+    $u = function (array $over = []) use ($f): string {
+        $q = array_replace([
+            'periode' => $f['periode'], 'dari' => $f['dari'], 'sampai' => $f['sampai'], 'q' => $f['q'], 'peran' => $f['peran'], 'status' => $f['status'],
+            'verifikasi' => $f['verifikasi'], 'daftar' => $f['daftar'], 'riset' => $f['riset'], 'urut' => $f['urut'],
+        ], $over);
+
+        if (($q['periode'] ?? null) === '30-hari') {
+            unset($q['periode']);
+        }
+
+        if (($q['urut'] ?? null) === 'email') {
+            unset($q['urut']);
+        }
+
+        return route('admin.users.index', array_filter($q, fn ($v) => $v !== null && $v !== ''));
+    };
+@endphp
 
 @section('content')
-<section class="admin-page">
-    <header class="bd-admin-page-head">
-        <div class="bd-admin-page-head__copy">
-            <p class="bd-admin-kicker">ACCESS / USERS</p>
-            <h1>Research Users</h1>
-            <p>Lihat akun yang terdaftar, kelengkapan profile, aktivitas research, dan status akses.</p>
-        </div>
-    </header>
-
-    <form method="GET" class="bd-admin-filter">
-        <input class="bd-admin-input" type="search" name="search" value="{{ request('search') }}" placeholder="Nama, email, institusi…">
-        <select class="bd-admin-select" name="status" data-auto-submit><option value="">Semua status</option><option value="active" @selected(request('status') === 'active')>Active</option><option value="suspended" @selected(request('status') === 'suspended')>Suspended</option></select>
-        <span></span>
-    </form>
-
-    <div class="bd-admin-table-wrap">
-        <table class="bd-admin-table">
-            <thead><tr><th>User</th><th>Institusi</th><th>Profile</th><th>Research</th><th>Status</th><th></th></tr></thead>
-            <tbody>
-            @forelse($users as $user)
-                <tr>
-                    <td><div class="bd-admin-table__title"><strong>{{ $user->name }}</strong><small>{{ $user->email }}</small></div></td>
-                    <td>{{ $user->institution ?: '—' }}</td>
-                    <td>{{ $user->profileCompletion() }}%</td>
-                    <td>{{ $user->ai_runs_count }} runs · {{ $user->conversations_count }} conversations</td>
-                    <td><span class="bd-admin-status bd-admin-status--{{ $user->status }}">{{ ucfirst($user->status) }}</span></td>
-                    <td><a class="bd-admin-table__action" href="{{ route('admin.users.show', $user) }}">Detail →</a></td>
-                </tr>
-            @empty
-                <tr><td colspan="6"><div class="bd-admin-empty"><div class="bd-admin-empty__inner"><span class="bd-admin-empty__mark">USR</span><h3>Tidak ada user.</h3></div></div></td></tr>
-            @endforelse
-            </tbody>
-        </table>
+{{-- Kerangka: region [data-us-swap] diganti dari salinan URL yang sama (tanpa muat ulang dokumen). Semua tautan dan form juga bekerja tanpa JavaScript. --}}
+<section class="admin-page bd-ix bd-us is-entering" data-us data-us-url="{{ route('admin.users.index') }}">
+    <div data-us-swap="head">
+        @include('admin.users.partials.head')
     </div>
 
-    {{ $users->links() }}
+    <div class="bd-us__notice" data-us-notice role="status" aria-live="polite" @if (! $notice) hidden @endif>{{ $notice }}</div>
+
+    @if (session('success'))
+        <div class="bd-ix__toast is-ok" role="status"><p>{{ session('success') }}</p></div>
+    @endif
+    @if ($errors->has('status'))
+        <div class="bd-ix__toast is-bad" role="alert"><p>{{ $errors->first('status') }}</p></div>
+    @endif
+
+    <div data-us-swap="kpi">
+        @include('admin.users.partials.kpi')
+    </div>
+    <div data-us-swap="viz">
+        @include('admin.users.partials.viz')
+    </div>
+    <div data-us-swap="activity">
+        @include('admin.users.partials.activity')
+    </div>
+    <div data-us-swap="filters">
+        @include('admin.users.partials.filters')
+    </div>
+    <div data-us-swap="list" aria-live="polite">
+        @include('admin.users.partials.list')
+    </div>
+
+    <div class="bd-us__error" data-us-error role="alert" hidden>
+        <p data-us-error-text>Data tidak dapat dimuat.</p>
+        <button type="button" class="bd-ix__btn" data-us-retry>Coba lagi</button>
+    </div>
+
+    {{-- Toast melayang (tidak menggeser tata letak) untuk hasil aksi akun. --}}
+    <div class="bd-us__toast" data-us-toast role="status" aria-live="polite" hidden></div>
+
+    <dialog class="bd-us__drawer" data-us-drawer aria-labelledby="us-drawer-title" @if ($detail) open @endif>
+        <div class="bd-us__drawer-head">
+            <h2 id="us-drawer-title">Detail pengguna</h2>
+            <button type="button" class="bd-ix__icon-btn" data-us-close aria-label="Tutup detail">@include('admin.tools.partials.icon', ['name' => 'x'])</button>
+        </div>
+        <div class="bd-us__drawer-body" data-us-drawer-body tabindex="-1">
+            @if ($detail)
+                @include('admin.users.partials.detail', ['d' => $detail])
+            @endif
+        </div>
+    </dialog>
 </section>
 @endsection

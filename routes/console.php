@@ -30,3 +30,9 @@ Artisan::command('research:admin-password-hash', function () {
 
     return 0;
 })->purpose('Generate a password hash for the admin login (ADMIN_PASSWORD_HASH)');
+
+Artisan::command('research:prune-login-events', function () {
+    $this->info(app(\App\Services\Users\LoginRecorder::class)->prune().' riwayat login kedaluwarsa dihapus.');
+})->purpose('Hapus riwayat login lebih lama dari retensi (research.security.login_retention_days)');
+
+\Illuminate\Support\Facades\Schedule::command('research:prune-login-events')->daily();

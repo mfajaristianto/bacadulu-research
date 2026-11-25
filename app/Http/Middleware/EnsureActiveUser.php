@@ -23,6 +23,8 @@ class EnsureActiveUser
                 ->withErrors(['email' => 'Akun ini tidak aktif. Silakan hubungi administrator.']);
         }
 
+        app(\App\Services\Users\LoginRecorder::class)->touch($request);
+
         return $next($request);
     }
 }

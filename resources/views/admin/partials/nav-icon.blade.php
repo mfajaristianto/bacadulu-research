@@ -79,6 +79,20 @@
         @break
 
 
+    @case('globe')
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+        >
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M3 12h18"/>
+            <path d="M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.4-3.9 9c-2.6-2.6-3.9-5.6-3.9-9s1.3-6.4 3.9-9Z"/>
+        </svg>
+        @break
+
+
     @case('tools')
         <svg
             viewBox="0 0 24 24"
@@ -108,6 +122,48 @@
             <path d="M8 8h8"/>
             <path d="M8 12h8"/>
             <path d="M8 16h5"/>
+        </svg>
+        @break
+
+
+    @case('provider')
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+        >
+            <path d="M4 4v16h16"/>
+            <path d="M7 15l4-5 3 3 5-7"/>
+        </svg>
+        @break
+
+
+    @case('document-prompt')
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+        >
+            <path d="M7 3h8l4 4v14H7z"/>
+            <path d="M15 3v4h4"/>
+            <path d="M10 12h6"/>
+            <path d="M10 16h6"/>
+        </svg>
+        @break
+
+
+    @case('behavior')
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+        >
+            <path d="M4 5h16v10H9l-5 4z"/>
+            <path d="M8 9h8"/>
+            <path d="M8 12h5"/>
         </svg>
         @break
 

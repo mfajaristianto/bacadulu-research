@@ -1,0 +1,153 @@
+/*
+|--------------------------------------------------------------------------
+| Alur produk: Mulai Riset -> Hasil -> Generate Document -> Dokumen Saya
+|--------------------------------------------------------------------------
+| Kompak: konten maks 1240px, jarak vertikal rapat, kartu rendah. Memakai palet BacaDulu (navy, coral, ivory).
+*/
+
+.rf-page {
+    --rf-ink: #17172b;
+    --rf-mute: #666570;
+    --rf-line: #e6ddd2;
+    --rf-paper: #fffcf7;
+    --rf-coral: #f26b4f;
+    --rf-coral-deep: #d95a42;
+    --rf-teal: #17817d;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 20px clamp(16px, 3vw, 40px) 48px;
+    color: var(--rf-ink);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.rf-page--narrow { max-width: 760px; }
+
+.rf-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; margin-bottom: 14px; }
+.rf-head h1 { margin: 0; font-size: clamp(22px, 2.4vw, 28px); line-height: 1.15; letter-spacing: -.02em; }
+
+.rf-steps { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 12px; color: var(--rf-mute); }
+.rf-steps li { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 5px; border: 1px solid var(--rf-line); border-radius: 999px; background: var(--rf-paper); }
+.rf-steps b { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #efe8de; color: var(--rf-ink); font-size: 11px; }
+.rf-steps .is-current { color: var(--rf-ink); border-color: var(--rf-coral); font-weight: 700; }
+.rf-steps .is-current b { background: var(--rf-coral); color: #fff; }
+.rf-steps .is-done b { background: var(--rf-teal); color: #fff; }
+
+.rf-card { margin-bottom: 12px; padding: 16px 18px; border: 1px solid var(--rf-line); border-radius: 14px; background: var(--rf-paper); box-shadow: 0 1px 2px rgba(23, 23, 43, .05); }
+.rf-card h2 { margin: 0 0 6px; font-size: 16px; letter-spacing: -.01em; }
+.rf-summary { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.rf-summary > div { min-width: 0; }
+.rf-eyebrow { margin: 0 0 2px; color: var(--rf-teal); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.rf-topic { font-size: 18px; overflow-wrap: anywhere; }
+
+.rf-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+.rf-row--4 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.rf-field { display: grid; gap: 4px; margin-bottom: 10px; font-size: 12px; font-weight: 700; color: var(--rf-ink); }
+.rf-field--inline { max-width: 240px; }
+.rf-field select, .rf-field input, .rf-field textarea {
+    width: 100%; box-sizing: border-box; min-height: 38px; padding: 8px 10px; border: 1px solid #d8cfc3; border-radius: 10px;
+    background: #fff; color: var(--rf-ink); font: inherit; font-weight: 500;
+}
+.rf-field textarea { min-height: 64px; max-height: 120px; resize: vertical; }
+.rf-field select:focus-visible, .rf-field input:focus-visible, .rf-field textarea:focus-visible { outline: 2px solid var(--rf-coral); outline-offset: 1px; }
+.rf-hint { margin: -4px 0 10px; color: var(--rf-mute); font-size: 12px; }
+.rf-book { margin: 0 0 6px; padding: 10px 12px 2px; border: 1px dashed #d8cfc3; border-radius: 12px; }
+.rf-book legend { padding: 0 6px; font-size: 12px; font-weight: 800; }
+.rf-book[hidden], [data-rf-q][hidden] { display: none; }
+.rf-questions { display: grid; gap: 0; }
+
+.rf-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 6px; }
+.rf-btn {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 18px; border: 1px solid #d8cfc3; border-radius: 10px;
+    background: #fff; color: var(--rf-ink); font: inherit; font-size: 13px; font-weight: 800; text-decoration: none; cursor: pointer;
+}
+.rf-btn:hover { border-color: var(--rf-ink); }
+.rf-btn--primary { border-color: var(--rf-coral); background: var(--rf-coral); color: #fff; }
+.rf-btn--primary:hover { border-color: var(--rf-coral-deep); background: var(--rf-coral-deep); }
+.rf-btn:focus-visible { outline: 2px solid var(--rf-ink); outline-offset: 2px; }
+.rf-btn[disabled] { opacity: .6; cursor: progress; }
+.rf-busy { color: var(--rf-mute); font-size: 12px; }
+.rf-alert { margin: 0 0 10px; padding: 9px 12px; border: 1px solid #e5b9b2; border-radius: 10px; background: #f9e7e4; color: #8a2f27; font-size: 13px; }
+.rf-note { margin: 4px 0 0; color: var(--rf-mute); font-size: 12px; }
+.rf-lead { margin: 0 0 6px; }
+
+.rf-section { padding: 12px 0; border-top: 1px solid var(--rf-line); }
+.rf-section:first-child { border-top: 0; padding-top: 0; }
+.rf-section h3 { margin: 0 0 8px; font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--rf-teal); }
+.rf-rm { color: var(--rf-coral-deep); }
+.rf-question { margin: 0 0 8px; font-weight: 600; }
+.rf-stats { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; padding: 0; list-style: none; color: var(--rf-mute); }
+.rf-stats b { color: var(--rf-ink); font-size: 16px; margin-right: 3px; }
+.rf-coverage { margin: 0 0 6px; padding: 0; list-style: none; display: grid; gap: 3px; }
+.rf-coverage span { display: inline-block; min-width: 64px; font-weight: 800; }
+.rf-coverage .is-none { color: var(--rf-mute); }
+.rf-group { margin: 4px 0; font-size: 13px; }
+.rf-group summary { cursor: pointer; font-weight: 700; }
+.rf-group ul { margin: 4px 0 0 18px; padding: 0; }
+
+.rf-tablewrap { overflow-x: auto; border: 1px solid var(--rf-line); border-radius: 10px; background: #fff; }
+.rf-table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 12.5px; }
+.rf-table th, .rf-table td { padding: 8px 10px; border-bottom: 1px solid var(--rf-line); text-align: left; vertical-align: top; }
+.rf-table thead th { position: sticky; top: 0; background: #f6f0e7; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+.rf-table tbody tr:last-child > * { border-bottom: 0; }
+.rf-table tbody th { min-width: 200px; max-width: 260px; font-weight: 600; }
+.rf-table small, .rf-table code, .rf-refs code { display: block; margin-top: 2px; color: var(--rf-mute); font-size: 11px; font-weight: 400; word-break: break-all; }
+.rf-table td code { display: inline; }
+.rf-table .is-missing { color: var(--rf-mute); font-style: italic; }
+.rf-src-title { display: block; overflow-wrap: anywhere; }
+.rf-refs { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 13px; }
+.rf-refs a { color: var(--rf-teal); font-weight: 700; }
+.rf-empty { padding: 14px; border: 1px dashed #d8cfc3; border-radius: 12px; background: #fff; }
+.rf-empty p { margin: 4px 0 0; color: var(--rf-mute); }
+
+.rf-generate header p { margin-bottom: 10px; }
+.rf-sections { margin: 0 0 8px; padding: 8px 12px; border: 1px solid var(--rf-line); border-radius: 10px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.rf-sections legend { padding: 0 6px; font-size: 12px; font-weight: 800; }
+.rf-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.rf-check small { color: var(--rf-mute); }
+
+.rf-ready { text-align: center; padding: 24px 20px; }
+.rf-ready h1 { margin: 0 0 4px; font-size: 22px; }
+.rf-check-mark { margin: 0 auto 6px; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #e0f1eb; color: #2c7565; font-size: 22px; font-weight: 800; }
+.rf-saved { margin: 0; color: #2c7565; font-weight: 800; }
+.rf-doc-title { margin: 12px 0 0; font-size: 14px; color: var(--rf-mute); font-weight: 600; overflow-wrap: anywhere; }
+.rf-ready .rf-actions { justify-content: center; margin-top: 14px; }
+.rf-progress { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; text-align: left; font-size: 13px; }
+.rf-progress li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 10px; border: 1px solid var(--rf-line); border-radius: 8px; background: #fff; }
+.rf-progress small { color: var(--rf-mute); }
+.rf-progress .is-failed { border-color: #e5b9b2; background: #f9e7e4; }
+
+/* "Temukan dokumen": sorot singkat; tanpa gerak bila pengguna meminta mengurangi animasi. */
+.br-doc-library-card.is-focused { outline: 3px solid var(--rf-coral, #f26b4f); outline-offset: 3px; animation: rf-pulse 1.6s ease-out 1; }
+@keyframes rf-pulse { from { box-shadow: 0 0 0 0 rgba(242, 107, 79, .45); } to { box-shadow: 0 0 0 16px rgba(242, 107, 79, 0); } }
+@media (prefers-reduced-motion: reduce) { .br-doc-library-card.is-focused { animation: none; } }
+
+@media (max-width: 900px) {
+    .rf-row--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+    .rf-page { padding-top: 14px; }
+    .rf-row, .rf-row--4 { grid-template-columns: 1fr; }
+    .rf-summary { flex-direction: column; }
+    .rf-actions .rf-btn { flex: 1 1 100%; }
+}
+
+/* Tutorial: video opsional */
+.br-tour__video { width: 100%; max-height: 180px; margin: 6px 0; border-radius: 10px; background: #000; }
+
+/* Kotak centang: lawan gaya input global yang membesarkannya */
+.rf-check input[type="checkbox"] { appearance: auto; -webkit-appearance: checkbox; width: 16px; height: 16px; min-height: 0; margin: 0; padding: 0; accent-color: var(--rf-coral); flex: 0 0 auto; }
+.rf-check span { line-height: 1.3; }
+
+/* ==========================================================================
+   Riset Buku di dalam kartu composer Workspace lama. Hanya menambah panel rumusan masalah;
+   scope .research-composer supaya tidak memengaruhi halaman lain.
+   ========================================================================== */
+.research-composer .rf-book[hidden], .research-composer .rf-q[hidden] { display: none; }
+.research-composer .rf-count { display: inline-flex; align-items: center; gap: 8px; color: #66718a; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.research-composer .rf-count select { min-height: 32px; padding: 4px 26px 4px 10px; border: 1px solid #ddd7ce; border-radius: 9px; background: #fff; color: #17172b; font: inherit; font-size: 12px; }
+.research-composer .rf-book .research-question-panel__head { flex-wrap: wrap; }
+.research-composer .rf-questions { display: grid; gap: 8px; margin-top: 8px; }
+.research-composer .rf-q { display: grid; gap: 4px; color: #66718a; font-size: 11px; font-weight: 700; }
+.research-composer .rf-q input { width: 100%; box-sizing: border-box; min-height: 40px; padding: 8px 12px; border: 1.5px solid rgba(255, 99, 65, .78); border-radius: 11px; background: transparent; color: #17172b; font: inherit; font-size: 13.5px; font-weight: 500; }
+.research-composer .rf-q input:focus-visible { outline: 0; border-color: #ff6341; box-shadow: 0 0 0 5px rgba(255, 99, 65, .07); }

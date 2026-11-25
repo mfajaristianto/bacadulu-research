@@ -41,6 +41,13 @@ export default defineConfig({
                 'resources/js/auth-research.js',
 
                 'resources/js/bacadulu-onboarding.js',
+
+                /* Referensi paling relevan (Source Discovery) */
+                'resources/css/pages/references.css',
+                'resources/js/research-references.js',
+
+                /* Alur produk: Mulai Riset, Hasil, Generate Document */
+                'resources/js/research-flow.js',
             ],
 
             refresh: true,

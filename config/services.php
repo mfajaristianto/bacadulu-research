@@ -74,4 +74,10 @@ return [
         ),
     ],
 
+    'openalex' => [
+        'api_key' => env('OPENALEX_API_KEY'),
+
+        'base_url' => 'https://api.openalex.org',
+    ],
+
 ];

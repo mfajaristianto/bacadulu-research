@@ -11,6 +11,20 @@ use Illuminate\Http\Request;
 
 class ResearchOutputPresentationController extends Controller
 {
+    /**
+     * Saran alur riset kanonis (suggestion, bukan paksaan). Dipakai juga oleh view Workspace
+     * agar panel "Next action" tidak berbeda dengan hasil endpoint presentation.
+     */
+    public const NEXT_TOOL = [
+        'literature-synthesis' => 'research-gap',
+        'research-gap' => 'theoretical-mapping',
+        'theoretical-mapping' => 'conceptual-framework',
+        'conceptual-framework' => 'variable-identification',
+        'variable-identification' => 'comparative-analysis',
+        // Comparative Analysis dapat kembali ke Research Gap untuk memperdalam perbedaan temuan.
+        'comparative-analysis' => 'research-gap',
+    ];
+
     public function run(
         Request $request,
         AiRun $aiRun
@@ -135,6 +149,20 @@ class ResearchOutputPresentationController extends Controller
                     ->nextAction(
                         $aiRun
                     ),
+
+                // Kontrak untuk Workspace: saran pertanyaan lanjutan (kosong bila aturan tidak aktif). UI belum membacanya.
+                'follow_ups' => array_values(
+                    array_filter(
+                        (array) data_get(
+                            $aiRun
+                                ->primaryResult
+                                ?->structured_output_json,
+                            'follow_ups',
+                            []
+                        ),
+                        'is_string'
+                    )
+                ),
 
                 'next_prompt' => $nextPrompt
                         ? [
@@ -397,27 +425,9 @@ class ResearchOutputPresentationController extends Controller
         |
         */
 
-        $chain = [
-            'literature-synthesis' => 'research-gap',
-
-            'research-gap' => 'theoretical-mapping',
-
-            'theoretical-mapping' => 'conceptual-framework',
-
-            'conceptual-framework' => 'variable-identification',
-
-            'variable-identification' => 'comparative-analysis',
-
-            /*
-             * Comparative Analysis dapat mengarah
-             * kembali ke Research Gap jika user
-             * ingin memperdalam perbedaan temuan.
-             */
-            'comparative-analysis' => 'research-gap',
-        ];
 
         $nextCode =
-            $chain[
+            self::NEXT_TOOL[
                 $currentCode
             ]
             ?? null;

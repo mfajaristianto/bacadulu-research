@@ -86,6 +86,15 @@ return [
             'report' => false,
         ],
 
+    // Salinan full-text artikel eksternal: privat, tanpa URL publik, nama berkas dibuat server.
+    'external_fulltext' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/external-fulltext'),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
     /*
             |--------------------------------------------------------------------------
             | Private Research Output

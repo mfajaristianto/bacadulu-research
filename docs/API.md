@@ -98,7 +98,7 @@ Prefix: `/{BACADULU_ADMIN_PATH}` (default `panel-adminbaca-research`). Login adm
 
 | Modul | Route (nama `admin.*`) |
 |---|---|
-| Dashboard | `dashboard` |
+| Dashboard | `dashboard`, `dashboard.ai-usage` (GET JSON, hanya baca, `throttle:60,1`: query `periode=today\|7d\|month\|history`, `bulan=YYYY-MM` wajib untuk `history`; 422 bila tidak valid; respons `{period, month, label, data, html}`, `html` = partial `admin.partials.ai-usage-body` yang sama dengan render awal; rumus periode WIB di `AiUsageSummary`) |
 | Pustaka | `library.index/create/store/edit/update`, `library.ingestion-status` |
 | Kategori | `categories.index/create/store/edit/update` |
 | Koleksi | `collections.index/create/store/edit/update` |

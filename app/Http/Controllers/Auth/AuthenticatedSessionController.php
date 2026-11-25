@@ -128,6 +128,8 @@ class AuthenticatedSessionController extends Controller
             'last_login_at' => now(),
         ])->save();
 
+        app(\App\Services\Users\LoginRecorder::class)->record($request, $user);
+
         /*
         |--------------------------------------------------------------------------
         | PROFILE GATE

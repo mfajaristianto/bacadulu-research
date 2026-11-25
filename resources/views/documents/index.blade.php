@@ -2,6 +2,10 @@
 
 @section('title', 'Dokumen Saya — BacaDulu Research')
 
+@push('styles')
+    @vite(['resources/js/research-flow.js'])
+@endpush
+
 @section('content')
 @php
     use Illuminate\Support\Str;
@@ -102,7 +106,7 @@
                     @foreach($documents as $document)
                         @php
                             $isReady = $document->status === 'completed';
-                            $toolName = $document->aiRun?->aiTool?->name ?: 'Research';
+                            $toolName = $document->aiRun?->aiTool?->name ?: data_get($document->settings_snapshot_json, 'research_tool') ?: 'Research';
                             $conversationTitle = $document->conversation?->title;
                             $storedFormat = data_get($document->settings_snapshot_json, 'output_format');
                             $preferredFormat = in_array($storedFormat, ['pdf', 'docx'], true)
@@ -110,7 +114,7 @@
                                 : ($activeFormat === 'docx' ? 'docx' : 'pdf');
                         @endphp
 
-                        <article class="br-doc-library-card">
+                        <article class="br-doc-library-card @if(($focusId ?? null) === $document->id) is-focus-target @endif" id="doc-{{ $document->id }}" data-document-id="{{ $document->id }}" @if(($focusId ?? null) === $document->id) data-doc-focus @endif>
                             <div class="br-doc-library-card__top">
                                 <span class="br-doc-library-card__icon">
                                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">

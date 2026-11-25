@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\User;
+use App\Services\Security\AdminAccess;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -39,6 +40,18 @@ class AuthController extends Controller
             && hash_equals(strtolower($expectedEmail), strtolower($data['email']))
             && $this->passwordMatches($data['password'], $expectedHash, $expectedPassword);
 
+        $role = 'super_admin';
+        $dbAdmin = null;
+
+        // Administrator tambahan (users.admin_role): masuk dengan kata sandi akunnya. Hash dummy menjaga waktu respons saat akun tidak ada.
+        if (! $valid && AdminAccess::supported()) {
+            $dbAdmin = User::query()->whereRaw('LOWER(email) = ?', [strtolower(trim($data['email']))])->whereNotNull('admin_role')->first();
+            $match = Hash::check($data['password'], $dbAdmin?->password ?: Hash::make('x'));
+            $valid = $dbAdmin !== null && $match && AdminAccess::roleFor($dbAdmin) !== null;
+            $role = AdminAccess::roleFor($dbAdmin) ?? 'admin';
+            $expectedEmail = $dbAdmin?->email ?? $expectedEmail;
+        }
+
         if (! $valid) {
             $this->audit($request, 'admin.login.failed', null, [
                 'email' => strtolower(trim($data['email'])),
@@ -49,7 +62,7 @@ class AuthController extends Controller
                 ->onlyInput('email');
         }
 
-        $adminUser = User::query()->whereRaw('LOWER(email) = ?', [strtolower($expectedEmail)])->first();
+        $adminUser = $dbAdmin ?? User::query()->whereRaw('LOWER(email) = ?', [strtolower($expectedEmail)])->first();
 
         if ($adminUser && $adminUser->status !== 'active') {
             return back()
@@ -62,6 +75,8 @@ class AuthController extends Controller
             'research_admin_authenticated' => true,
             'research_admin_email' => $expectedEmail,
             'research_admin_user_id' => $adminUser?->id,
+            'research_admin_role' => $role,
+            'research_admin_db' => $dbAdmin !== null,
         ]);
 
         $this->audit($request, 'admin.login', $adminUser?->id, [
@@ -84,6 +99,8 @@ class AuthController extends Controller
             'research_admin_authenticated',
             'research_admin_email',
             'research_admin_user_id',
+            'research_admin_role',
+            'research_admin_db',
         ]);
 
         $request->session()->regenerate(true);

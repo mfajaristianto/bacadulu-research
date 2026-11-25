@@ -1,12 +1,12 @@
 {{-- Research Tool Picker: selection stays connected to existing prompt runtime --}}
-<div class="research-prompt-menu" id="research-prompt-menu" data-prompt-menu role="listbox" aria-label="Pilih Research Tool" hidden>
+<div class="research-prompt-menu" id="research-prompt-menu" data-prompt-menu role="listbox" aria-label="Pilih alat riset" hidden>
     <header class="research-prompt-menu__head">
         <div>
-            <span>RESEARCH TOOLS</span>
-            <strong>Pilih cara analisis</strong>
-            <p>Temukan pendekatan yang sesuai untuk pertanyaan research Anda.</p>
+            <span>ALAT RISET</span>
+            <strong>Pilih jenis kajian</strong>
+            <p>Temukan pendekatan yang sesuai untuk pertanyaan riset Anda.</p>
         </div>
-        <button type="button" data-prompt-close aria-label="Tutup pilihan prompt">×</button>
+        <button type="button" data-prompt-close aria-label="Tutup pilihan alat riset">×</button>
     </header>
     <div class="research-prompt-menu__body">
         @forelse($prompts as $prompt)
@@ -14,8 +14,9 @@
                 <button type="button" class="research-prompt-option" role="option"
                     aria-selected="{{ (int) $activePrompt?->id === (int) $prompt->id ? 'true' : 'false' }}"
                     data-prompt-id="{{ $prompt->id }}"
+                    data-prompt-mode="{{ $prompt->input_mode_name }}"
                     data-prompt-name="{{ $prompt->display_name }}"
-                    data-prompt-tool="{{ $prompt->aiTool?->name ?: 'Research Tool' }}"
+                    data-prompt-tool="{{ $prompt->aiTool?->name ?: 'Alat riset' }}"
                     data-prompt-description="{{ $prompt->short_description ?: $prompt->aiTool?->description ?: 'Research prompt' }}">
                     <span class="research-prompt-option__index">{{ str_pad((string)$loop->iteration,2,'0',STR_PAD_LEFT) }}</span>
                     <span class="research-prompt-option__icon" aria-hidden="true">
@@ -44,8 +45,8 @@
                 </button>
             </div>
         @empty
-            <div class="research-prompt-menu__empty">Belum ada Research Tool yang aktif.</div>
+            <div class="research-prompt-menu__empty">Belum ada alat riset yang aktif.</div>
         @endforelse
     </div>
-    <footer class="research-prompt-menu__motion-note">Pilih tool untuk menyesuaikan pendekatan analisis.</footer>
+    <footer class="research-prompt-menu__motion-note">Pilih alat untuk menyesuaikan jenis kajian.</footer>
 </div>

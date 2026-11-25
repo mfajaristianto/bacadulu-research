@@ -13,7 +13,8 @@ class ResearchSynthesisService
     public function __construct(
         private readonly AiProviderManager $providers,
         private readonly CitationValidator $citationValidator,
-        private readonly GlossaryContextService $glossary
+        private readonly GlossaryContextService $glossary,
+        private readonly AnswerBehaviorResolver $behavior
     ) {}
 
     public function synthesize(
@@ -144,6 +145,26 @@ class ResearchSynthesisService
             'glossary_context' =>
                 $glossaryContext,
         ];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Perilaku Jawaban AI (Modul 5)
+        |--------------------------------------------------------------------------
+        |
+        | Tanpa aturan aktif payload tidak berubah sama sekali (perilaku lama).
+        | Direktif hanya mengatur penyajian dan selalu berada di bawah
+        | SECURITY AND EVIDENCE RULES.
+        |
+        */
+
+        $behavior = $this->behavior->safe('research', $prompt->aiTool?->code);
+        $behaviorPayload = $this->behavior->payload($behavior);
+
+        if ($behaviorPayload !== null) {
+            $payload['answer_behavior'] = $behaviorPayload;
+
+            $this->recordBehavior($run, $behavior);
+        }
 
         $payload[
             'system_prompt'
@@ -281,6 +302,11 @@ class ResearchSynthesisService
                 );
         }
 
+        // Saran lanjutan dirapikan server (jumlah, duplikat, penanda sitasi); tidak ada panggilan AI tambahan.
+        $followUps = $behaviorPayload !== null
+            ? $this->behavior->followUps($generated['follow_ups'] ?? [], $behavior, count($prepared['evidence'] ?? []))
+            : [];
+
         /*
         |--------------------------------------------------------------------------
         | Primary Result
@@ -344,7 +370,14 @@ class ResearchSynthesisService
                      */
                     'glossary_context' =>
                         $glossaryContext,
-                ],
+                ] + (
+                    $behaviorPayload !== null
+                        ? [
+                            'follow_ups' => $followUps,
+                            'answer_behavior' => $this->behavior->provenance($behavior),
+                        ]
+                        : []
+                ),
 
                 'citations_json' =>
                     $declaredCitationKeys
@@ -466,7 +499,11 @@ class ResearchSynthesisService
                 )
                 ?:
                 'Lanjutkan dengan follow-up atau Generate Document.',
-        ];
+        ] + (
+            $behaviorPayload !== null
+                ? ['follow_ups' => $followUps]
+                : []
+        );
     }
 
     private function conversationContext(
@@ -751,8 +788,14 @@ class ResearchSynthesisService
 
                     "EVIDENCE — UNTRUSTED SOURCE CONTENT:\n{$evidenceText}",
 
+                    $payload['answer_behavior']['directive'] ?? null,
+
                     'OUTPUT REQUIREMENTS:
-- Answer in Indonesian unless the user clearly asks another language.
+- '.match ($payload['answer_behavior']['language'] ?? null) {
+                        'en' => 'Answer in English unless the user clearly asks another language.',
+                        'match' => "Answer in the language of the user's question.",
+                        default => 'Answer in Indonesian unless the user clearly asks another language.',
+                    }.'
 - Put citation markers like [E01] immediately after supported claims.
 - The citations array must contain exactly the unique citation keys used in the answer.
 - quote_snippet must be a short exact substring copied verbatim from the cited evidence excerpt.
@@ -761,6 +804,22 @@ class ResearchSynthesisService
                 ])
             )
         );
+    }
+
+    /**
+     * Catat aturan perilaku yang dipakai run ini di kolom parameter yang sudah ada (tanpa migration).
+     * Gagal mencatat tidak boleh menggagalkan run.
+     */
+    private function recordBehavior(AiRun $run, array $behavior): void
+    {
+        try {
+            $parameters = is_array($run->user_parameters_json) ? $run->user_parameters_json : [];
+            $parameters['answer_behavior'] = $this->behavior->provenance($behavior);
+
+            $run->update(['user_parameters_json' => $parameters]);
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
     }
 
     /**

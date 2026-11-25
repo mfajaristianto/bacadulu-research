@@ -1,0 +1,83 @@
+/* ============================================================
+   PERILAKU JAWABAN AI (admin/answer-behavior)
+   Mewarisi token dan komponen .bd-ix (admin-instructions.css) dan tata letak .bd-dp (admin-document-prompts.css: daftar, tab, bilah versi,
+   diff, riwayat). Berkas ini hanya menambah yang khas modul: tab cakupan di daftar, kelompok isian aturan, blok pratinjau konfigurasi.
+   Tanpa kartu bersarang: bagian dipisahkan oleh ruang dan satu garis tipis.
+   ============================================================ */
+
+.bd-ab { --ab-line: var(--ix-line); }
+
+/* Tab cakupan di daftar ---------------------------------------------------------------------------------- */
+
+.bd-ab__tabs { display: flex; gap: 2px; overflow-x: auto; border-bottom: 1px solid var(--ab-line); scrollbar-width: thin; }
+.bd-ab__tab { position: relative; display: inline-flex; align-items: center; gap: 8px; flex: none; padding: 11px 14px; color: var(--ix-ink-3); font-size: var(--text-label); font-weight: 700; white-space: nowrap; border-radius: 10px 10px 0 0; transition: color var(--ix-t) ease, background-color var(--ix-t) ease; }
+.bd-ab__tab:hover { color: var(--ix-ink); background: var(--ix-hover); }
+.bd-ab__tab.is-on { color: var(--ix-ink); }
+.bd-ab__tab.is-on::after { content: ""; position: absolute; right: 12px; bottom: -1px; left: 12px; height: 2px; border-radius: 2px; background: var(--ix-red); }
+.bd-ab__tab-n { min-width: 22px; padding: 1px 7px; border-radius: 999px; background: var(--ix-chip); color: var(--ix-ink-2); font-size: .75rem; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.bd-ab__tab:focus-visible { outline: 2px solid var(--ix-ink); outline-offset: -2px; }
+
+/* Buat aturan: form dan preset berdampingan di layar lebar ------------------------------------------------ */
+
+.bd-ab__new { display: grid; gap: 32px; }
+.bd-ab__presets { display: grid; gap: 10px; align-content: start; }
+.bd-ab__preset { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; }
+.bd-ab__preset form { flex: none; }
+
+@media (min-width: 1100px) {
+    .bd-ab__new { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; align-items: start; }
+}
+
+/* Editor ------------------------------------------------------------------------------------------------- */
+
+.bd-ab__pane { display: grid; gap: 18px; align-content: start; }
+.bd-ab__group { padding: 16px 0 4px; border-top: 1px solid var(--ab-line); }
+.bd-ab__group legend { padding: 0 0 4px; font-size: var(--text-body); font-weight: 750; }
+.bd-ab__narrow { max-width: 220px; }
+
+.bd-ab__dl { display: grid; gap: 0; }
+.bd-ab__dl > div { display: grid; grid-template-columns: minmax(140px, 220px) minmax(0, 1fr); gap: 4px 20px; padding: 9px 0; border-top: 1px solid var(--ab-line); font-size: var(--text-body-sm); }
+.bd-ab__dl > div:first-child { border-top: 0; }
+.bd-ab__dl dt { color: var(--ix-ink-3); font-weight: 650; }
+.bd-ab__dl dd { overflow-wrap: anywhere; }
+
+.bd-ab__fixed { margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--ab-line); }
+.bd-ab__fixed-list { display: grid; gap: 6px; padding-left: 18px; font-size: var(--text-body-sm); color: var(--ix-ink-2); list-style: disc; }
+
+/* Pratinjau konfigurasi ---------------------------------------------------------------------------------- */
+
+.bd-ab__banner { padding: 12px 14px; border-left: 3px solid var(--ix-red); background: var(--ix-hover); font-size: var(--text-body-sm); line-height: 1.6; color: var(--ix-ink-2); border-radius: 0 10px 10px 0; }
+.bd-ab__banner strong { color: var(--ix-ink); }
+.bd-ab__previewform { display: grid; gap: 14px; }
+.bd-ab__result { display: grid; gap: 10px; padding-top: 18px; border-top: 1px solid var(--ab-line); }
+.bd-ab__note { color: var(--ix-ink-3); font-size: var(--text-label); line-height: 1.6; }
+.bd-ab__applied { display: grid; gap: 10px; counter-reset: ab; }
+.bd-ab__applied li { display: grid; gap: 2px; padding-left: 30px; position: relative; counter-increment: ab; }
+.bd-ab__applied li::before { content: counter(ab); position: absolute; left: 0; top: 1px; width: 22px; height: 22px; border-radius: 50%; background: var(--ix-chip); color: var(--ix-ink-2); font-size: .75rem; font-weight: 700; display: grid; place-items: center; }
+.bd-ab__sample { margin: 0; padding: 14px 16px; border: 1px dashed var(--ix-line); border-radius: 10px; background: var(--ix-field); display: grid; gap: 6px; font-size: var(--text-body-sm); line-height: 1.65; overflow-wrap: anywhere; }
+.bd-ab__skeleton { display: grid; gap: 6px; padding-left: 20px; list-style: decimal; font-size: var(--text-body-sm); color: var(--ix-ink-2); }
+.bd-ab code { padding: 1px 6px; border-radius: 6px; background: var(--ix-chip); font-size: .85em; }
+
+@media (max-width: 767px) {
+    .bd-ab__dl > div { grid-template-columns: minmax(0, 1fr); }
+    .bd-ab__preset { align-items: flex-start; flex-direction: column; }
+    .bd-ab__tab { padding: 13px 14px; }
+    .bd-ab .bd-dp__checks { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bd-ab__tab { transition: none; }
+}
+
+/* Filter: pilihan kelompok/alat panjang tidak boleh melebarkan baris sampai tombol Cari turun sendirian. */
+.bd-ab .bd-ix__search { flex: 1 1 220px; }
+.bd-ab .bd-ix__filters .bd-ix__select--filter { flex: 0 1 190px; min-width: 150px; max-width: 210px; text-overflow: ellipsis; }
+
+@media (max-width: 767px) {
+    .bd-ab .bd-ix__filters .bd-ix__select--filter { flex: 1 1 calc(50% - 5px); max-width: none; }
+}
+
+.bd-ab__hints { display: grid; gap: 4px; margin-top: 6px; color: var(--ix-ink-3); font-size: var(--text-label); line-height: 1.55; }
+.bd-ab__hints strong { color: var(--ix-ink-2); font-weight: 650; }
+.bd-ab__howto { margin-top: 8px; padding-top: 14px; border-top: 1px solid var(--ab-line); }
+.bd-ab__steps { display: grid; gap: 8px; padding-left: 20px; list-style: decimal; font-size: var(--text-body-sm); color: var(--ix-ink-2); line-height: 1.6; max-width: 76ch; }

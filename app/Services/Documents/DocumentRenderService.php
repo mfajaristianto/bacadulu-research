@@ -14,6 +14,18 @@ class DocumentRenderService
         private readonly PdfRenderer $pdfRenderer
     ) {}
 
+    /** Pengguna memilih SATU format: berkas format lain dibuang (renderer membuat DOCX dan PDF sekaligus). */
+    public function keepOnly(DocumentGeneration $g, string $format): void
+    {
+        $drop = $format === 'pdf' ? 'docx' : 'pdf';
+        $disk = $g->{$drop.'_disk'};
+        $path = $g->{$drop.'_path'};
+        if (filled($disk) && filled($path)) {
+            Storage::disk($disk)->delete($path);
+        }
+        $g->update([$drop.'_disk' => null, $drop.'_path' => null]);
+    }
+
     public function render(
         DocumentGeneration $generation
     ): DocumentGeneration {
@@ -140,19 +152,67 @@ class DocumentRenderService
             |--------------------------------------------------------------------------
             */
 
-            $this
-                ->docxRenderer
-                ->render(
-                    $content,
+            /*
+             * Format cetak: dokumen yang membawa salinan layout memakai
+             * renderer layout (DOCX dan PDF dari aturan yang sama).
+             * Tanpa layout, renderer lama dipakai persis seperti sebelumnya.
+             */
+            if (
+                is_array(
+                    $content['layout']
+                    ?? null
+                )
+            ) {
+                $layout =
+                    PrintLayout::hydrate(
+                        $content['layout']
+                    );
+
+                $model =
+                    PrintDocumentModel::build(
+                        $content,
+                        $layout
+                    );
+
+                PrintDocxWriter::render(
+                    $model,
+                    $layout,
                     $docxTemp
                 );
 
-            $this
-                ->pdfRenderer
-                ->render(
-                    $content,
-                    $pdfTemp
-                );
+                if (
+                    file_put_contents(
+                        $pdfTemp,
+                        PrintPdfWriter::render(
+                            PrintLayoutEngine::run(
+                                $model,
+                                $layout
+                            ),
+                            $model['title']
+                        )
+                    )
+                    ===
+                    false
+                ) {
+                    throw new RuntimeException(
+                        'PDF gagal dibuat.'
+                    );
+                }
+            } else {
+                $this
+                    ->docxRenderer
+                    ->render(
+                        $content,
+                        $docxTemp
+                    );
+
+                $this
+                    ->pdfRenderer
+                    ->render(
+                        $content,
+                        $pdfTemp
+                    );
+            }
 
             $this->assertValidFile(
                 $docxTemp,

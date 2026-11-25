@@ -555,7 +555,7 @@ class AdminAuditCoverageTest extends TestCase
             ->shouldReceive(
                 'render'
             )
-            ->once()
+            ->never() // membuat dokumen kini hanya membuat draf; render terjadi saat naskah diterbitkan dari editor
             ->andReturnUsing(
                 function (
                     DocumentGeneration $generation
@@ -621,11 +621,18 @@ class AdminAuditCoverageTest extends TestCase
                 )
                 ->firstOrFail();
 
+        // Setelah dibuat, pengguna diarahkan langsung ke editor dokumen (?mode=edit); pengalihan ini disengaja di controller.
         $response
             ->assertRedirect(
                 route(
                     'documents.show',
-                    $generation
+                    [
+                        'documentGeneration' =>
+                            $generation,
+
+                        'mode' =>
+                            'edit',
+                    ]
                 )
             );
 
@@ -654,7 +661,7 @@ class AdminAuditCoverageTest extends TestCase
             'audit_logs',
             [
                 'action' =>
-                    'document.generated',
+                    'document.draft_created',
 
                 'auditable_type' =>
                     DocumentGeneration::class,

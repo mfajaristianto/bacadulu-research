@@ -398,7 +398,7 @@
 
                         <div>
                             <strong>
-                                Pilih Research Tool
+                                Pilih Alat Riset
                             </strong>
 
                             <p>
@@ -462,12 +462,11 @@
 
                         <div>
                             <strong>
-                                Periksa evidence
+                                Periksa sumber
                             </strong>
 
                             <p>
-                                Nilai jawaban bersama source dan validated
-                                evidence, bukan output AI saja
+                                Tinjau hasil riset bersama sumber yang digunakan
                             </p>
                         </div>
                     </article>

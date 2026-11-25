@@ -1,39 +1,48 @@
 @extends('layouts.admin')
 
-@php($editing = $tool->exists)
+@php
+    $editing = $tool->exists;
+@endphp
 
-@section('title', $editing ? 'Edit Research Tool' : 'Tambah Research Tool')
-@section('page_title', 'Research Tools')
+@section('title', $editing ? 'Edit Alat Riset' : 'Tambah Alat Riset')
+@section('page_title', 'Katalog Alat AI')
 
+{{-- Halaman form biasa: cadangan tanpa JavaScript dan tujuan tautan "Buka alat". Daftar alat memakai dialog. --}}
 @section('content')
-<section class="admin-page">
-    <header class="bd-admin-page-head">
-        <div class="bd-admin-page-head__copy"><p class="bd-admin-kicker">AI CONTROL / TOOL</p><h1>{{ $editing ? $tool->name : 'Tambah Research Tool' }}</h1><p>Tool menjelaskan jenis pekerjaan research; prompt version mengontrol instruction internal.</p></div>
-        <div class="bd-admin-page-head__actions"><a href="{{ route('admin.tools.index') }}" class="bd-admin-button bd-admin-button--ghost">← Research Tools</a></div>
+<section class="admin-page bd-tl bd-tl--page">
+    <header class="bd-tl__head">
+        <div>
+            <a href="{{ route('admin.tools.index') }}" class="bd-tl__back">@include('admin.tools.partials.icon', ['name' => 'arrow']) Katalog Alat AI</a>
+            <h1>{{ $editing ? $tool->name : 'Tambah Alat Riset' }}</h1>
+            <p>Alat menjelaskan jenis pekerjaan riset. Prompt-nya ada di Instruksi AI, riwayatnya di Versi Instruksi.</p>
+        </div>
     </header>
 
-    <form method="POST" action="{{ $editing ? route('admin.tools.update', $tool) : route('admin.tools.store') }}" class="bd-admin-form-shell">
+    <form method="POST" action="{{ $editing ? route('admin.tools.update', $tool) : route('admin.tools.store') }}" class="bd-tl__pageform" novalidate>
         @csrf
-        @if($editing) @method('PUT') @endif
+        @if ($editing) @method('PUT') @endif
 
-        <div class="bd-admin-form">
-            <section class="bd-admin-form__section">
-                <div class="bd-admin-form__section-head"><strong>Tool Identity</strong><p>Code dipakai internal, nama dan deskripsi dapat ditampilkan ke user.</p></div>
-                <div class="bd-admin-form__grid">
-                    <label class="bd-admin-form-field"><span>Code</span><input class="bd-admin-input" name="code" value="{{ old('code', $tool->code) }}" placeholder="research-gap" required></label>
-                    <label class="bd-admin-form-field"><span>Status</span><select class="bd-admin-select" name="status"><option value="active" @selected(old('status', $tool->status ?: 'active') === 'active')>Active</option><option value="archived" @selected(old('status', $tool->status) === 'archived')>Archived</option></select></label>
-                    <label class="bd-admin-form-field is-full"><span>Nama</span><input class="bd-admin-input" name="name" value="{{ old('name', $tool->name) }}" maxlength="180" required></label>
-                    <label class="bd-admin-form-field is-full"><span>Deskripsi</span><textarea class="bd-admin-textarea" name="description" maxlength="2000">{{ old('description', $tool->description) }}</textarea></label>
-                    <input type="hidden" name="icon" value="{{ old('icon', $tool->icon) }}">
-                </div>
-            </section>
-            <section class="bd-admin-form__section"><button class="bd-admin-button bd-admin-button--primary" type="submit">{{ $editing ? 'Simpan Tool' : 'Buat Tool' }}</button></section>
+        <div class="bd-tl__fields">
+            @include('admin.tools.partials.fields', ['tool' => $tool, 'modal' => false])
         </div>
 
-        <aside class="bd-admin-form__aside">
-            <section><strong>Active Prompt</strong><p>@if($tool->activePromptTemplate){{ $tool->activePromptTemplate->name }} · v{{ $tool->activePromptTemplate->version }}@elseBelum ada Prompt Version aktif.@endif</p></section>
-            @if($editing)<section><a href="{{ route('admin.prompt-versions.index', ['tool' => $tool->id]) }}" class="bd-admin-button bd-admin-button--ghost">Lihat Prompt Versions</a></section>@endif
-        </aside>
+        @if ($editing)
+            @php $prompt = $tool->activePromptTemplate; @endphp
+            <div class="bd-tl__linked">
+                <span class="bd-tl__label">Instruksi AI aktif</span>
+                <p>
+                    @if ($prompt) {{ $prompt->name }} · v{{ $prompt->version }} · {{ $prompt->status }}
+                    @else Belum ada instruksi aktif; alat ini belum dapat dipakai pengguna.
+                    @endif
+                </p>
+                <a class="bd-tl__link" href="{{ route('admin.prompt-versions.index', ['tool' => $tool->id]) }}">Kelola instruksi dan versi</a>
+            </div>
+        @endif
+
+        <div class="bd-tl__dialog-actions">
+            <a href="{{ route('admin.tools.index') }}" class="bd-tl__btn bd-tl__btn--quiet">Batal</a>
+            <button type="submit" class="bd-tl__btn bd-tl__btn--primary">{{ $editing ? 'Simpan perubahan' : 'Buat alat' }}</button>
+        </div>
     </form>
 </section>
 @endsection

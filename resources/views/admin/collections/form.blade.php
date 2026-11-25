@@ -1,48 +1,68 @@
 @extends('layouts.admin')
 
-@php($editing = $collection->exists)
+@php
+    $editing = $collection->exists;
+@endphp
 
-@section('title', $editing ? 'Edit Collection' : 'Tambah Collection')
-@section('page_title', 'Collections')
+@section('title', $editing ? 'Edit Koleksi' : 'Tambah Koleksi')
+@section('page_title', 'Koleksi')
 
+{{-- Halaman form biasa: cadangan tanpa JavaScript dan tujuan tautan "Buka koleksi". Daftar koleksi memakai dialog. --}}
 @section('content')
-<section class="admin-page">
-    <header class="bd-admin-page-head">
-        <div class="bd-admin-page-head__copy"><p class="bd-admin-kicker">KNOWLEDGE / COLLECTION</p><h1>{{ $editing ? 'Edit Collection' : 'Tambah Collection' }}</h1><p>Pilih source yang ingin dikumpulkan dalam konteks yang sama.</p></div>
-        <div class="bd-admin-page-head__actions"><a href="{{ route('admin.collections.index') }}" class="bd-admin-button bd-admin-button--ghost">← Collections</a></div>
+<section class="admin-page bd-col bd-col--page">
+    <header class="bd-col__head">
+        <div>
+            <a href="{{ route('admin.collections.index') }}" class="bd-col__back">@include('admin.collections.partials.icon', ['name' => 'arrow']) Koleksi</a>
+            <h1>{{ $editing ? 'Edit Koleksi' : 'Tambah Koleksi' }}</h1>
+            <p>Pilih sumber yang ingin dikumpulkan dalam konteks riset yang sama.</p>
+        </div>
     </header>
 
-    <form method="POST" action="{{ $editing ? route('admin.collections.update', $collection) : route('admin.collections.store') }}" class="bd-admin-form-shell">
+    <form method="POST" action="{{ $editing ? route('admin.collections.update', $collection) : route('admin.collections.store') }}" class="bd-col__pageform" novalidate>
         @csrf
-        @if($editing) @method('PUT') @endif
+        @if ($editing) @method('PUT') @endif
+        <input type="hidden" name="sync_documents" value="1">
 
-        <div class="bd-admin-form">
-            <section class="bd-admin-form__section">
-                <div class="bd-admin-form__grid">
-                    <label class="bd-admin-form-field is-full"><span>Nama Collection</span><input class="bd-admin-input" name="name" value="{{ old('name', $collection->name) }}" maxlength="180" required></label>
-                    <label class="bd-admin-form-field is-full"><span>Deskripsi <small>opsional</small></span><textarea class="bd-admin-textarea" name="description" maxlength="2000">{{ old('description', $collection->description) }}</textarea></label>
-                    <label class="bd-admin-form-field"><span>Status</span><select class="bd-admin-select" name="status"><option value="active" @selected(old('status', $collection->status ?: 'active') === 'active')>Active</option><option value="archived" @selected(old('status', $collection->status) === 'archived')>Archived</option></select></label>
-                </div>
-            </section>
+        <div class="bd-col__fields">
+            <div class="bd-col__field">
+                <label class="bd-col__label" for="col-name">Nama koleksi</label>
+                <input class="bd-col__input" id="col-name" name="name" type="text" maxlength="180" required value="{{ old('name', $collection->name) }}" placeholder="Mis. ESG dan Nilai Perusahaan" @if ($errors->has('name')) aria-invalid="true" @endif>
+                <p class="bd-col__note">{{ $errors->first('name') }}</p>
+            </div>
+            <div class="bd-col__field">
+                <label class="bd-col__label" for="col-description">Deskripsi <small>opsional</small></label>
+                <textarea class="bd-col__input bd-col__textarea" id="col-description" name="description" rows="3" maxlength="2000">{{ old('description', $collection->description) }}</textarea>
+                <p class="bd-col__note">{{ $errors->first('description') }}</p>
+            </div>
+            <div class="bd-col__field">
+                <label class="bd-col__label" for="col-status">Status</label>
+                <select class="bd-col__select" id="col-status" name="status" required>
+                    <option value="active" @selected(old('status', $collection->status ?: 'active') === 'active')>Aktif</option>
+                    <option value="archived" @selected(old('status', $collection->status) === 'archived')>Diarsipkan</option>
+                </select>
+                <p class="bd-col__note">{{ $errors->first('status') }}</p>
+            </div>
 
-            <section class="bd-admin-form__section">
-                <div class="bd-admin-form__section-head"><strong>Sources</strong><p>Collection tidak mengubah category utama source.</p></div>
-                <div class="bd-admin-checklist">
-                    @forelse($documents as $document)
-                        <label class="bd-admin-checkrow">
-                            <input type="checkbox" name="document_ids[]" value="{{ $document->id }}" @checked(in_array($document->id, old('document_ids', $selectedDocuments), true))>
-                            <span><strong>{{ $document->title }}</strong><small>{{ $document->category?->name ?: 'Tanpa kategori' }} · {{ ucfirst($document->status) }}</small></span>
+            <div class="bd-col__field">
+                <span class="bd-col__label">Sumber dalam koleksi</span>
+                <p class="bd-col__hint">Koleksi tidak mengubah kategori sumber. Mencentang hanya menautkan sumber; PDF tidak digandakan.</p>
+                <div class="bd-col__checklist">
+                    @forelse ($documents as $document)
+                        <label class="bd-col__cand">
+                            <span class="bd-col__check"><input type="checkbox" name="document_ids[]" value="{{ $document->id }}" @checked(in_array($document->id, old('document_ids', $selectedDocuments), true))><i></i></span>
+                            <span class="bd-col__cand-text"><strong>{{ $document->title }}</strong><small>{{ $document->category?->name ?: 'Tanpa kategori' }} · {{ $document->status }}</small></span>
                         </label>
                     @empty
-                        <p class="bd-admin-muted">Belum ada source di Library.</p>
+                        <p class="bd-col__muted">Belum ada sumber di Pustaka.</p>
                     @endforelse
                 </div>
-            </section>
-
-            <section class="bd-admin-form__section"><button class="bd-admin-button bd-admin-button--primary" type="submit">{{ $editing ? 'Simpan Collection' : 'Buat Collection' }}</button></section>
+            </div>
         </div>
 
-        <aside class="bd-admin-form__aside"><section><strong>Collection</strong><p>Gunakan untuk grouping tematik, proyek, atau corpus tertentu. Jangan gunakan sebagai pengganti Category.</p></section></aside>
+        <div class="bd-col__dialog-actions">
+            <a href="{{ route('admin.collections.index') }}" class="bd-col__btn bd-col__btn--quiet">Batal</a>
+            <button type="submit" class="bd-col__btn bd-col__btn--primary">{{ $editing ? 'Simpan perubahan' : 'Buat koleksi' }}</button>
+        </div>
     </form>
 </section>
 @endsection

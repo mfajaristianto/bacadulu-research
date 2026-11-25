@@ -12,12 +12,11 @@ ready(() => {
     const next = tour.querySelector('[data-tour-next]');
     const back = tour.querySelector('[data-tour-back]');
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
-    // Cara memulai (topik + Research Tool) diajarkan langsung di halaman New Research;
-    // tour ini hanya menunjukkan letak fitur lain.
+    // Alur produk: Research (tanpa AI) -> Generate Document (AI) -> Dokumen Saya.
     const steps = [
-        ['Research baru kapan saja', 'Tekan tombol oranye + di sidebar untuk membuka research baru. Riwayatmu tersimpan di sana.'],
-        ['Periksa evidence', 'Baca jawaban dan sumber. Jika bukti kurang, perjelas topik terlebih dahulu.'],
-        ['Simpan dan buat dokumen', 'Simpan hasil ke Saved, kemudian lanjutkan ke editor dokumen untuk PDF/DOCX.'],
+        ['Pilih kategori dan alat riset', 'Pilih kategori dan alat riset, tulis topik, lalu tekan Mulai Riset. Pencarian ini tidak memakai AI.'],
+        ['Baca hasil riset ringkas', 'Lihat gambaran, perbandingan penelitian, dan referensi. Data yang tidak ada pada evidence ditandai apa adanya.'],
+        ['Generate Document (opsional)', 'AI hanya dipakai saat Anda memilih Generate Document. Dokumen otomatis tersimpan di Dokumen Saya.'],
     ];
     let current = 0;
     let closing = false;

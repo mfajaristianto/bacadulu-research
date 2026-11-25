@@ -9,8 +9,25 @@
 @import './bundles/core.css';
 
 @import './pages/admin.css';
+@import './pages/admin-dashboard.css';
 @import './pages/admin-auth.css';
 @import './pages/admin-ai-runs.css';
-@import './pages/admin-library-source.css';
+@import './pages/admin-library.css';
+@import './pages/admin-sync.css';
+@import './pages/admin-external-sources.css';
+@import './pages/admin-external-fulltext.css';
+@import './pages/admin-categories.css';
+@import './pages/admin-collections.css';
+@import './pages/admin-glossary.css';
+@import './pages/admin-tools.css';
+@import './pages/admin-instructions.css';
+@import './pages/admin-providers.css';
+@import './pages/admin-document-prompts.css';
+@import './pages/admin-answer-behavior.css';
+@import './pages/admin-print-format.css';
+@import './pages/admin-audit.css';
+@import './pages/admin-users.css';
+@import './pages/admin-security.css';
+@import './pages/admin-settings.css';
 
 @import './bundles/overrides.css';

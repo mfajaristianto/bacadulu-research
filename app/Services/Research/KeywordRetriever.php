@@ -7,6 +7,14 @@ use Illuminate\Support\Collection;
 
 class KeywordRetriever
 {
+    private bool $scanLimited = false;
+
+    /** True bila pemindaian chunk berhenti di pagar pengaman (hasil terakhir mungkin belum lengkap). */
+    public function wasScanLimited(): bool
+    {
+        return $this->scanLimited;
+    }
+
     /**
      * @return Collection<int, array{
      *     chunk: DocumentChunk,
@@ -119,8 +127,35 @@ class KeywordRetriever
                 12
             );
 
-        $candidates =
+        /*
+         * Pemindaian TIDAK bias urutan ID: seluruh chunk yang memuat sebuah istilah dinilai (streaming per 500 baris), dan hanya
+         * `max_per_document` terbaik per dokumen yang disimpan (cukup untuk keputusan akhir yang sama dengan menilai semuanya).
+         * Dulu: `limit(candidate_limit)` tanpa urutan -> chunk yang paling relevan bisa terbuang jika id-nya besar.
+         * `candidate_limit` kini = jumlah kandidat TERBAIK yang dipertahankan untuk diversifikasi. `scan_limit` = pagar pengaman
+         * jumlah chunk yang dinilai; bila tercapai, wasScanLimited() bernilai true (hasil mungkin belum lengkap).
+         */
+        $scanLimit =
+            max(
+                1000,
+                (int) config(
+                    'research.retrieval.scan_limit',
+                    50000
+                )
+            );
+
+        $this->scanLimited = false;
+
+        $perDoc = [];
+
+        $scanned = 0;
+
+        $stream =
             DocumentChunk::query()
+                ->select([
+                    'id',
+                    'document_id',
+                    'content',
+                ])
                 ->whereIn(
                     'document_id',
                     $documentIds
@@ -143,73 +178,95 @@ class KeywordRetriever
                         }
                     }
                 )
+                ->lazyById(
+                    500
+                );
+
+        foreach ($stream as $chunk) {
+            if (++$scanned > $scanLimit) {
+                $this->scanLimited = true;
+
+                break;
+            }
+
+            $analysis =
+                $this->analyseMatch(
+                    $chunk->content,
+                    $terms,
+                    $query
+                );
+
+            if (
+                $analysis['matched_term_count'] < $minimumMatchedTerms
+                || $analysis['score'] < $minimumScore
+            ) {
+                continue;
+            }
+
+            $bucket =
+                &$perDoc[
+                    $chunk->document_id
+                ];
+
+            $bucket[] = [
+                'id' => (int) $chunk->id,
+                'score' => $analysis['score'],
+            ];
+
+            if (count($bucket) > $maximumPerDocument) {
+                usort(
+                    $bucket,
+                    fn (array $x, array $y): int =>
+                        $y['score'] <=> $x['score']
+                        ?: $x['id'] <=> $y['id']
+                );
+
+                $bucket = array_slice(
+                    $bucket,
+                    0,
+                    $maximumPerDocument
+                );
+            }
+
+            unset($bucket);
+        }
+
+        $kept =
+            collect(
+                $perDoc
+            )
+                ->flatten(
+                    1
+                )
+                ->sort(
+                    fn (array $x, array $y): int =>
+                        $y['score'] <=> $x['score']
+                        ?: $x['id'] <=> $y['id']
+                )
+                ->take(
+                    $candidateLimit
+                )
+                ->values();
+
+        $models =
+            DocumentChunk::query()
                 ->with([
                     'document.category',
                 ])
-                ->limit(
-                    $candidateLimit
+                ->whereIn(
+                    'id',
+                    $kept->pluck('id')->all()
                 )
                 ->get()
+                ->keyBy('id');
+
+        $candidates =
+            $kept
                 ->map(
-                    function (
-                        DocumentChunk $chunk
-                    ) use (
-                        $terms,
-                        $query,
-                        $minimumMatchedTerms
-                    ): array {
-                        $analysis =
-                            $this
-                                ->analyseMatch(
-                                    $chunk->content,
-                                    $terms,
-                                    $query
-                                );
-
-                        return [
-                            'chunk' =>
-                                $chunk,
-
-                            'score' =>
-                                $analysis[
-                                    'score'
-                                ],
-
-                            'matched_terms' =>
-                                $analysis[
-                                    'matched_terms'
-                                ],
-
-                            'matched_term_count' =>
-                                $analysis[
-                                    'matched_term_count'
-                                ],
-
-                            'minimum_matched_terms' =>
-                                $minimumMatchedTerms,
-                        ];
-                    }
-                )
-                ->filter(
-                    fn (
-                        array $item
-                    ): bool =>
-                        $item[
-                            'matched_term_count'
-                        ]
-                        >=
-                        $item[
-                            'minimum_matched_terms'
-                        ]
-                        &&
-                        $item[
-                            'score'
-                        ]
-                        >=
-                        $minimumScore
-                )
-                ->sortByDesc(
-                    'score'
+                    fn (array $row): array => [
+                        'chunk' => $models[$row['id']],
+                        'score' => $row['score'],
+                    ]
                 )
                 ->values();
 
@@ -298,7 +355,7 @@ class KeywordRetriever
     /**
      * @return array<int, string>
      */
-    private function queryTerms(
+    public function queryTerms(
         string $query
     ): array {
         $query =
@@ -509,7 +566,7 @@ class KeywordRetriever
      *     matched_term_count: int
      * }
      */
-    private function analyseMatch(
+    public function analyseMatch(
         string $content,
         array $terms,
         string $query

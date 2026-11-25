@@ -399,3 +399,8 @@
     .research-send { width: 40px; height: 40px; }
     .research-composer__note { padding: 0 10px 9px; }
 }
+
+/* Tautan ke penemuan referensi (tanpa AI) di bawah kolom pertanyaan */
+.research-references-link { margin: 10px 0 0; font-size: .82rem; }
+.research-references-link a { color: var(--bd-orange-deep, #d95a42); font-weight: 650; text-underline-offset: 3px; }
+.research-references-link span { color: var(--text-secondary, #666570); font-weight: 500; }

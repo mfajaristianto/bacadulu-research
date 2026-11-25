@@ -7,7 +7,6 @@ use App\Http\Middleware\EnsureProfileComplete;
 use App\Http\Middleware\ResearchLiveRefresh;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SentryRequestContext;
-use App\Http\Middleware\SourceProcessingUi;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -115,7 +114,7 @@ return Application::configure(
             */
 
             $middleware->trustProxies(
-                at: '*'
+                at: array_values(array_filter(array_map('trim', explode(',', (string) env('TRUSTED_PROXIES', '127.0.0.1,::1')))))
             );
 
             /*
@@ -160,8 +159,6 @@ return Application::configure(
                         SentryRequestContext::class,
 
                         SecurityHeaders::class,
-
-                        SourceProcessingUi::class,
 
                     ]
                 );

@@ -8,6 +8,9 @@ use Throwable;
 
 class ResearchSettingsService
 {
+    /** @var array<string, mixed>|null nilai bawaan (config/env) sebelum override database diterapkan; diisi sekali per instance */
+    private ?array $defaults = null;
+
     public function definitions(): array
     {
         return [
@@ -52,6 +55,27 @@ class ResearchSettingsService
                 'group' => 'ai',
                 'description' => 'Conversation messages supplied as context.',
             ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Grounded Synthesis — provider nyata (Tahap 17B)
+            |--------------------------------------------------------------------------
+            | Kunci API TIDAK pernah menjadi setting (hanya environment). Tarif disimpan sebagai teks agar "belum diisi" dapat dibedakan dari 0.
+            */
+
+            'synthesis.provider' => ['config' => 'research.synthesis.provider', 'type' => 'string', 'group' => 'synthesis', 'description' => 'Grounded synthesis provider (mock/openai).'],
+            'synthesis.live_enabled' => ['config' => 'research.synthesis.live_enabled', 'type' => 'boolean', 'group' => 'synthesis', 'description' => 'Explicit admin enable for real AI synthesis.'],
+            'synthesis.model' => ['config' => 'research.synthesis.model', 'type' => 'string', 'group' => 'synthesis', 'description' => 'Synthesis model name.'],
+            'synthesis.timeout' => ['config' => 'research.synthesis.timeout', 'type' => 'integer', 'group' => 'synthesis', 'description' => 'Synthesis request timeout in seconds.'],
+            'synthesis.max_output_tokens' => ['config' => 'research.synthesis.max_output_tokens', 'type' => 'integer', 'group' => 'synthesis', 'description' => 'Synthesis maximum output tokens.'],
+            'synthesis.max_input_tokens' => ['config' => 'research.synthesis.max_input_tokens', 'type' => 'integer', 'group' => 'synthesis', 'description' => 'Synthesis maximum estimated input tokens.'],
+            'synthesis.price_input_per_mtok_usd' => ['config' => 'research.synthesis.price_input_per_mtok_usd', 'type' => 'string', 'group' => 'synthesis', 'description' => 'Admin-supplied USD per 1M input tokens.'],
+            'synthesis.price_output_per_mtok_usd' => ['config' => 'research.synthesis.price_output_per_mtok_usd', 'type' => 'string', 'group' => 'synthesis', 'description' => 'Admin-supplied USD per 1M output tokens.'],
+            'synthesis.max_cost_per_request_usd' => ['config' => 'research.synthesis.max_cost_per_request_usd', 'type' => 'float', 'group' => 'synthesis', 'description' => 'Maximum estimated USD per synthesis request.'],
+            'synthesis.max_retries' => ['config' => 'research.synthesis.max_retries', 'type' => 'integer', 'group' => 'synthesis', 'description' => 'Maximum transient retries per synthesis request.'],
+            'synthesis.user_requests_per_day' => ['config' => 'research.synthesis.user_requests_per_day', 'type' => 'integer', 'group' => 'synthesis', 'description' => 'Real synthesis requests per user per day.'],
+            'synthesis.global_requests_per_day' => ['config' => 'research.synthesis.global_requests_per_day', 'type' => 'integer', 'group' => 'synthesis', 'description' => 'Real synthesis requests across all users per day.'],
+            'synthesis.requests_per_minute' => ['config' => 'research.synthesis.requests_per_minute', 'type' => 'integer', 'group' => 'synthesis', 'description' => 'Real synthesis requests per minute (global).'],
 
             /*
             |--------------------------------------------------------------------------
@@ -206,6 +230,9 @@ class ResearchSettingsService
 
     public function applyOverrides(): void
     {
+        // Nilai bawaan direkam sekali, sebelum override pertama (dan sebelum tabel dicek), agar "bawaan server" tetap dapat ditampilkan.
+        $this->defaults ??= $this->effectiveFlat();
+
         try {
             if (! Schema::hasTable('research_settings')) {
                 return;
@@ -216,6 +243,7 @@ class ResearchSettingsService
 
             $settings =
                 ResearchSetting::query()
+                    ->whereIn('key', array_keys($definitions))
                     ->get();
 
             foreach ($settings as $setting) {
@@ -292,23 +320,18 @@ class ResearchSettingsService
                         'key' => $key,
                     ],
                     [
-                        'group' =>
-                            $definition['group'],
+                        'group' => $definition['group'],
 
-                        'value' =>
-                            $this->serialize(
-                                $normalized,
-                                $definition['type']
-                            ),
+                        'value' => $this->serialize(
+                            $normalized,
+                            $definition['type']
+                        ),
 
-                        'value_type' =>
-                            $definition['type'],
+                        'value_type' => $definition['type'],
 
-                        'description' =>
-                            $definition['description'],
+                        'description' => $definition['description'],
 
-                        'updated_by' =>
-                            $updatedBy,
+                        'updated_by' => $updatedBy,
                     ]
                 );
 
@@ -322,6 +345,27 @@ class ResearchSettingsService
                 $normalized
             );
         }
+    }
+
+    /** Nilai bawaan dari konfigurasi/env server (tanpa override database). @return array<string, mixed> */
+    public function defaultFlat(): array
+    {
+        return $this->defaults ?? $this->effectiveFlat();
+    }
+
+    /**
+     * Penanda versi pengaturan tersimpan untuk deteksi perubahan bersamaan oleh admin lain: berubah setiap ada baris definisi yang
+     * ditulis/diubah. Hanya kunci berdaftar putih yang dihitung (baris catatan provider tidak ikut).
+     */
+    public function revision(): string
+    {
+        if (! Schema::hasTable('research_settings')) {
+            return 'none';
+        }
+
+        $rows = ResearchSetting::query()->whereIn('key', array_keys($this->definitions()));
+
+        return substr(sha1(($rows->max('updated_at') ?? '-').'|'.$rows->count().'|'.$rows->max('id')), 0, 16);
     }
 
     /*
@@ -355,9 +399,7 @@ class ResearchSettingsService
         $result = [];
 
         foreach (
-            $this->effectiveFlat()
-            as
-            $key => $value
+            $this->effectiveFlat() as $key => $value
         ) {
             data_set(
                 $result,
@@ -387,9 +429,7 @@ class ResearchSettingsService
         $result = [];
 
         foreach (
-            $this->definitions()
-            as
-            $key => $definition
+            $this->definitions() as $key => $definition
         ) {
             $result[$key] =
                 config(
@@ -408,14 +448,11 @@ class ResearchSettingsService
     ): mixed {
         return match ($key) {
 
-            'documents.default_type' =>
-                'Research Article',
+            'documents.default_type' => 'Research Article',
 
-            'documents.default_citation_style' =>
-                'APA 7',
+            'documents.default_citation_style' => 'APA 7',
 
-            default =>
-                null,
+            default => null,
 
         };
     }
@@ -426,22 +463,18 @@ class ResearchSettingsService
     ): mixed {
         return match ($type) {
 
-            'integer' =>
-                (int) $value,
+            'integer' => (int) $value,
 
-            'float' =>
-                (float) $value,
+            'float' => (float) $value,
 
-            'boolean' =>
-                filter_var(
-                    $value,
-                    FILTER_VALIDATE_BOOL
-                ),
+            'boolean' => filter_var(
+                $value,
+                FILTER_VALIDATE_BOOL
+            ),
 
-            default =>
-                trim(
-                    (string) $value
-                ),
+            default => trim(
+                (string) $value
+            ),
 
         };
     }

@@ -13,7 +13,8 @@ use Illuminate\Support\Str;
 class ResearchEvidencePipeline
 {
     public function __construct(
-        private readonly KeywordRetriever $retriever
+        private readonly KeywordRetriever $retriever,
+        private readonly AnswerBehaviorResolver $behavior
     ) {}
 
     public function prepare(
@@ -336,6 +337,71 @@ class ResearchEvidencePipeline
             $sufficient
                 ? 'Lanjutkan analisis menggunakan evidence yang tersedia.'
                 : 'Persempit pertanyaan, gunakan istilah yang lebih spesifik, atau pilih Research Tool lain.';
+
+        /*
+         * Perilaku Jawaban AI: pesan saat bukti tidak cukup.
+         *
+         * Run berhenti di sini tanpa memanggil AI, jadi pesan ini deterministik.
+         * Kondisi dibedakan dari data retrieval: tidak ada dokumen kandidat,
+         * ada kandidat tetapi tidak ada potongan relevan, atau ada potongan
+         * relevan namun di bawah batas minimum. Tanpa teks kustom dari aturan
+         * aktif, pesan lama dipertahankan persis.
+         */
+        if (! $sufficient) {
+            $condition =
+                $candidateSourceIds === []
+                    ? 'no_documents'
+                    : (
+                        $retrievals->isEmpty()
+                            ? 'irrelevant'
+                            : 'insufficient'
+                    );
+
+            $resolved =
+                $this
+                    ->behavior
+                    ->safe(
+                        'research',
+                        $prompt
+                            ->aiTool
+                            ?->code
+                    );
+
+            $custom =
+                $resolved[
+                    'unavailable'
+                ][
+                    $condition
+                ]
+                ?? [];
+
+            $message =
+                $custom[
+                    'message'
+                ]
+                ?? $message;
+
+            $nextAction =
+                $custom[
+                    'next_action'
+                ]
+                ?? $nextAction;
+
+            if (
+                $custom !== []
+            ) {
+                $parameters[
+                    'answer_behavior'
+                ] =
+                    $this
+                        ->behavior
+                        ->provenance(
+                            $resolved,
+                            'condition:'
+                            .$condition
+                        );
+            }
+        }
 
         /*
         |--------------------------------------------------------------------------

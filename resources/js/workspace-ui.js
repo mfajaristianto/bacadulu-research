@@ -1949,6 +1949,8 @@ function initResearchRunPolling() {
                     const incomingProcess = html.querySelector('.research-result-process');
                     if (incomingProcess) host.replaceWith(incomingProcess);
                     current.replaceWith(incoming);
+                    // Pesan "masuk antrean" (flash) berada di luar layout hasil dan jadi basi setelah selesai.
+                    document.querySelectorAll('.research-result-flash, .research-composer-success').forEach((el) => el.remove());
                     initInlineSavedResult(incoming);
                     document.dispatchEvent(new CustomEvent('bacaresearch:result-updated'));
                 } catch {
@@ -2775,6 +2777,20 @@ function initFirstResearch() {
 
     // Tour tidak boleh tertinggal saat halaman disembunyikan/ditinggalkan.
     window.addEventListener('pagehide', () => closeTour());
+
+    // "Cari referensi dulu": bawa kategori dan pertanyaan dari form ke halaman Referensi (tanpa mengirim form riset).
+    document.querySelectorAll('[data-references-link]').forEach((link) => {
+        link.addEventListener('click', () => {
+            const form = link.closest('form');
+            if (!form) return;
+            const url = new URL(link.href, window.location.origin);
+            const cat = form.querySelector('[name="category_id"]')?.value;
+            const msg = form.querySelector('[name="message"]')?.value?.trim();
+            if (cat) url.searchParams.set('category_id', cat);
+            if (msg) url.searchParams.set('q', msg.slice(0, 500));
+            link.href = url.toString();
+        });
+    });
 
     syncChips();
 }

@@ -34,12 +34,12 @@
         @endif
 
         <form
-            method="POST"
-            action="{{ route('research.run') }}"
+            method="GET"
+            action="{{ route('research.result') }}"
             class="research-composer research-composer--new"
             data-chat-form
+            data-rf-form
         >
-            @csrf
 
             @if($selectedSource)
                 <input type="hidden" name="source_id" value="{{ $selectedSource->id }}">
@@ -50,13 +50,14 @@
 
                 <textarea
                     id="fr-message"
-                    name="message"
+                    name="q"
                     rows="2"
                     placeholder="Masukkan judul atau topik penelitian..."
                     required
-                    maxlength="5000"
+                    minlength="3"
+                    maxlength="500"
                     data-chat-input
-                >{{ old('message') }}</textarea>
+                >{{ old('q', request('q')) }}</textarea>
             </div>
 
             <div class="fr-field">
@@ -69,7 +70,7 @@
                         @foreach($categories as $category)
                             <option
                                 value="{{ $category->id }}"
-                                @selected(old('category_id', $selectedSource?->category_id) == $category->id)
+                                @selected(old('category_id', request('category_id', $selectedSource?->category_id)) == $category->id)
                             >
                                 {{ $category->name }}
                             </option>
@@ -112,7 +113,7 @@
                             </svg>
                         </button>
                     @empty
-                        <p class="fr-tools__empty">Belum ada Research Tool yang aktif.</p>
+                        <p class="fr-tools__empty">Belum ada alat riset yang aktif.</p>
                     @endforelse
                 </div>
 
@@ -125,6 +126,28 @@
                 </button>
             </div>
 
+            @php
+                $rfBook = $activePrompt?->input_mode_name === 'book';
+                $rfQs = array_values((array) old('questions', request('questions', [])));
+                $rfCount = max(1, min(8, count(array_filter($rfQs, fn ($q) => filled($q))) ?: 3));
+            @endphp
+            <div class="fr-field rf-book" data-rf-book @unless($rfBook) hidden @endunless>
+                <span class="fr-label">Rumusan masalah</span>
+                <label class="rf-count">Jumlah Rumusan Masalah
+                    <select data-rf-count aria-controls="rf-questions">
+                        @for($i = 1; $i <= 8; $i++)<option value="{{ $i }}" @selected($rfCount === $i)>{{ $i }}</option>@endfor
+                    </select>
+                </label>
+                <div id="rf-questions" class="rf-questions">
+                    @for($i = 0; $i < 8; $i++)
+                        <label class="rf-q" data-rf-q @if($i >= $rfCount || ! $rfBook) hidden @endif>
+                            <span>Rumusan Masalah {{ $i + 1 }}</span>
+                            <input type="text" name="questions[]" maxlength="500" value="{{ $rfQs[$i] ?? '' }}" @if($i >= $rfCount || ! $rfBook) disabled @endif>
+                        </label>
+                    @endfor
+                </div>
+            </div>
+
             {{-- Menu pilihan prompt existing tetap menjadi sumber nilai prompt_template_id. --}}
             <div class="research-prompt-picker-wrap fr-prompt-bridge">
                 <button
@@ -135,7 +158,7 @@
                     aria-controls="research-prompt-menu"
                     tabindex="-1"
                 >
-                    <span data-prompt-label>{{ $activePrompt?->display_name ?: 'Pilih research prompt' }}</span>
+                    <span data-prompt-label>{{ $activePrompt?->display_name ?: 'Pilih alat riset' }}</span>
                 </button>
 
                 <input
@@ -167,10 +190,6 @@
                     </svg>
                 </button>
             </div>
-
-            <p class="fr-note">
-                Output AI bukan evidence akademik. Evidence tetap berasal dari source yang diretrieve.
-            </p>
         </form>
     </section>
 
@@ -200,7 +219,7 @@
 
         <ol class="fr-flow">
             <li data-fr-step="title"><i aria-hidden="true"></i><span>Judul</span></li>
-            <li data-fr-step="tool"><i aria-hidden="true"></i><span>Research Tool</span></li>
+            <li data-fr-step="tool"><i aria-hidden="true"></i><span>Alat Riset</span></li>
             <li data-fr-step="source"><i aria-hidden="true"></i><span>Source</span></li>
             <li data-fr-step="reading"><i aria-hidden="true"></i><span>Reading</span></li>
             <li data-fr-step="evidence"><i aria-hidden="true"></i><span>Evidence</span></li>

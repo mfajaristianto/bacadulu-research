@@ -33,7 +33,8 @@ class ResearchOnboardingUxTest extends TestCase
         $this->assertAuthenticated();
         $this->get(route('register.success'))
             ->assertOk()
-            ->assertSee('Akun berhasil dibuat');
+            ->assertSee('Siap mulai research?')
+            ->assertSee('Akunmu sudah aktif');
     }
 
     public function test_onboarding_is_persisted_for_the_authenticated_account(): void

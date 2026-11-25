@@ -9,6 +9,7 @@ use App\Models\DocumentFile;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
 
@@ -173,15 +174,69 @@ class SourceIngestionService
                     $absolutePath
                 );
 
-            return DB::transaction(
-                function () use (
-                    $document,
-                    $uploadedFile,
-                    $disk,
-                    $storedPath,
-                    $checksum
-                ): DocumentFile {
+            return $this->registerStagedFile(
+                $document,
+                $disk,
+                $storedPath,
+                $uploadedFile->getClientOriginalName(),
+                $uploadedFile->getMimeType() ?: 'application/pdf',
+                $uploadedFile->getSize(),
+                $checksum !== false ? $checksum : null
+            );
+        } catch (
+            Throwable $exception
+        ) {
+            Storage::disk(
+                $disk
+            )
+                ->delete(
+                    $storedPath
+                );
 
+            throw $exception;
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pulihkan versi lama
+    |--------------------------------------------------------------------------
+    |
+    | File lama disalin ke path baru, bukan dipakai bersama, sehingga menghapus
+    | atau memproses satu versi tidak pernah menyentuh versi lain. Versi lama tetap utuh.
+    |
+    */
+
+    public function stageRestore(Document $document, DocumentFile $from): DocumentFile
+    {
+        $disk = $from->disk;
+        $storedPath = Str::random(40).'.pdf';
+
+        if (! Storage::disk($disk)->exists($from->path) || ! Storage::disk($disk)->copy($from->path, $storedPath)) {
+            throw new RuntimeException('File versi ini tidak ditemukan di penyimpanan, jadi tidak bisa dipulihkan.');
+        }
+
+        try {
+            return $this->registerStagedFile(
+                $document,
+                $disk,
+                $storedPath,
+                $from->original_name,
+                $from->mime_type ?: 'application/pdf',
+                $from->file_size,
+                $from->checksum
+            );
+        } catch (Throwable $exception) {
+            Storage::disk($disk)->delete($storedPath);
+
+            throw $exception;
+        }
+    }
+
+    /** Satu transaksi: catat file baru, jadikan versi sebelumnya superseded, dan arahkan dokumen ke file ini. */
+    private function registerStagedFile(Document $document, string $disk, string $storedPath, ?string $originalName, string $mime, ?int $size, ?string $checksum): DocumentFile
+    {
+        return DB::transaction(function () use ($document, $disk, $storedPath, $originalName, $mime, $size, $checksum): DocumentFile {
                     $sourceFile =
                         DocumentFile::create([
                             'document_id' =>
@@ -193,24 +248,10 @@ class SourceIngestionService
                             'path' =>
                                 $storedPath,
 
-                            'original_name' =>
-                                $uploadedFile
-                                    ->getClientOriginalName(),
-
-                            'mime_type' =>
-                                $uploadedFile
-                                    ->getMimeType()
-                                ?:
-                                'application/pdf',
-
-                            'file_size' =>
-                                $uploadedFile
-                                    ->getSize(),
-
-                            'checksum' =>
-                                $checksum !== false
-                                    ? $checksum
-                                    : null,
+                            'original_name' => $originalName,
+                            'mime_type' => $mime,
+                            'file_size' => $size,
+                            'checksum' => $checksum,
 
                             'status' =>
                                 'queued',
@@ -271,21 +312,8 @@ class SourceIngestionService
                             null,
                     ]);
 
-                    return $sourceFile;
-                }
-            );
-        } catch (
-            Throwable $exception
-        ) {
-            Storage::disk(
-                $disk
-            )
-                ->delete(
-                    $storedPath
-                );
-
-            throw $exception;
-        }
+            return $sourceFile;
+        });
     }
 
     /*

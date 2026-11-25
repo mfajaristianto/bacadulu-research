@@ -14,6 +14,8 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResearchController;
+use App\Http\Controllers\ResearchDocumentController;
+use App\Http\Controllers\ResearchFlowController;
 use App\Http\Controllers\SavedResultController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -348,6 +350,16 @@ Route::middleware([
                 ]
             )->name('workspace');
 
+            // Alur produk: hasil riset ringkas (tanpa AI) -> Generate Document (AI).
+
+            Route::get('/research/result', [ResearchFlowController::class, 'result'])
+                ->middleware('throttle:60,1')
+                ->name('research.result');
+
+            Route::post('/research/document', [ResearchDocumentController::class, 'store'])
+                ->middleware('throttle:6,1')
+                ->name('research.document.store');
+
             Route::get(
                 '/workspace/{conversation}',
                 [
@@ -372,6 +384,35 @@ Route::middleware([
             )
                 ->middleware('throttle:research')
                 ->name('research.run');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Source Discovery (referensi tanpa AI)
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get('/research/references', [\App\Http\Controllers\ReferenceDiscoveryController::class, 'index'])
+                ->middleware('throttle:60,1')
+                ->name('research.references');
+
+            Route::get('/research/references/{kind}/{id}', [\App\Http\Controllers\ReferenceDiscoveryController::class, 'show'])
+                ->where(['kind' => 'ext|doc', 'id' => '[0-9]+'])
+                ->middleware('throttle:60,1')
+                ->name('research.references.show');
+
+            Route::post('/research/references/analysis', [\App\Http\Controllers\ReferenceDiscoveryController::class, 'analysis'])
+                ->middleware('throttle:research')
+                ->name('research.references.analysis');
+
+            // Sintesis AI berbasis Evidence Bundle (Tahap 16; hanya provider uji).
+            Route::post('/research/references/synthesis', [\App\Http\Controllers\GroundedSynthesisController::class, 'store'])
+                ->middleware('throttle:research')
+                ->name('research.references.synthesis');
+
+            Route::get('/research/references/synthesis/{uuid}', [\App\Http\Controllers\GroundedSynthesisController::class, 'show'])
+                ->where('uuid', '[0-9a-fA-F-]{36}')
+                ->middleware('throttle:60,1')
+                ->name('research.references.synthesis.show');
 
 
             /*
@@ -655,6 +696,17 @@ Route::prefix($adminPath)
                     ]
                 )->name('dashboard');
 
+                // Filter Penggunaan AI di Beranda tanpa reload (JSON, hanya baca).
+                Route::get(
+                    '/ai-usage',
+                    [
+                        AdminDashboardController::class,
+                        'usage',
+                    ]
+                )
+                    ->middleware('throttle:60,1')
+                    ->name('dashboard.ai-usage');
+
 
                 /*
                 |--------------------------------------------------------------------------
@@ -702,6 +754,23 @@ Route::prefix($adminPath)
                     ]
                 )->name('library.update');
 
+                // Duplikat, versi, dan penyajian PDF privat (hanya admin; tidak ada URL storage publik).
+                Route::post('/library/check-duplicate', [AdminLibraryController::class, 'checkDuplicate'])
+                    ->middleware('throttle:60,1')
+                    ->name('library.check-duplicate');
+
+                Route::get('/library/files/{file}/view', [AdminLibraryController::class, 'viewFile'])
+                    ->middleware('throttle:120,1')
+                    ->name('library.files.view');
+
+                Route::get('/library/files/{file}/download', [AdminLibraryController::class, 'downloadFile'])
+                    ->middleware('throttle:60,1')
+                    ->name('library.files.download');
+
+                Route::post('/library/{document}/files/{file}/restore', [AdminLibraryController::class, 'restore'])
+                    ->middleware('throttle:20,1')
+                    ->name('library.files.restore');
+
 
                 /*
                 |--------------------------------------------------------------------------
@@ -716,6 +785,8 @@ Route::prefix($adminPath)
                         'index',
                     ]
                 )->name('tools.index');
+
+                Route::get('/tools/check', [AdminAiToolController::class, 'check'])->name('tools.check');
 
                 Route::get(
                     '/tools/create',
@@ -795,5 +866,10 @@ Route::prefix($adminPath)
                         'update',
                     ]
                 )->name('prompts.update');
+
+                // Instruksi & Versi: revisi (draf baru), aktivasi versi, arsip draf. Semua lewat PromptVersions.
+                Route::post('/prompts/{prompt}/revise', [AdminPromptController::class, 'revise'])->name('prompts.revise');
+                Route::patch('/prompts/{prompt}/activate', [AdminPromptController::class, 'activate'])->name('prompts.activate');
+                Route::patch('/prompts/{prompt}/archive', [AdminPromptController::class, 'archive'])->name('prompts.archive');
             });
     });

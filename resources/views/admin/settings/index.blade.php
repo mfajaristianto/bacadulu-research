@@ -1,666 +1,171 @@
 @extends('layouts.admin')
 
-@section('title', 'Settings')
-@section('page_title', 'Settings')
+@section('title', 'Pengaturan')
+@section('page_title', 'Pengaturan')
+
+@php
+    $nf = fn ($n) => number_format((int) $n, 0, ',', '.');
+    $iconPath = [
+        'riset' => 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z M20 20l-4-4',
+        'sumber' => 'M12 16V4 M7 9l5-5 5 5 M5 20h14',
+        'dokumen' => 'M7 3h7l4 4v14H7z M14 3v4h4 M10 12h5 M10 16h5',
+        'operasional' => 'M4 7h10 M18 7h2 M4 17h2 M10 17h10 M14 5v4 M6 15v4',
+        'sistem' => 'M7 11V8a5 5 0 0 1 10 0v3 M6 11h12v9H6z',
+    ];
+    $byCat = collect($items)->groupBy('cat');
+@endphp
 
 @section('content')
-
-<section class="admin-page">
-
-    <header class="bd-admin-page-head">
-
-        <div class="bd-admin-page-head__copy">
-
-            <p class="bd-admin-kicker">
-                SYSTEM / SETTINGS
-            </p>
-
-            <h1>
-                Research Runtime
-            </h1>
-
-            <p>
-                Parameter operasional dapat diubah dari admin.
-                Secret, API key, password, dan connector token
-                tetap dikelola dari environment server.
-            </p>
-
+{{-- Formulir tunggal untuk semua kelompok (draf tidak hilang saat berpindah kelompok). Tanpa JavaScript semua kelompok tampil berurutan dan formulir tetap tersimpan lewat PUT biasa. --}}
+<section class="admin-page bd-ix bd-st is-entering" data-st data-st-url="{{ route('admin.settings.index') }}" data-st-revision="{{ $revision }}">
+    <header class="bd-ix__head bd-st__head">
+        <div>
+            <h1>Pengaturan</h1>
+            <p>Kelola konfigurasi operasional dan preferensi sistem BacaDulu Research.</p>
         </div>
-
+        <p class="bd-st__headmeta" data-st-swap="headmeta">
+            {{ $nf($overview['managed']) }} pengaturan di {{ $overview['groups'] }} kelompok
+            · @if ($overview['updatedAt']) diperbarui <time datetime="{{ $overview['updatedAt']->toIso8601String() }}">{{ $overview['updatedAt']->locale('id')->translatedFormat('j M Y, H.i') }} WIB</time>@else belum pernah diubah dari bawaan server @endif
+        </p>
     </header>
 
-    <div class="bd-admin-note">
+    @if (session('success'))
+        <div class="bd-ix__toast is-ok" role="status"><p>{{ session('success') }}</p></div>
+    @endif
+    @if ($errors->has('revision'))
+        <div class="bd-ix__toast is-bad" role="alert"><p>{{ $errors->first('revision') }}</p></div>
+    @endif
 
-        <strong>
-            Secret isolation
-        </strong>
-
-        <p>
-            OpenAI API key:
-            <strong>
-                {{
-                    $apiKeyConfigured
-                        ? 'Configured ✓'
-                        : 'Not configured'
-                }}
-            </strong>
-
-            · Queue connection:
-            <strong>
-                {{ strtoupper($queueConnection) }}
-            </strong>
-
-            · Source Sync:
-            <strong>
-                {{ strtoupper($sourceSyncProvider) }}
-            </strong>
-        </p>
-
+    <div data-st-swap="overview">
+        @include('admin.settings.partials.overview')
     </div>
 
-    <form
-        method="POST"
-        action="{{ route('admin.settings.update') }}"
-        class="bd-admin-form"
-        style="margin-top:22px;"
-    >
+    <div class="bd-st__conflict" data-st-conflict role="alert" hidden>
+        <p data-st-conflict-text>Pengaturan diubah oleh admin lain.</p>
+        <button type="button" class="bd-ix__btn" data-st-reload>Muat ulang halaman</button>
+    </div>
 
-        @csrf
-        @method('PUT')
+    <div class="bd-st__layout">
+        <aside class="bd-st__side" aria-label="Kelompok pengaturan">
+            <label class="bd-ix__search bd-st__search">
+                <span class="bd-ix__sr">Cari pengaturan</span>
+                @include('admin.tools.partials.icon', ['name' => 'search'])
+                <input class="bd-ix__input" type="search" placeholder="Cari pengaturan…" autocomplete="off" data-st-search aria-controls="st-editor">
+            </label>
+            <p class="bd-st__found" data-st-found role="status" aria-live="polite" hidden></p>
 
-        {{-- AI --}}
-        <section class="bd-admin-form__section">
-
-            <div class="bd-admin-form__section-head">
-
-                <strong>
-                    AI Runtime
-                </strong>
-
-                <p>
-                    Provider dan parameter generation.
-                    API key tidak pernah disimpan di database.
-                </p>
-
+            <div class="bd-st__nav" role="tablist" aria-label="Kelompok pengaturan" aria-orientation="vertical" data-st-tabs>
+                <span class="bd-st__nav-ind" aria-hidden="true" data-st-ind></span>
+                @foreach ($categories as $key => [$name, $desc])
+                    <button type="button" role="tab" id="st-tab-{{ $key }}" class="bd-st__tab {{ $category === $key ? 'is-on' : '' }}" aria-selected="{{ $category === $key ? 'true' : 'false' }}" aria-controls="st-panel-{{ $key }}" tabindex="{{ $category === $key ? 0 : -1 }}" data-st-tab="{{ $key }}">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="{{ $iconPath[$key] }}" /></svg>
+                        <span class="bd-st__tab-copy">
+                            <strong>{{ $name }}</strong>
+                            <small>{{ $desc }}</small>
+                        </span>
+                        <span class="bd-st__tab-meta" data-st-tabmeta="{{ $key }}">
+                            @if ($key === 'sistem')hanya baca @else{{ $overview['byCategory'][$key]['n'] ?? 0 }} @endif
+                        </span>
+                    </button>
+                @endforeach
             </div>
+        </aside>
 
-            <div class="bd-admin-form__grid">
+        <form method="POST" action="{{ route('admin.settings.update') }}" class="bd-st__editor" id="st-editor" data-st-form novalidate>
+            @csrf @method('PUT')
+            <input type="hidden" name="revision" value="{{ $revision }}" data-st-revision-input>
 
-                <label class="bd-admin-form-field">
+            @foreach ($categories as $key => [$name, $desc])
+                <section class="bd-st__panel" role="tabpanel" id="st-panel-{{ $key }}" aria-labelledby="st-tab-{{ $key }}" data-st-panel="{{ $key }}" @if ($category !== $key) data-st-inactive @endif>
+                    <header class="bd-st__panel-head">
+                        <h2>{{ $name }}</h2>
+                        <p>{{ $desc }}</p>
+                    </header>
 
-                    <span>
-                        Provider
-                    </span>
+                    @if ($key === 'sistem')
+                        @include('admin.settings.partials.system')
+                    @else
+                        @php
+                            $rows = $byCat[$key] ?? collect();
+                            $main = $rows->reject(fn ($i) => $i['advanced'] ?? false);
+                            $adv = $rows->filter(fn ($i) => $i['advanced'] ?? false);
+                        @endphp
+                        <div class="bd-st__rows">
+                            @foreach ($main as $item)
+                                @include('admin.settings.partials.row', ['item' => $item])
+                            @endforeach
+                        </div>
 
-                    <select
-                        class="bd-admin-select"
-                        name="ai_provider"
-                    >
-                        <option
-                            value="mock"
-                            @selected(
-                                old(
-                                    'ai_provider',
-                                    data_get(
-                                        $settings,
-                                        'ai.provider',
-                                        'mock'
-                                    )
-                                )
-                                ===
-                                'mock'
-                            )
-                        >
-                            Mock
-                        </option>
+                        @if ($adv->isNotEmpty())
+                            <details class="bd-st__adv" data-st-adv>
+                                <summary><span>Pengaturan lanjutan</span> <small>{{ $adv->count() }} pengaturan</small></summary>
+                                <div class="bd-st__rows">
+                                    @foreach ($adv as $item)
+                                        @include('admin.settings.partials.row', ['item' => $item])
+                                    @endforeach
+                                </div>
+                            </details>
+                        @endif
 
-                        <option
-                            value="openai"
-                            @selected(
-                                old(
-                                    'ai_provider',
-                                    data_get(
-                                        $settings,
-                                        'ai.provider'
-                                    )
-                                )
-                                ===
-                                'openai'
-                            )
-                        >
-                            OpenAI
-                        </option>
-                    </select>
+                        @if ($key === 'sumber' && $upload)
+                            <div class="bd-st__util">
+                                <h3 class="bd-st__h">Penggunaan nyata batas unggah</h3>
+                                <div class="bd-st__meter" role="img" aria-label="Berkas terbesar {{ $nf($upload['maxKb']) }} KB dari batas {{ $nf($upload['limitKb']) }} KB">
+                                    <span style="--w: {{ max(2, (float) $upload['pct']) }}%"></span>
+                                </div>
+                                <p>Berkas terbesar yang tercatat: <strong>{{ number_format($upload['maxKb'] / 1024, 1, ',', '.') }} MB</strong> dari batas <strong>{{ number_format($upload['limitKb'] / 1024, 0, ',', '.') }} MB</strong> ({{ str_replace('.', ',', (string) $upload['pct']) }}%), dari {{ $nf($upload['count']) }} berkas. Dihitung dari tabel berkas sumber.</p>
+                            </div>
+                        @endif
 
-                </label>
+                        <aside class="bd-st__preview" data-st-preview="{{ $key }}" aria-live="polite">
+                            <h3 class="bd-st__h">Ringkasan efek <span>· dari draf, belum tersimpan</span></h3>
+                            <p data-st-preview-text></p>
+                            <p class="bd-st__preview-note" data-st-preview-warn hidden></p>
+                            <p class="bd-ix__hint">Ini penjelasan aturan, bukan simulasi jawaban AI. Tidak ada yang ditulis ke database sebelum Anda menyimpan.</p>
+                        </aside>
 
-                <label class="bd-admin-form-field">
+                        @if ($key === 'operasional')
+                            <div class="bd-st__foreign">
+                                <h3 class="bd-st__h">Tersimpan tetapi belum dipakai</h3>
+                                @foreach ($unused as $u)
+                                    <div class="bd-st__ro">
+                                        <div><strong>{{ $u['label'] }}</strong><p>{{ $u['note'] }}</p></div>
+                                        <span class="bd-st__rovalue">{{ $u['value'] }} {{ $u['unit'] }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    @endif
+                </section>
+            @endforeach
+        </form>
+    </div>
 
-                    <span>
-                        Model
-                    </span>
+    <div data-st-swap="history">
+        @include('admin.settings.partials.history')
+    </div>
 
-                    <input
-                        class="bd-admin-input"
-                        name="ai_model"
-                        value="{{
-                            old(
-                                'ai_model',
-                                data_get(
-                                    $settings,
-                                    'ai.model'
-                                )
-                            )
-                        }}"
-                        placeholder="Kosong = provider default"
-                    >
-
-                </label>
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Timeout
-                    </span>
-
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="ai_timeout"
-                        min="10"
-                        max="300"
-                        value="{{
-                            old(
-                                'ai_timeout',
-                                data_get(
-                                    $settings,
-                                    'ai.timeout',
-                                    90
-                                )
-                            )
-                        }}"
-                        required
-                    >
-
-                    <small>
-                        Detik.
-                    </small>
-
-                </label>
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Max output tokens
-                    </span>
-
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="max_output_tokens"
-                        min="256"
-                        max="16000"
-                        value="{{
-                            old(
-                                'max_output_tokens',
-                                data_get(
-                                    $settings,
-                                    'ai.max_output_tokens',
-                                    3500
-                                )
-                            )
-                        }}"
-                        required
-                    >
-
-                </label>
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Conversation context
-                    </span>
-
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="context_messages"
-                        min="0"
-                        max="30"
-                        value="{{
-                            old(
-                                'context_messages',
-                                data_get(
-                                    $settings,
-                                    'ai.context_messages',
-                                    8
-                                )
-                            )
-                        }}"
-                        required
-                    >
-
-                    <small>
-                        Jumlah message sebelumnya, bukan evidence.
-                    </small>
-
-                </label>
-
+    {{-- Di luar <form> agar tetap menempel sampai akhir halaman; tombol simpan terhubung ke formulir lewat atribut form. --}}
+        <div class="bd-st__savebar" data-st-savebar hidden role="region" aria-label="Perubahan belum disimpan">
+            <p><strong data-st-count>0</strong> <span data-st-count-label>perubahan belum disimpan</span></p>
+            <div class="bd-st__saveactions">
+                <button type="button" class="bd-ix__btn bd-ix__btn--quiet" data-st-cancel>Batalkan</button>
+                <button type="submit" form="st-editor" class="bd-ix__btn bd-ix__btn--primary" data-st-save>Simpan perubahan</button>
             </div>
+        </div>
 
-        </section>
+    <div class="bd-st__toast" data-st-toast role="status" aria-live="polite" hidden></div>
 
-        {{-- INGESTION --}}
-        <section class="bd-admin-form__section">
-
-            <div class="bd-admin-form__section-head">
-
-                <strong>
-                    Source Ingestion
-                </strong>
-
-                <p>
-                    PDF extraction dan document chunking.
-                </p>
-
+    <dialog class="bd-st__dialog" data-st-dialog aria-labelledby="st-dialog-title">
+        <form method="dialog" class="bd-st__dialog-box">
+            <h2 id="st-dialog-title">Tinjau perubahan berdampak besar</h2>
+            <p class="bd-st__dialog-lead">Perubahan berikut memengaruhi cara sistem bekerja untuk pengguna. Berlaku untuk riset baru; data lama tidak diubah.</p>
+            <ul data-st-dialog-list></ul>
+            <div class="bd-st__dialog-actions">
+                <button type="submit" value="cancel" class="bd-ix__btn bd-ix__btn--quiet">Kembali mengedit</button>
+                <button type="submit" value="confirm" class="bd-ix__btn bd-ix__btn--primary" data-st-confirm>Ya, simpan</button>
             </div>
-
-            <div class="bd-admin-form__grid">
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Upload limit KB
-                    </span>
-
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="upload_limit_kb"
-                        value="{{
-                            old(
-                                'upload_limit_kb',
-                                data_get(
-                                    $settings,
-                                    'ingestion.max_upload_kb',
-                                    102400
-                                )
-                            )
-                        }}"
-                        required
-                    >
-
-                </label>
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Chunk words
-                    </span>
-
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="chunk_words"
-                        value="{{
-                            old(
-                                'chunk_words',
-                                data_get(
-                                    $settings,
-                                    'ingestion.chunk_words',
-                                    500
-                                )
-                            )
-                        }}"
-                        required
-                    >
-
-                </label>
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Chunk overlap
-                    </span>
-
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="chunk_overlap_words"
-                        value="{{
-                            old(
-                                'chunk_overlap_words',
-                                data_get(
-                                    $settings,
-                                    'ingestion.chunk_overlap_words',
-                                    75
-                                )
-                            )
-                        }}"
-                        required
-                    >
-
-                </label>
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Minimum chunk
-                    </span>
-
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="minimum_chunk_words"
-                        value="{{
-                            old(
-                                'minimum_chunk_words',
-                                data_get(
-                                    $settings,
-                                    'ingestion.minimum_chunk_words',
-                                    60
-                                )
-                            )
-                        }}"
-                        required
-                    >
-
-                </label>
-
-            </div>
-
-        </section>
-
-        {{-- RETRIEVAL --}}
-        <section class="bd-admin-form__section">
-
-            <div class="bd-admin-form__section-head">
-
-                <strong>
-                    Retrieval
-                </strong>
-
-                <p>
-                    Guard relevance dan evidence selection.
-                </p>
-
-            </div>
-
-            <div class="bd-admin-form__grid">
-
-                <label class="bd-admin-form-field">
-                    <span>Candidate limit</span>
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="candidate_limit"
-                        value="{{ old('candidate_limit', data_get($settings, 'retrieval.candidate_limit', 400)) }}"
-                        required
-                    >
-                </label>
-
-                <label class="bd-admin-form-field">
-                    <span>Evidence limit</span>
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="evidence_limit"
-                        value="{{ old('evidence_limit', data_get($settings, 'retrieval.evidence_limit', 8)) }}"
-                        required
-                    >
-                </label>
-
-                <label class="bd-admin-form-field">
-                    <span>Max per document</span>
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="max_per_document"
-                        value="{{ old('max_per_document', data_get($settings, 'retrieval.max_per_document', 3)) }}"
-                        required
-                    >
-                </label>
-
-                <label class="bd-admin-form-field">
-                    <span>Minimum evidence</span>
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="minimum_evidence"
-                        value="{{ old('minimum_evidence', data_get($settings, 'retrieval.minimum_evidence', 2)) }}"
-                        required
-                    >
-                </label>
-
-                <label class="bd-admin-form-field">
-                    <span>Minimum score</span>
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="1"
-                        name="minimum_score"
-                        value="{{ old('minimum_score', data_get($settings, 'retrieval.minimum_score', 0.15)) }}"
-                        required
-                    >
-                </label>
-
-                <label class="bd-admin-form-field">
-                    <span>Excerpt length</span>
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="excerpt_length"
-                        value="{{ old('excerpt_length', data_get($settings, 'retrieval.excerpt_length', 900)) }}"
-                        required
-                    >
-                </label>
-
-            </div>
-
-        </section>
-
-        {{-- QUEUE --}}
-        <section class="bd-admin-form__section">
-
-            <div class="bd-admin-form__section-head">
-
-                <strong>
-                    Queue & Live Processing
-                </strong>
-
-                <p>
-                    Queue connection tetap berasal dari ENV.
-                    Di sini hanya nama queue dan refresh interval.
-                </p>
-
-            </div>
-
-            <div class="bd-admin-form__grid">
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Research queue
-                    </span>
-
-                    <input
-                        class="bd-admin-input"
-                        name="research_queue"
-                        value="{{ old('research_queue', data_get($settings, 'queue.research_queue', 'research')) }}"
-                        required
-                    >
-
-                </label>
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Ingestion queue
-                    </span>
-
-                    <input
-                        class="bd-admin-input"
-                        name="ingestion_queue"
-                        value="{{ old('ingestion_queue', data_get($settings, 'queue.ingestion_queue', 'ingestion')) }}"
-                        required
-                    >
-
-                </label>
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Live refresh
-                    </span>
-
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="live_refresh_seconds"
-                        min="1"
-                        max="30"
-                        value="{{ old('live_refresh_seconds', data_get($settings, 'queue.live_refresh_seconds', 2)) }}"
-                        required
-                    >
-
-                    <small>
-                        Detik.
-                    </small>
-
-                </label>
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Profile gate
-                    </span>
-
-                    <input
-                        class="bd-admin-input"
-                        type="number"
-                        name="profile_gate"
-                        min="0"
-                        max="100"
-                        value="{{ old('profile_gate', data_get($settings, 'access.profile_gate', 80)) }}"
-                        required
-                    >
-
-                </label>
-
-            </div>
-
-        </section>
-
-        {{-- DOCUMENT --}}
-        <section class="bd-admin-form__section">
-
-            <div class="bd-admin-form__section-head">
-
-                <strong>
-                    Document Defaults
-                </strong>
-
-                <p>
-                    Default awal untuk document generation.
-                </p>
-
-            </div>
-
-            <div class="bd-admin-form__grid">
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Default document type
-                    </span>
-
-                    <select
-                        class="bd-admin-select"
-                        name="default_document_type"
-                    >
-
-                        @foreach($documentTypes as $type)
-
-                            <option
-                                value="{{ $type }}"
-                                @selected(
-                                    old(
-                                        'default_document_type',
-                                        data_get(
-                                            $settings,
-                                            'documents.default_type',
-                                            'Research Article'
-                                        )
-                                    )
-                                    ===
-                                    $type
-                                )
-                            >
-                                {{ $type }}
-                            </option>
-
-                        @endforeach
-
-                    </select>
-
-                </label>
-
-                <label class="bd-admin-form-field">
-
-                    <span>
-                        Default citation style
-                    </span>
-
-                    <select
-                        class="bd-admin-select"
-                        name="default_citation_style"
-                    >
-
-                        @foreach($citationStyles as $style)
-
-                            <option
-                                value="{{ $style }}"
-                                @selected(
-                                    old(
-                                        'default_citation_style',
-                                        data_get(
-                                            $settings,
-                                            'documents.default_citation_style',
-                                            'APA 7'
-                                        )
-                                    )
-                                    ===
-                                    $style
-                                )
-                            >
-                                {{ $style }}
-                            </option>
-
-                        @endforeach
-
-                    </select>
-
-                </label>
-
-            </div>
-
-        </section>
-
-        <section class="bd-admin-form__section">
-
-            <button
-                type="submit"
-                class="bd-admin-button bd-admin-button--primary"
-            >
-                Simpan Runtime Settings
-            </button>
-
-        </section>
-
-    </form>
-
+        </form>
+    </dialog>
 </section>
-
 @endsection

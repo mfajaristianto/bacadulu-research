@@ -1,0 +1,144 @@
+/* ============================================================
+   TEMPLATE & FORMAT CETAK (admin/document-templates)
+   Mewarisi token dan komponen .bd-ix (admin-instructions.css) serta kerangka .bd-dp (admin-document-prompts.css). Berkas ini hanya
+   menambah: kolom daftar, preset, editor dua area (pengaturan | pratinjau halaman) dengan tab pengaturan, dan tabel dukungan keluaran.
+   Perilaku (tab, satuan, pratinjau langsung) ada di resources/js/admin-print-format.js.
+   ============================================================ */
+
+/* Daftar ------------------------------------------------------------------------------------------------ */
+
+.bd-pf__list-head,
+.bd-pf__row { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.3fr); }
+.bd-pf__default { margin-left: 6px; padding: 1px 8px; border-radius: 8px; background: var(--ix-chip); color: var(--ix-ink-2); font-size: .6875rem; font-weight: 700; vertical-align: middle; }
+.bd-pf__actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; margin-top: 4px; }
+.bd-pf__item { list-style: none; }
+
+/* Buat template ----------------------------------------------------------------------------------------- */
+
+.bd-pf__new { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 56px); align-items: start; }
+.bd-pf__new > section, .bd-pf__new-side { display: grid; gap: 14px; min-width: 0; }
+.bd-pf__new-side { gap: 32px; }
+.bd-pf__preset { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 20px; padding: 14px 0; border-top: 1px solid var(--dp-line); }
+.bd-pf__preset .bd-ix__text { flex: 1 1 280px; min-width: 0; }
+.bd-pf__inline { display: grid; grid-template-columns: minmax(150px, 1fr) auto; gap: 8px; align-items: center; flex: 1 1 320px; min-width: 0; }
+.bd-pf__inline .bd-ix__note { grid-column: 1 / -1; }
+
+/* Editor ------------------------------------------------------------------------------------------------ */
+
+.bd-pf__pane { padding-left: 0; border-left: 0; }
+.bd-pf__workspace { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr); gap: clamp(24px, 3vw, 40px); align-items: start; }
+.bd-pf__workspace > * { min-width: 0; }
+.bd-pf__form { display: grid; gap: 18px; min-width: 0; }
+.bd-pf__fieldset { display: grid; gap: 18px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.bd-pf__fieldset:disabled .bd-ix__input { color: var(--ix-ink-2); background: var(--ix-hover); cursor: not-allowed; }
+.bd-pf__info { display: grid; gap: 10px; }
+.bd-pf .bd-ix__grid { align-items: start; }
+.bd-pf__identity { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.bd-pf__identity > :first-child { grid-column: 1 / -1; }
+.bd-pf__form .bd-ix__input, .bd-pf__form .bd-dp__check { scroll-margin-block: 90px; }
+.bd-pf__more summary { cursor: pointer; width: max-content; padding: 4px 0; color: var(--ix-ink-2); font-size: var(--text-label); font-weight: 650; }
+.bd-pf__more summary small { color: var(--ix-ink-3); font-weight: 500; }
+.bd-pf__more[open] summary { margin-bottom: 6px; }
+.bd-pf__legacy { display: grid; gap: 14px; max-width: 720px; }
+
+.bd-pf__tabs { display: flex; flex-wrap: wrap; gap: 0 2px; border-bottom: 1px solid var(--dp-line); }
+.bd-pf__tab { position: relative; flex: none; min-height: 40px; padding: 10px 10px; border: 0; background: transparent; color: var(--ix-ink-3); font: inherit; font-size: var(--text-label); font-weight: 700; white-space: nowrap; cursor: pointer; border-radius: 10px 10px 0 0; transition: color var(--ix-t) ease, background-color var(--ix-t) ease; }
+.bd-pf__tab:hover { color: var(--ix-ink); background: var(--ix-hover); }
+.bd-pf__tab.is-on { color: var(--ix-ink); }
+.bd-pf__tab.is-on::after { content: ""; position: absolute; right: 10px; bottom: -1px; left: 10px; height: 2px; border-radius: 2px; background: var(--ix-red); }
+.bd-pf__tab:focus-visible { outline: 2px solid var(--ix-ink); outline-offset: -2px; }
+.bd-pf__tab--preview { display: none; }
+
+.bd-pf__panel { display: grid; gap: 16px; padding-top: 4px; }
+.bd-pf__panel[hidden] { display: none; }
+.bd-pf__panel-title { margin-top: 6px; font-size: 1rem; font-weight: 750; }
+.bd-pf__panel-title:first-child { margin-top: 0; }
+.bd-pf__grid4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.bd-pf__hrow { padding-top: 6px; border-top: 1px solid var(--dp-line); }
+.bd-pf__hrow:first-of-type { border-top: 0; }
+.bd-pf__panel code { padding: 1px 6px; border-radius: 6px; background: var(--ix-chip); font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .8125rem; }
+
+.bd-pf__savebar { position: sticky; bottom: 0; z-index: 2; justify-content: flex-end; padding: 12px 0; background: linear-gradient(to top, var(--ix-bg, #FFFBF5) 70%, transparent); }
+
+/* Pratinjau --------------------------------------------------------------------------------------------- */
+
+.bd-pf__preview { position: sticky; top: 16px; display: grid; gap: 12px; max-height: calc(100dvh - 32px); overflow-y: auto; padding: 0 4px 4px 0; outline: none; }
+.bd-pf__preview[hidden] { display: none; }
+.bd-pf__preview[aria-busy="true"] .bd-pf__pages { opacity: .6; }
+.bd-pf__preview.is-stale .bd-pf__pages { opacity: .45; }
+.bd-pf__preview.is-stale [data-pf-status] { color: var(--ix-bad); font-weight: 650; }
+.bd-pf__preview-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.bd-pf__preview-head .bd-ix__side-title { margin: 0; }
+.bd-pf__controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.bd-pf__status { color: var(--ix-ink-3); font-size: var(--text-label); font-variant-numeric: tabular-nums; }
+.bd-pf__status-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.bd-pf__pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 16px; transition: opacity var(--ix-t) ease; }
+.bd-pf__pages.is-large { grid-template-columns: minmax(0, 1fr); }
+.bd-pf__zoom { display: inline-flex; align-items: center; gap: 8px; font-size: var(--text-label); color: var(--ix-ink-2); cursor: pointer; }
+.bd-pf__zoom input { width: 16px; height: 16px; accent-color: var(--ix-red); }
+.bd-pf__pages .pf-page { display: grid; gap: 6px; margin: 0; }
+.bd-pf__pages svg { display: block; width: 100%; height: auto; background: #fff; border: 1px solid #D9CBB4; border-radius: 3px; box-shadow: 0 3px 12px rgba(42, 32, 24, .12); }
+.bd-pf__pages svg text { fill: #111; }
+.bd-pf__pages figcaption { color: var(--ix-ink-3); font-size: .75rem; line-height: 1.4; }
+.bd-pf__downloads { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+.bd-pf__badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 750; white-space: nowrap; }
+.bd-pf__badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.bd-pf__badge--ok { background: var(--ix-ok-soft); color: var(--ix-ok); }
+.bd-pf__badge--warn { background: #FBF1DF; color: var(--ix-warn); }
+.bd-pf__badge--bad { background: var(--ix-bad-soft); color: var(--ix-bad); }
+
+.bd-pf__checks { display: grid; gap: 6px; }
+.bd-pf__checks li { position: relative; padding: 8px 10px 8px 30px; border-radius: 10px; font-size: var(--text-body-sm); line-height: 1.5; }
+.bd-pf__checks li::before { position: absolute; top: 8px; left: 10px; width: 16px; font-weight: 800; text-align: center; }
+.bd-pf__checks li.is-ok { background: transparent; color: var(--ix-ink-2); }
+.bd-pf__checks li.is-ok::before { content: "✓"; color: var(--ix-ok); }
+.bd-pf__checks li.is-warn { background: #FBF1DF; }
+.bd-pf__checks li.is-warn::before { content: "!"; color: var(--ix-warn); }
+.bd-pf__checks li.is-error { background: var(--ix-bad-soft); }
+.bd-pf__checks li.is-error::before { content: "×"; color: var(--ix-bad); }
+
+.bd-pf__support { width: 100%; border-collapse: collapse; font-size: var(--text-body-sm); }
+.bd-pf__support th, .bd-pf__support td { padding: 8px 10px; border-top: 1px solid var(--dp-line); text-align: left; vertical-align: top; }
+.bd-pf__support thead th { border-top: 0; color: var(--ix-ink-3); font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; }
+.bd-pf__support tbody th { font-weight: 650; }
+.bd-pf__support small { display: block; margin-top: 2px; color: var(--ix-ink-3); font-size: .75rem; font-weight: 500; line-height: 1.45; }
+.bd-pf__support .is-yes { color: var(--ix-ok); font-weight: 700; }
+.bd-pf__support .is-no { color: var(--ix-ink-3); }
+
+/* Responsif --------------------------------------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+    /* Pratinjau menjadi tab tersendiri: tidak ada dua kolom sempit dan tidak ada dialog bersarang. */
+    .bd-pf__workspace { grid-template-columns: minmax(0, 1fr); }
+    .bd-pf__tab--preview { display: inline-block; }
+    .bd-pf__preview { position: static; max-height: none; overflow: visible; }
+    .bd-pf__workspace[data-pf-view="preview"] .bd-pf__info,
+    .bd-pf__workspace[data-pf-view="preview"] .bd-pf__savebar { display: none; }
+    .bd-pf__list-head { display: none; }
+    .bd-pf__row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .bd-pf__row .bd-ix__text { grid-column: 1 / -1; }
+    .bd-pf__new { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 760px) {
+    .bd-pf__identity { grid-template-columns: minmax(0, 1fr); }
+    .bd-pf__tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; }
+    .bd-pf__grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .bd-pf__controls { grid-template-columns: minmax(0, 1fr); }
+    .bd-pf__inline { grid-template-columns: minmax(0, 1fr); }
+    .bd-pf__inline .bd-ix__btn { justify-self: start; }
+    .bd-pf__support th, .bd-pf__support td { padding: 8px 6px; }
+    .bd-pf__savebar .bd-ix__btn { flex: 1 1 auto; }
+    .bd-pf__pages { grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); }
+}
+
+@media (max-width: 420px) {
+    .bd-pf__grid4 { grid-template-columns: minmax(0, 1fr); }
+    .bd-pf__row { grid-template-columns: minmax(0, 1fr); }
+    .bd-pf__actions { justify-content: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bd-pf *, .bd-pf *::before, .bd-pf *::after { transition-duration: .01ms !important; }
+}

@@ -270,6 +270,16 @@ class AcademicDocumentBuilder
         |--------------------------------------------------------------------------
         */
 
+        /*
+         * Format cetak (Template & Format Cetak): bila template punya versi layout aktif, salinan layout disimpan
+         * di konten dokumen ini sehingga dokumen lama tidak berubah ketika versi format baru diaktifkan.
+         * Tanpa layout, renderer lama dan format lama dipakai persis seperti sebelumnya.
+         */
+        $print =
+            $template
+                ? app(PrintTemplates::class)->effective($template)
+                : null;
+
         $templateSnapshot =
             $template
                 ? [
@@ -353,6 +363,15 @@ class AcademicDocumentBuilder
             'format' =>
                 $format,
 
+            ...(
+                $print
+                    ? [
+                        'layout' =>
+                            $print['layout'],
+                    ]
+                    : []
+            ),
+
             'sections' =>
                 $sections,
 
@@ -360,12 +379,32 @@ class AcademicDocumentBuilder
                 $references,
 
             'template' =>
-                $templateSnapshot,
+                $templateSnapshot
+                + (
+                    $print
+                        ? [
+                            'layout_version' =>
+                                $print['version'],
+
+                            'layout_hash' =>
+                                $print['hash'],
+                        ]
+                        : []
+                ),
 
             'glossary_context' =>
                 $glossaryContext,
 
             'provenance' => [
+                ...(
+                    $print
+                        ? [
+                            'print_layout_hash' =>
+                                $print['hash'],
+                        ]
+                        : []
+                ),
+
                 'conversation_id' =>
                     $run
                         ->conversation_id,
@@ -1707,6 +1746,48 @@ class AcademicDocumentBuilder
             ->unique()
             ->values()
             ->all();
+    }
+
+    /**
+     * Konten dokumen dari bagian yang sudah ditulis alur Generate Document (bukan dari AiRun). Format cetak mengikuti template
+     * bila ada, selain itu format baku. Tidak memanggil AI.
+     *
+     * @param  list<array{heading: string, body: string, section_role?: string}>  $sections
+     * @param  list<string>  $references
+     * @param  array<string, mixed>  $provenance
+     */
+    public function buildFromSections(
+        string $title,
+        string $documentType,
+        string $citationStyle,
+        array $sections,
+        array $references,
+        array $provenance = [],
+        ?DocumentTemplate $template = null
+    ): array {
+        $schema = $this->templateSchema($template, $documentType);
+        $print = $template ? app(PrintTemplates::class)->effective($template) : null;
+
+        return [
+            'title' => $title,
+            'document_type' => $documentType,
+            'citation_style' => $citationStyle,
+            'format' => $this->normalizeFormat($schema['format'] ?? []),
+            ...($print ? ['layout' => $print['layout']] : []),
+            'sections' => array_values(array_map(fn ($s) => [
+                'heading' => (string) $s['heading'],
+                'body' => (string) $s['body'],
+                'section_role' => $s['section_role'] ?? 'draft',
+            ], $sections)),
+            'references' => array_values($references),
+            'template' => $template ? [
+                'id' => $template->id, 'code' => $template->code, 'name' => $template->name, 'document_type' => $template->document_type,
+                'version' => (int) $template->version, 'schema_hash' => hash('sha256', json_encode($template->schema_json ?? [])),
+                ...($print ? ['layout_version' => $print['version'], 'layout_hash' => $print['hash']] : []),
+            ] : [],
+            'glossary_context' => [],
+            'provenance' => $provenance + ['validated_result' => true, 'generated_at' => now()->toIso8601String()],
+        ];
     }
 
     private function upper(

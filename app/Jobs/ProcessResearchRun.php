@@ -295,7 +295,21 @@ class ProcessResearchRun implements ShouldQueue
                             'next_action'
                         ]
                         ?? null,
-                ],
+                ] + (
+                    isset(
+                        $result[
+                            'follow_ups'
+                        ]
+                    )
+                        ? [
+                            // Kontrak data untuk Workspace; UI pengguna belum menampilkannya.
+                            'follow_ups' =>
+                                $result[
+                                    'follow_ups'
+                                ],
+                        ]
+                        : []
+                ),
             ]);
 
             /*
@@ -538,8 +552,24 @@ class ProcessResearchRun implements ShouldQueue
                     ],
                 ]);
 
+            /*
+             * Error teknis (retrieval/provider) berbeda dari "literatur tidak ada".
+             * Pesan boleh dikustom lewat aturan Perilaku Jawaban AI; tanpa itu teks lama dipakai.
+             * Detail exception tidak pernah ditampilkan ke pengguna.
+             */
+            $errorCopy =
+                $this->behaviorErrorCopy(
+                    $prompt
+                        ->aiTool
+                        ?->code
+                );
+
             $assistant->update([
                 'content' =>
+                    $errorCopy[
+                        'message'
+                    ]
+                    ??
                     'Research tidak dapat diselesaikan. Silakan coba kembali.',
 
                 'metadata' => [
@@ -556,6 +586,10 @@ class ProcessResearchRun implements ShouldQueue
                         [],
 
                     'next_action' =>
+                        $errorCopy[
+                            'next_action'
+                        ]
+                        ??
                         'Coba ulangi research request atau periksa konfigurasi AI/provider.',
                 ],
             ]);
@@ -672,6 +706,14 @@ class ProcessResearchRun implements ShouldQueue
             )
             ->update([
                 'content' =>
+                    $this->behaviorErrorCopy(
+                        $run
+                            ->aiTool
+                            ?->code
+                    )[
+                        'message'
+                    ]
+                    ??
                     'Research tidak dapat diselesaikan. Silakan coba kembali.',
 
                 'metadata' => [
@@ -688,6 +730,14 @@ class ProcessResearchRun implements ShouldQueue
                         [],
 
                     'next_action' =>
+                        $this->behaviorErrorCopy(
+                            $run
+                                ->aiTool
+                                ?->code
+                        )[
+                            'next_action'
+                        ]
+                        ??
                         'Coba ulangi research request atau periksa queue worker.',
                 ],
             ]);
@@ -710,6 +760,29 @@ class ProcessResearchRun implements ShouldQueue
                     ),
             ]
         );
+    }
+
+    /**
+     * Pesan error teknis dari aturan Perilaku Jawaban AI (kosong bila admin tidak menulisnya).
+     * Tidak pernah memuat detail exception dan tidak boleh menggagalkan penanganan error.
+     *
+     * @return array{message?: string, next_action?: string}
+     */
+    private function behaviorErrorCopy(
+        ?string $toolCode
+    ): array {
+        return app(
+            \App\Services\Research\AnswerBehaviorResolver::class
+        )
+            ->safe(
+                'research',
+                $toolCode
+            )[
+                'unavailable'
+            ][
+                'error'
+            ]
+            ?? [];
     }
 
     /*

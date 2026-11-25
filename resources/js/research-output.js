@@ -1081,6 +1081,13 @@ function escapeAttribute(value) {
         if (
             !parsed.sections.length
         ) {
+            // Tanpa section, seluruh teks sudah masuk intro di atas; jangan dirender dua kali.
+            if (introLines.length) {
+                answer.replaceChildren(
+                    wrapper,
+                );
+                return;
+            }
             const body =
                 document.createElement(
                     'div',
