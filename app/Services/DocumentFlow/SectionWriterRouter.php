@@ -13,7 +13,8 @@ use Throwable;
  *  - Penyedia gagal (rate limit, kuota, timeout, tidak tersedia, atau keluaran tidak lolos validasi) => keluaran penyedia itu
  *    DIBUANG seluruhnya; penyedia berikutnya menulis ulang bagian yang sama dari awal dengan SectionRequest yang identik.
  *    Tidak ada "melanjutkan token terakhir".
- *  - Penyedia berbayar (tier 'paid') dilewati kecuali config research.document_generation.allow_paid = true.
+ *  - Kebijakan research.document_generation.policy: free_only (bawaan; berbayar dilewati), free_first (gratis dulu, lalu berbayar),
+ *    paid_only. Berbayar tidak pernah dipakai pada free_only; allow_paid = true (lama) setara free_first bila policy tidak diisi.
  *  - Kegagalan non-failover (mis. permintaan ditolak) menghentikan bagian: penyedia lain tidak dicoba.
  */
 final class SectionWriterRouter
@@ -23,16 +24,21 @@ final class SectionWriterRouter
     /** @return list<SectionWriter> */
     public function writers(): array
     {
-        $allowPaid = (bool) config('research.document_generation.allow_paid', false);
-        $out = [];
+        $policy = (string) (config('research.document_generation.policy') ?: (config('research.document_generation.allow_paid') ? 'free_first' : 'free_only'));
+        $free = [];
+        $paid = [];
         foreach ((array) config('research.document_generation.providers', []) as $class) {
             $writer = app($class);
-            if ($writer instanceof SectionWriter && ($writer->tier() !== 'paid' || $allowPaid)) {
-                $out[] = $writer;
+            if ($writer instanceof SectionWriter) {
+                $writer->tier() === 'paid' ? $paid[] = $writer : $free[] = $writer;
             }
         }
 
-        return $out;
+        return match ($policy) {
+            'free_first' => [...$free, ...$paid],
+            'paid_only' => $paid,
+            default => $free,
+        };
     }
 
     /**

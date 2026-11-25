@@ -208,6 +208,9 @@ class DatabaseSeeder extends Seeder
                 'active_prompt_template_id' => $prompt->id,
             ]);
         }
+
+        // Riset Buku (input_mode=book): idempoten per ai_tools.code, tidak menimpa alat yang sudah ada.
+        $this->call(BookResearchToolSeeder::class);
     }
 
     private function canonicalTools(): array

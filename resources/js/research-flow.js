@@ -23,7 +23,7 @@ function initForm() {
             row.hidden = !on;
             const input = row.querySelector('input');
             input.disabled = !on;
-            input.required = on && i === 0;
+            input.required = on; // semua Rumusan Masalah yang ditampilkan wajib diisi
         });
     };
 

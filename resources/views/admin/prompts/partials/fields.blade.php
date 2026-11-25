@@ -14,6 +14,9 @@
             <section class="bd-ix__read"><h3>{{ $label }}</h3><p class="bd-ix__read-text">{{ $prompt->{$key} }}</p></section>
         @endif
     @endforeach
+    @if (\Illuminate\Support\Facades\Schema::hasColumn('prompt_templates', 'input_mode'))
+        <section class="bd-ix__read"><h3>Jenis input pengguna</h3><p class="bd-ix__read-text">{{ $prompt->input_mode_name === 'book' ? 'Riset buku (topik + rumusan masalah)' : 'Riset biasa (satu topik)' }} · input_mode = {{ $prompt->input_mode_name }}</p></section>
+    @endif
     @foreach ($fieldGroups as $group => $fields)
         <div class="bd-ix__group">
             <h3 class="bd-ix__group-title">{{ $group }}</h3>

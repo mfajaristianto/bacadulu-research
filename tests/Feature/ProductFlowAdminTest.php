@@ -64,6 +64,24 @@ class ProductFlowAdminTest extends TestCase
         $this->assertGreaterThan(strpos($html, 'Pengaturan Pencarian'), strpos($html, 'Kamus Istilah Pencarian'));
     }
 
+    public function test_prompt_read_only_view_shows_the_input_mode_of_the_active_version(): void
+    {
+        $mk = function (string $code, string $name, string $mode): int {
+            $tool = \App\Models\AiTool::create(['code' => $code, 'name' => $name, 'description' => 'x', 'status' => 'active']);
+            $p = \App\Models\PromptTemplate::create(['ai_tool_id' => $tool->id, 'name' => $name, 'task_prompt' => 'Aturan uji.', 'version' => 1, 'status' => 'active', 'input_mode' => $mode]);
+            $tool->update(['active_prompt_template_id' => $p->id]);
+
+            return $p->id;
+        };
+        $book = $mk('riset-buku-uji', 'Riset Buku Uji', 'book');
+        $std = $mk('riset-biasa-uji', 'Riset Biasa Uji', 'standard');
+
+        $this->asSuper()->get(route('admin.prompts.index', ['instruksi' => $book, 'v' => $book]))->assertOk()
+            ->assertSee('Jenis input pengguna')->assertSee('input_mode = book', false)->assertSee('Riset buku (topik + rumusan masalah)');
+        $this->asSuper()->get(route('admin.prompts.index', ['instruksi' => $std, 'v' => $std]))->assertOk()
+            ->assertSee('input_mode = standard', false)->assertDontSee('input_mode = book', false);
+    }
+
     // ---- pengguna ---------------------------------------------------------------------------------------------------
 
     public function test_users_default_sort_is_email_ascending_with_required_columns(): void

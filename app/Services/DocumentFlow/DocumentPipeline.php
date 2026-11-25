@@ -65,7 +65,7 @@ final class DocumentPipeline
 
             if (! $res['ok']) {
                 // Keluaran parsial bagian ini TIDAK masuk dokumen; hanya bagian sebelumnya yang tersimpan.
-                $state['sections'][] = ['key' => $s['key'], 'heading' => $s['heading'], 'status' => 'failed', 'attempts' => $res['attempts']];
+                $state['sections'][] = ['key' => $s['key'], 'heading' => $s['heading'], 'status' => 'failed', 'attempts' => $res['attempts'], 'validation' => 'failed', 'completed_at' => now()->toIso8601String()];
                 $state['state'] = 'failed';
                 $this->checkpoint($g, $p, $done, $bundles, $state, 'failed', "Bagian \"{$s['heading']}\" gagal ditulis oleh semua penyedia AI yang tersedia. Bagian sebelumnya tetap tersimpan; coba lagi nanti.");
 
@@ -77,6 +77,7 @@ final class DocumentPipeline
             $state['sections'][] = [
                 'key' => $s['key'], 'heading' => $s['heading'], 'status' => 'done', 'provider' => $res['provider'], 'model' => $res['model'], 'attempts' => $res['attempts'],
                 'citations' => $this->citationsIn($res['text']), 'words' => str_word_count($res['text']),
+                'validation' => 'passed', 'completed_at' => now()->toIso8601String(), // sitasi + keluaran divalidasi Router sebelum bagian dianggap selesai
             ];
             $this->checkpoint($g, $p, $done, $bundles, $state, 'generating');
         }

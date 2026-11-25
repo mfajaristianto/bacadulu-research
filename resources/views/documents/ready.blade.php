@@ -30,6 +30,7 @@
                     <h1>Dokumen berhasil dibuat</h1>
                     <p class="rf-saved">✓ Tersimpan di Dokumen Saya</p>
                     <p class="rf-note" data-rf-download-note>{{ $downloaded ? 'Dokumen ini pernah diunduh.' : 'Unduhan dimulai otomatis.' }}</p>
+                    <p class="rf-note" data-rf-download-status>Status unduhan: {{ $downloaded ? 'Pernah diminta untuk diunduh' : 'Belum pernah diunduh' }}</p>
                     <h2 class="rf-doc-title">{{ $g->title }}</h2>
                     <div class="rf-actions">
                         <a class="rf-btn rf-btn--primary" href="{{ $downloadUrl }}" data-rf-download @if($autoDownload) data-rf-auto="{{ $g->id }}" @endif>Unduh lagi</a>

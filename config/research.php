@@ -354,6 +354,8 @@ return [
     'document_generation' => [
         'providers' => [\App\Services\DocumentFlow\MockSectionWriter::class],
         'allow_paid' => (bool) env('DOCUMENT_AI_ALLOW_PAID', false),
+        // free_only (bawaan) | free_first (gratis dulu, lalu berbayar) | paid_only. Kosong = turunan dari allow_paid. Tanpa penagihan live.
+        'policy' => env('DOCUMENT_AI_POLICY'),
     ],
 
     'documents' => [

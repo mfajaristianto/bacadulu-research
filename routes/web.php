@@ -353,11 +353,11 @@ Route::middleware([
             // Alur produk: hasil riset ringkas (tanpa AI) -> Generate Document (AI).
 
             Route::get('/research/result', [ResearchFlowController::class, 'result'])
-                ->middleware('throttle:60,1')
+                ->middleware('throttle:research-results')
                 ->name('research.result');
 
             Route::post('/research/document', [ResearchDocumentController::class, 'store'])
-                ->middleware('throttle:6,1')
+                ->middleware('throttle:document-generation')
                 ->name('research.document.store');
 
             Route::get(

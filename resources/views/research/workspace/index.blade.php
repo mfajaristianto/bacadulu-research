@@ -775,31 +775,6 @@
 
 
 
-                        {{-- RISET BUKU: tampil hanya untuk alat bertipe buku (jumlah + rumusan masalah). Visual = kartu pertanyaan lama. --}}
-                        @php
-                            $rfBook = $activePrompt?->input_mode_name === 'book';
-                            $rfQs = array_values((array) old('questions', request('questions', [])));
-                            $rfCount = max(1, min(8, count(array_filter($rfQs, fn ($q) => filled($q))) ?: 3));
-                        @endphp
-                        <div class="research-question-panel rf-book" data-rf-book @unless($rfBook) hidden @endunless>
-                            <div class="research-question-panel__head">
-                                <strong>RUMUSAN MASALAH</strong>
-                                <label class="rf-count">Jumlah Rumusan Masalah
-                                    <select data-rf-count aria-controls="rf-questions">
-                                        @for($i = 1; $i <= 8; $i++)<option value="{{ $i }}" @selected($rfCount === $i)>{{ $i }}</option>@endfor
-                                    </select>
-                                </label>
-                            </div>
-                            <div id="rf-questions" class="rf-questions">
-                                @for($i = 0; $i < 8; $i++)
-                                    <label class="rf-q" data-rf-q @if($i >= $rfCount || ! $rfBook) hidden @endif>
-                                        <span>Rumusan Masalah {{ $i + 1 }}</span>
-                                        <input type="text" name="questions[]" maxlength="500" value="{{ $rfQs[$i] ?? '' }}" @if($i >= $rfCount || ! $rfBook) disabled @endif>
-                                    </label>
-                                @endfor
-                            </div>
-                        </div>
-
                         <div class="research-question-panel">
 
                             <div class="research-question-panel__head">
@@ -862,6 +837,31 @@
 
                             </div>
 
+                        </div>
+
+                        {{-- RISET BUKU: tampil hanya untuk alat bertipe buku (jumlah + rumusan masalah). Visual = kartu pertanyaan lama. Urutan: Kategori, Alat, Topik, lalu Jumlah + Rumusan Masalah. --}}
+                        @php
+                            $rfBook = $activePrompt?->input_mode_name === 'book';
+                            $rfQs = array_values((array) old('questions', request('questions', [])));
+                            $rfCount = max(1, min(8, count(array_filter($rfQs, fn ($q) => filled($q))) ?: 3));
+                        @endphp
+                        <div class="research-question-panel rf-book" data-rf-book @unless($rfBook) hidden @endunless>
+                            <div class="research-question-panel__head">
+                                <strong>RUMUSAN MASALAH</strong>
+                                <label class="rf-count">Jumlah Rumusan Masalah
+                                    <select data-rf-count aria-controls="rf-questions">
+                                        @for($i = 1; $i <= 8; $i++)<option value="{{ $i }}" @selected($rfCount === $i)>{{ $i }}</option>@endfor
+                                    </select>
+                                </label>
+                            </div>
+                            <div id="rf-questions" class="rf-questions">
+                                @for($i = 0; $i < 8; $i++)
+                                    <label class="rf-q" data-rf-q @if($i >= $rfCount || ! $rfBook) hidden @endif>
+                                        <span>Rumusan Masalah {{ $i + 1 }}</span>
+                                        <input type="text" name="questions[]" maxlength="500" value="{{ $rfQs[$i] ?? '' }}" @if($i >= $rfCount || ! $rfBook) disabled @endif>
+                                    </label>
+                                @endfor
+                            </div>
                         </div>
 
                     </form>

@@ -220,6 +220,17 @@ class AppServiceProvider extends ServiceProvider
                 )
         );
 
+        // Alur produk: dua counter terpisah (throttle:N,M numerik berbagi satu counter per pengguna untuk semua route).
+        RateLimiter::for(
+            'research-results',
+            fn (Request $request) => Limit::perMinute(60)->by('research-results:'.($request->user() ? 'user:'.$request->user()->id : 'ip:'.$request->ip()))
+        );
+
+        RateLimiter::for(
+            'document-generation',
+            fn (Request $request) => Limit::perMinute(6)->by('document-generation:'.($request->user() ? 'user:'.$request->user()->id : 'ip:'.$request->ip()))
+        );
+
         RateLimiter::for(
             'profile',
             fn (

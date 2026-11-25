@@ -27,7 +27,7 @@ class ResearchDocumentController extends Controller
         $data = $request->validate([
             'category_id' => ['required', 'integer', 'exists:categories,id'],
             'prompt_template_id' => ['required', 'integer'],
-            'q' => ['required', 'string', 'min:3', 'max:500'],
+            'q' => ['required', 'string', 'min:3', 'max:500', 'not_regex:'.ResearchFlowController::TEMPLATE_PLACEHOLDER],
             'questions' => ['nullable', 'array', 'max:'.ResearchResultComposer::MAX_QUESTIONS],
             'questions.*' => ['nullable', 'string', 'max:500'],
             'document_type' => ['required', 'string', 'in:'.implode(',', (array) config('research.documents.types', []))],

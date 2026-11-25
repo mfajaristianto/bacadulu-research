@@ -338,6 +338,14 @@ function initPromptPicker() {
 
     let lastAppliedQuestion = '';
 
+    const isResearchFlowForm =
+        Boolean(
+            chatInput
+                ?.closest(
+                    '[data-rf-form]',
+                ),
+        );
+
     try {
         questionMap =
             questionMapElement
@@ -605,6 +613,15 @@ function initPromptPicker() {
             return false;
         }
 
+        /*
+         * Form riset baru ([data-rf-form]): ruleset/question_template Alat Riset adalah aturan backend,
+         * BUKAN nilai input pengguna. Field Topik tetap milik pengguna. Template hanya dipakai jalur
+         * percakapan lama (form lanjutan), yang tidak memiliki [data-rf-form].
+         */
+        if (isResearchFlowForm) {
+            return false;
+        }
+
         const question =
             questionForPrompt(
                 promptId,
@@ -824,6 +841,8 @@ function initPromptPicker() {
                 questionApplied
                 ||
                 forceQuestion
+                ||
+                isResearchFlowForm
             )
         ) {
             focusComposer();

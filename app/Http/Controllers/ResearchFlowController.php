@@ -17,6 +17,12 @@ use Illuminate\View\View;
  */
 class ResearchFlowController extends Controller
 {
+    /**
+     * Token template Alat Riset yang dikenal sistem (semua question_template memakai {topik}; {objek} dan {fokus} didokumentasikan
+     * di Admin). Topik yang masih berisi token ini adalah template yang belum diisi. Kurung kurawal lain (mis. "{X}") sah.
+     */
+    public const TEMPLATE_PLACEHOLDER = '/\{\s*(?:topik|topic|objek|fokus)\s*\}/iu';
+
     public function __construct(private ResearchResultComposer $composer, private SectionPlanner $planner) {}
 
     public function start(Request $request): View
@@ -73,7 +79,7 @@ class ResearchFlowController extends Controller
         $data = $request->validate([
             'category_id' => ['required', 'integer', 'exists:categories,id'],
             'prompt_template_id' => ['required', 'integer'],
-            'q' => ['required', 'string', 'min:3', 'max:500'],
+            'q' => ['required', 'string', 'min:3', 'max:500', 'not_regex:'.self::TEMPLATE_PLACEHOLDER],
             'questions' => ['nullable', 'array', 'max:'.ResearchResultComposer::MAX_QUESTIONS],
             'questions.*' => ['nullable', 'string', 'max:500'],
         ], [
@@ -81,6 +87,8 @@ class ResearchFlowController extends Controller
             'prompt_template_id.required' => 'Pilih alat riset.',
             'q.required' => 'Tulis topik atau pertanyaan riset.',
             'q.min' => 'Topik atau pertanyaan riset terlalu pendek.',
+            // Ruleset/template Alat Riset adalah aturan backend, bukan topik pengguna: placeholder yang belum diganti ditolak.
+            'q.not_regex' => 'Ganti {topik} dengan topik riset Anda; jangan kirim template alat yang belum diisi.',
         ]);
 
         $tool = $this->tools()->firstWhere('id', (int) $data['prompt_template_id']);
@@ -88,9 +96,16 @@ class ResearchFlowController extends Controller
             return redirect()->route('workspace')->withInput()->withErrors(['prompt_template_id' => 'Alat riset atau kategori tidak tersedia.']);
         }
 
-        $data['questions'] = array_values(array_filter(array_map('trim', (array) ($data['questions'] ?? [])), fn ($q) => $q !== ''));
-        if ($tool->input_mode_name === 'book' && $data['questions'] === []) {
-            return redirect()->route('workspace')->withInput()->withErrors(['questions' => 'Isi minimal satu rumusan masalah.']);
+        $submitted = array_map(fn ($q) => trim((string) $q), array_values((array) ($data['questions'] ?? [])));
+        $data['questions'] = array_values(array_filter($submitted, fn ($q) => $q !== ''));
+        if ($tool->input_mode_name === 'book') {
+            if ($data['questions'] === []) {
+                return redirect()->route('workspace')->withInput()->withErrors(['questions' => 'Isi minimal satu rumusan masalah.']);
+            }
+            // Kolom yang ditampilkan (jumlah dipilih) wajib terisi semua; yang disembunyikan tidak ikut terkirim.
+            if (count($data['questions']) !== count($submitted)) {
+                return redirect()->route('workspace')->withInput()->withErrors(['questions' => 'Isi semua rumusan masalah yang ditampilkan.']);
+            }
         }
 
         return [$tool, $data];

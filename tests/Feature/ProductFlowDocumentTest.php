@@ -190,9 +190,35 @@ class ProductFlowDocumentTest extends TestCase
 
         PaidWriter::$calls = [];
         DocumentGeneration::query()->delete();
-        config(['research.document_generation.allow_paid' => true]);
+        config(['research.document_generation.allow_paid' => true]);   // setara free_first: gratis lebih dulu, berbayar hanya cadangan
         $this->generate();
-        $this->assertNotEmpty(PaidWriter::$calls);
+        $this->assertSame([], PaidWriter::$calls);
+    }
+
+    public function test_provider_policy_free_first_and_paid_only(): void
+    {
+        $ids = fn () => array_map(fn ($w) => $w->id(), app(\App\Services\DocumentFlow\SectionWriterRouter::class)->writers());
+        config(['research.document_generation.providers' => [PaidWriter::class, MockSectionWriter::class]]);
+
+        config(['research.document_generation.policy' => null, 'research.document_generation.allow_paid' => false]);
+        $this->assertSame(['mock'], $ids());                       // bawaan = FREE ONLY
+        config(['research.document_generation.policy' => 'free_first']);
+        $this->assertSame(['mock', 'paid'], $ids());
+        config(['research.document_generation.policy' => 'paid_only']);
+        $this->assertSame(['paid'], $ids());
+    }
+
+    public function test_section_checkpoint_records_validation_attempts_evidence_and_timestamp(): void
+    {
+        $this->generate();
+        foreach (DocumentGeneration::firstOrFail()->settings_snapshot_json['generation']['sections'] as $s) {
+            $this->assertSame('done', $s['status']);
+            $this->assertSame('passed', $s['validation']);
+            $this->assertNotEmpty($s['completed_at']);
+            $this->assertNotEmpty($s['provider']);
+            $this->assertNotEmpty($s['attempts']);
+            $this->assertIsArray($s['citations']);
+        }
     }
 
     public function test_non_failover_failure_stops_without_trying_other_providers(): void

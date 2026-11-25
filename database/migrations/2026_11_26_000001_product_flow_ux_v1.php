@@ -26,7 +26,7 @@ return new class extends Migration
             Schema::create('user_login_events', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-                $table->timestamp('login_at');
+                $table->timestamp('login_at')->useCurrent(); // useCurrent: tanpa ini MariaDB (explicit_defaults_for_timestamp=OFF) menambah ON UPDATE CURRENT_TIMESTAMP
                 $table->timestamp('last_activity_at')->nullable();
                 $table->string('ip_address', 45)->nullable();
                 $table->string('user_agent', 255)->nullable();
